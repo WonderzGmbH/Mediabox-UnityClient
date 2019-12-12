@@ -7,7 +7,7 @@ namespace Mediabox.Samples {
 	/// This sample shows how to load and save save games.
 	/// Details to this class can be found in the base class.
 	/// </summary>
-	public class Game : GameWithSavegame<GameDefinition, Savegame> {
+	public class Game : GameWithSaveGame<GameDefinition, SaveGame> {
 		int level;
 		public override void StartGame(string contentBundleFolderPath, GameDefinition gameDefinition) {
 			Debug.Log("[Game] Started.");
@@ -18,14 +18,14 @@ namespace Mediabox.Samples {
 		}
 
 		protected override string SaveGameName => "save.json";
-		protected override Savegame CreateSaveGame() {
-			return new Savegame {
+		protected override SaveGame CreateSaveGame() {
+			return new SaveGame {
 				level = ++this.level
 			};
 		}
 
-		protected override void LoadSaveGame(Savegame savegame) {
-			this.level = savegame.level;
+		protected override void LoadSaveGame(SaveGame saveGame) {
+			this.level = saveGame.level;
 		}
 	}
 }

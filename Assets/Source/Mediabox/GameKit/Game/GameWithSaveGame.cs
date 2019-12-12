@@ -6,7 +6,7 @@ namespace Mediabox.GameKit.Game {
 	/// Inherit from this class, if you want to define a game with a savegame. Place it in any relevant scene / prefab that is loaded from GameManager.
 	/// </summary>
 	/// <typeparam name="TGameDefinition">The type of GameDefinition needs to match the one used in your GameManager.</typeparam>
-	public abstract class GameWithSavegame<TGameDefinition, TSaveGame> : GameBase<TGameDefinition> {
+	public abstract class GameWithSaveGame<TGameDefinition, TSaveGame> : GameBase<TGameDefinition> {
 		/// <summary>
 		/// Implement this Getter to specify the name of the SaveGame-File.
 		/// </summary>
