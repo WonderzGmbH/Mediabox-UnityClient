@@ -38,6 +38,7 @@
               <e p="Editor" t="Include">
                 <e p="EditorNativeAPI.cs" t="Include" />
                 <e p="GameDefinitionManagerBase.cs" t="Include" />
+                <e p="LoadDefaultSceneOnPlayMode.cs" t="Include" />
                 <e p="OpenInFileBrowser.cs" t="Include" />
               </e>
             </e>

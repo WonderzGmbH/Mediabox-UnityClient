@@ -103,6 +103,7 @@ namespace Mediabox.GameManager.Editor {
 				return;
 			EditorGUI.BeginChangeCheck();
 			var autoSimulate = GUILayout.Toggle(EditorPrefs.GetBool(autoSimulateEditorPrefKey, true), "Auto-Simulate");
+			LoadDefaultSceneOnPlayMode.enabled = autoSimulate;
 			if(EditorGUI.EndChangeCheck())
 				EditorPrefs.SetBool(autoSimulateEditorPrefKey, autoSimulate);
 			if (!Application.isPlaying) {

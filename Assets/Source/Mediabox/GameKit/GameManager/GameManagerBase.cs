@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.IO;
 using System.Linq;
 using JetBrains.Annotations;
@@ -81,12 +82,16 @@ namespace Mediabox.GameKit.GameManager {
         }
 
         public void UnloadGameContent() {
+            StartCoroutine(UnloadGameContentInternal());
+        }
+
+        protected virtual IEnumerator UnloadGameContentInternal() {
             SceneManager.LoadScene("StartScene");
             if (this.loadedBundle != null) {
                 this.loadedBundle.Unload(true);
                 this.loadedBundle = null;
             }
-            Resources.UnloadUnusedAssets();
+            yield return Resources.UnloadUnusedAssets();
             this.nativeApi.OnUnloadingSucceeded();
         }
         #endregion // IMediaboxCallbacks
