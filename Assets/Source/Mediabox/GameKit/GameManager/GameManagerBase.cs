@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.IO;
 using System.Linq;
 using JetBrains.Annotations;
@@ -21,6 +22,7 @@ namespace Mediabox.GameKit.GameManager {
         string saveGamePath;
         AssetBundle loadedBundle;
         static GameManagerBase<TGameDefinition> instance;
+        string loadedSceneName;
 
         /// <summary>
         /// This method needs to be called so the API can be initialized.
@@ -50,17 +52,21 @@ namespace Mediabox.GameKit.GameManager {
             FindGame()?.Load(path);
         }
         
-        public void SetContentBundleFolder(string path){
-            try {
+        public void SetContentBundleFolder(string path) {
+            StartCoroutine(SetContentBundleFolderInternal(path));
+        }
+
+        protected virtual IEnumerator SetContentBundleFolderInternal(string path) {
+            //try {
                 var definition = default(TGameDefinition);
                 var settings = GameDefinitionSettings.Load();
                 path = FixWronglyZippedArchive(path);
                 if (settings.useGameDefinitionJsonFile) {
                     definition = LoadGameDefinition(path, settings);
                     if (definition is IGameBundleDefinition gameBundleDefinition) {
-                        LoadGameDefinitionBundle(path, gameBundleDefinition);
+                        yield return LoadGameDefinitionBundle(path, gameBundleDefinition);
                         if (definition is IGameSceneDefinition gameSceneDefinition) {
-                            LoadGameDefinitionScene(gameSceneDefinition);
+                            yield return LoadGameDefinitionScene(gameSceneDefinition);
                         }
                     }
                 }
@@ -69,26 +75,31 @@ namespace Mediabox.GameKit.GameManager {
                 FindGame()?.SetLanguage(this.language);
                 FindGame()?.StartGame(path, definition);
                 this.nativeApi.OnLoadingSucceeded();
-            } catch (Exception e) {
-                Debug.LogException(e);
-                this.nativeApi.OnLoadingFailed();
-            }
+            // } catch (Exception e) {
+            //     Debug.LogException(e);
+            //     this.nativeApi.OnLoadingFailed();
+            // }
         }
 
         public void WriteSaveData(string path) {
-            FindGame()?.Save(path);
+            //FindGame()?.Save(path);
             this.nativeApi.OnSaveDataWritten();
         }
 
         public void UnloadGameContent() {
-            SceneManager.LoadScene("StartScene");
-            if (this.loadedBundle != null) {
-                this.loadedBundle.Unload(true);
-                this.loadedBundle = null;
-            }
-            Resources.UnloadUnusedAssets();
+            StartCoroutine(UnloadGameContentInternal());
+        }
+
+        protected virtual IEnumerator UnloadGameContentInternal() {
+            yield return SceneManager.LoadSceneAsync(0);
+             if (this.loadedBundle != null) {
+                 this.loadedBundle.Unload(true);
+                 this.loadedBundle = null;
+             }
+             yield return Resources.UnloadUnusedAssets();
             this.nativeApi.OnUnloadingSucceeded();
         }
+        
         #endregion // IMediaboxCallbacks
         
         /// <summary>
@@ -100,19 +111,22 @@ namespace Mediabox.GameKit.GameManager {
         /// <param name="saveGamePath">The path from which to load and in which to store the SaveGame-File.</param>
         protected abstract void OnStartGame(string contentBundleFolderPath, [CanBeNull] TGameDefinition definition, string saveGamePath);
 
-        static void LoadGameDefinitionScene(IGameSceneDefinition gameSceneDefinition) {
-            SceneManager.LoadScene(gameSceneDefinition.SceneName);
+        IEnumerator LoadGameDefinitionScene(IGameSceneDefinition gameSceneDefinition) {
+            var sceneRequest = SceneManager.LoadSceneAsync(gameSceneDefinition.SceneName);
+            yield return sceneRequest;
+            this.loadedSceneName = gameSceneDefinition.SceneName;
         }
 
-        void LoadGameDefinitionBundle(string path, IGameBundleDefinition gameBundleDefinition) {
-            var bundlePath = Path.Combine(path, gameBundleDefinition.BundleName);
-            var bundle = AssetBundle.LoadFromFile(bundlePath);
-            if (bundle == null) {
+        IEnumerator LoadGameDefinitionBundle(string path, IGameBundleDefinition gameBundleDefinition) {
+            var bundlePath = Path.Combine(Application.streamingAssetsPath, gameBundleDefinition.BundleName);
+            var bundle = AssetBundle.LoadFromFileAsync(bundlePath);
+            yield return bundle;
+            if (bundle == null || bundle.assetBundle == null) {
                 this.nativeApi.OnLoadingFailed();
                 throw new Exception($"No AssetBundle found at contentBundleFolderPath {bundlePath}. Either, the contentBundleFolderPath has not been set up correctly in the GameDefinition, or the bundle has not been placed in the correct place.");
             }
 
-            this.loadedBundle = bundle;
+            this.loadedBundle = bundle.assetBundle;
         }
 
         static TGameDefinition LoadGameDefinition(string path, GameDefinitionSettings settings) {

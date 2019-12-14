@@ -49,8 +49,8 @@ namespace Mediabox.GameManager.Editor {
 		void Stop() {
 			this.state = State.Stopping;
 			this.waitingForSaveDataCallback = true;
-			SendEvent(nameof(IMediaboxCallbacks.WriteSaveData), this.saveDataFolder);
 			this.waitingForUnloadCallback = true;
+			SendEvent(nameof(IMediaboxCallbacks.WriteSaveData), this.saveDataFolder);
 			SendEvent(nameof(IMediaboxCallbacks.UnloadGameContent), null);
 		}
 
