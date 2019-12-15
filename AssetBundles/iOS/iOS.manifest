@@ -1,0 +1,10 @@
+ManifestFileVersion: 0
+CRC: 2120564715
+AssetBundleManifest:
+  AssetBundleInfos:
+    Info_0:
+      Name: gamea
+      Dependencies: {}
+    Info_1:
+      Name: gameb
+      Dependencies: {}
