@@ -209,7 +209,10 @@ namespace Mediabox.GameManager.Editor {
 			if (GUILayout.Button("Delete")) {
 				Directory.Delete(directories[this.selectedIndex], true);
 				directories = directories.Where(dir => dir != directories[this.selectedIndex]).ToArray();
-			}
+                if (directories.Length > 0 && this.selectedIndex >= directories.Length - 1) {
+                    this.selectedIndex = directories.Length - 1;
+                }
+            }
 			GUILayout.EndHorizontal();
 			return directories;
 		}
