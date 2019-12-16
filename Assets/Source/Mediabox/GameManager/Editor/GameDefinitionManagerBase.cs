@@ -227,7 +227,7 @@ namespace Mediabox.GameManager.Editor {
 				directories = Directory.GetDirectories(this.settings.gameDefinitionDirectoryPath);
 				this.selectedIndex = Array.IndexOf(directories, this.newDefinitionName);
 				this.gameDefinition = new TGameDefinition();
-				File.WriteAllText(Path.Combine(newDirectory, "index.json"), JsonUtility.ToJson(this.gameDefinition));
+				File.WriteAllText(Path.Combine(newDirectory, this.settings.gameDefinitionFileName), JsonUtility.ToJson(this.gameDefinition));
 			}
 
 			GUILayout.EndHorizontal();
