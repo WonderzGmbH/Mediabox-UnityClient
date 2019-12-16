@@ -62,6 +62,8 @@ namespace Mediabox.GameKit.GameManager {
                         LoadGameDefinitionBundle(path, gameBundleDefinition);
                         if (definition is IGameSceneDefinition gameSceneDefinition) {
                             LoadGameDefinitionScene(gameSceneDefinition);
+                        } else {
+                            this.LoadAllScenesInBundle(this.loadedBundle);
                         }
                     }
                 }
@@ -73,6 +75,16 @@ namespace Mediabox.GameKit.GameManager {
             } catch (Exception e) {
                 Debug.LogException(e);
                 this.nativeApi.OnLoadingFailed();
+            }
+        }
+
+        public void LoadAllScenesInBundle(AssetBundle bundle) {
+            var scenePaths = bundle.GetAllScenePaths();
+            if (scenePaths.Length > 0) {
+                SceneManager.LoadScene(scenePaths[0]);
+                for (int i = 0; i < scenePaths.Length; i++) {
+                    SceneManager.LoadScene(scenePaths[i], LoadSceneMode.Additive);
+                }
             }
         }
 
