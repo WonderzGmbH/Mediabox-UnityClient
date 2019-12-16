@@ -78,7 +78,12 @@ namespace Mediabox.GameManager.Editor {
 
 		static void DrawBuildArea() {
 			if (GUILayout.Button("Build GameDefinitions")) {
-				EditorUtility.DisplayDialog("Not implemented", "This feature has not been implemented so far.", "OK");
+				EditorUtility.DisplayDialog(
+                    "Not implemented yet 🤗",
+                    "Please build the bundles via\n" +
+                    "Window > Asset Bundle Browser > Build > Target iOS\n" +
+                    "and copy the generated files to your GameDefinitions folder.",
+                    "👍");
 			}
 		}
 
@@ -225,7 +230,8 @@ namespace Mediabox.GameManager.Editor {
 				var newDirectory = Path.Combine(this.settings.gameDefinitionDirectoryPath, this.newDefinitionName);
 				Directory.CreateDirectory(newDirectory);
 				directories = Directory.GetDirectories(this.settings.gameDefinitionDirectoryPath);
-				this.selectedIndex = Array.IndexOf(directories, this.newDefinitionName);
+				this.selectedIndex = Array.IndexOf(directories, newDirectory);
+                Debug.Log("selected index: " + this.selectedIndex);
 				this.gameDefinition = new TGameDefinition();
 				File.WriteAllText(Path.Combine(newDirectory, this.settings.gameDefinitionFileName), JsonUtility.ToJson(this.gameDefinition));
 			}
