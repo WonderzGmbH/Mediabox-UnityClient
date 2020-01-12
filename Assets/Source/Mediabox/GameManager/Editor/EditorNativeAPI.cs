@@ -38,7 +38,8 @@ namespace Mediabox.GameManager.Editor {
 			this.state = State.Startable;
 		}
 
-		void Start() {
+		void Start(string contentBundleFolder) {
+			this.contentBundleFolder = contentBundleFolder;
 			this.state = State.Starting;
 			this.waitingForLoadingCallback = true;
 			SendEvent(nameof(IMediaboxCallbacks.SetContentLanguage), this.locale);
@@ -83,29 +84,27 @@ namespace Mediabox.GameManager.Editor {
 			this.state = State.Startable;
 		}
 
-		public void OnGUI(bool autoSimulate, string contentBundleFolder) {
+		public void AutoSimulate(string contentBundleFolder) {
+			if (this.state == State.Startable) {
+				Start(contentBundleFolder);
+			} else if (this.state == State.Stoppable && this.contentBundleFolder != contentBundleFolder) {
+				Stop();
+			}
+		}
+		
+		public void OnGUI(string contentBundleFolder) {
 			GUILayout.Label("Simulating...");
 			this.locale = EditorGUILayout.TextField("Locale", this.locale);
 			this.saveDataFolder = EditorGUILayout.TextField("SaveDataFolder", this.saveDataFolder);
 			GUILayout.Label($"State: {this.state}");
-			if (autoSimulate) {
-				if (this.state == State.Startable) {
-					this.contentBundleFolder = contentBundleFolder;
-					Start();
-				} else if (this.state == State.Stoppable && this.contentBundleFolder != contentBundleFolder) {
-					Stop();
-				}
-			} else {
-				DrawContextButtons();
-			}
-			
+			DrawContextButtons(contentBundleFolder);
 		}
 
-		void DrawContextButtons() {
+		void DrawContextButtons(string contentBundleFolder) {
 			switch (this.state) {
 				case State.Startable:
 					if (GUILayout.Button("Start Game"))
-						Start();
+						Start(contentBundleFolder);
 					break;
 				case State.Stoppable:
 					if (GUILayout.Button("Stop Game"))

@@ -24,14 +24,11 @@ namespace Mediabox.GameManager.Editor {
 	/// <typeparam name="TGameDefinition">The type of GameDefinition that you're using.</typeparam>
 	public class GameDefinitionManagerBase<TWindow, TGameDefinition> : EditorWindow where TWindow : GameDefinitionManagerBase<TWindow, TGameDefinition> where TGameDefinition : class, new() {
 
-		const string autoSimulateEditorPrefKey = "Mediabox.GameManager.Editor.AutoSimulate";
 		int selectedIndex;
 		string newDefinitionName;
 
 		public TGameDefinition gameDefinition;
 		static TWindow window;
-		EditorNativeAPI simulationModeNativeApi;
-		bool IsInSimulationMode => this.simulationModeNativeApi != null;
 		GameDefinitionSettings settings;
 		protected static TWindow ShowWindow()
 		{
@@ -71,7 +68,8 @@ namespace Mediabox.GameManager.Editor {
 				EditorGUILayout.HelpBox("Create a new GameDefinition to begin work.", MessageType.Info);
 			} else {
 				DrawEditorArea(directories);
-				DrawSimulationArea(directories);
+				SimulationMode.ContentBundleFolder = directories[this.selectedIndex];
+				DrawSimulationArea();
 			}
 			DrawBuildArea();
 		}
@@ -97,36 +95,30 @@ namespace Mediabox.GameManager.Editor {
 			directories = DrawSelector(directories);
 			if (directories.Length == 0)
 				return;
-			
 			LoadGameDefinition(directories);
 			DrawGameDefinitionEditor(directories);
 
 		}
 
-		void DrawSimulationArea(string[] directories) {
-			if (directories.Length == 0)
-				return;
+		void DrawSimulationArea() {
 			EditorGUI.BeginChangeCheck();
-			var autoSimulate = GUILayout.Toggle(EditorPrefs.GetBool(autoSimulateEditorPrefKey, true), "Auto-Simulate");
-			LoadDefaultSceneOnPlayMode.enabled = autoSimulate;
-			if(EditorGUI.EndChangeCheck())
-				EditorPrefs.SetBool(autoSimulateEditorPrefKey, autoSimulate);
+			SimulationMode.AutoSimulate = GUILayout.Toggle(SimulationMode.AutoSimulate, "Auto-Simulate");
 			if (!Application.isPlaying) {
-				this.simulationModeNativeApi = null;
-				DrawStartPlayMode( directories[this.selectedIndex]);
+				SimulationMode.StopSimulationMode();
+				DrawStartPlayMode();
 				DrawDummyStartSimulation();
 			} else {
 				DrawStopPlayMode();
-				if (!this.IsInSimulationMode) {
-					DrawStartSimulationMode(autoSimulate, directories[this.selectedIndex]);
+				if (!SimulationMode.IsInSimulationMode) {
+					DrawStartSimulationMode();
 				} else {
-					DrawSimulationMode(autoSimulate, directories[this.selectedIndex]);
+					DrawSimulationMode();
 				}
 			}
 		}
 
-		void DrawSimulationMode(bool autoSimulate, string contentBundleFolder) {
-			this.simulationModeNativeApi.OnGUI(autoSimulate, contentBundleFolder);
+		void DrawSimulationMode() {
+			SimulationMode.SimulationModeNativeApi.OnGUI(SimulationMode.ContentBundleFolder);
 		}
 
 		void ValidateSelectedGameDefinition(string[] directories) {
@@ -151,18 +143,13 @@ namespace Mediabox.GameManager.Editor {
 			}
 		}
 
-		void DrawStartSimulationMode(bool autoSimulate, string contentBundleFolder) {
-			if ((autoSimulate && Event.current.type == EventType.Repaint) || GUILayout.Button("Start Simulation")) {
-				StartSimulationMode(contentBundleFolder);
+		void DrawStartSimulationMode() {
+			if (GUILayout.Button("Start Simulation")) {
+				SimulationMode.StartSimulationMode();
 			}
 		}
 
-		void StartSimulationMode(string contentBundleFolder) {
-			this.simulationModeNativeApi = new EditorNativeAPI(contentBundleFolder);
-			FindObjectOfType<GameManagerBase<TGameDefinition>>().SetNativeApi(this.simulationModeNativeApi);
-		}
-
-		void DrawStartPlayMode(string contentBundleFolder) {
+		void DrawStartPlayMode() {
 			EditorGUILayout.HelpBox("Start play mode to enable Simulation Mode.", MessageType.Info);
 			if (GUILayout.Button("Start Play Mode")) {
 				EditorApplication.isPlaying = true;

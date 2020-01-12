@@ -15,7 +15,7 @@ namespace Mediabox.GameKit.GameManager {
     /// You need to implement this class once in your project and place it in your starting scene.
     /// </summary>
     /// <typeparam name="TGameDefinition">The type of GameDefinition that you use in your project. GameDefinitions will be stored separately on the Mediabox-Backend and allow you to launch different types of game within one Unity Client. This feature can be configured and disabled using the "Game Definition Manager" folder under the "Mediabox"-Menu.</typeparam>
-    public abstract class GameManagerBase<TGameDefinition> : MonoBehaviour, IMediaboxCallbacks {
+    public abstract class GameManagerBase<TGameDefinition> : GameManagerBase, IMediaboxCallbacks {
 
         INativeAPI nativeApi;
         string language;
@@ -28,7 +28,7 @@ namespace Mediabox.GameKit.GameManager {
         /// </summary>
         /// <param name="nativeApi">An implementation of NativeAPI.</param>
         /// <exception cref="NativeApiAlreadySetupException">Thrown, if SetNativeApi has already been called.</exception>
-        public void SetNativeApi(INativeAPI nativeApi) {
+        public override void SetNativeApi(INativeAPI nativeApi) {
             if(this.nativeApi != null)
                 throw new NativeApiAlreadySetupException();
             this.nativeApi = nativeApi;
@@ -192,5 +192,9 @@ namespace Mediabox.GameKit.GameManager {
             if (instance == this)
                 instance = null;
         }
+    }
+
+    public abstract class GameManagerBase : MonoBehaviour {
+        public abstract void SetNativeApi(INativeAPI nativeAPI);
     }
 }
