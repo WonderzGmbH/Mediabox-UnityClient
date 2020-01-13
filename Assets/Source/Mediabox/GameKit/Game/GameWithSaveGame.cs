@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Mediabox.GameKit.Game {
@@ -18,9 +19,9 @@ namespace Mediabox.GameKit.Game {
 		/// <summary>
 		/// Implement this method in order to add any logic necessary to load a TSaveGame.
 		/// </summary>
-		protected abstract void LoadSaveGame(TSaveGame saveGame);
+		protected abstract Task LoadSaveGame(TSaveGame saveGame);
     
-		public sealed override void Save(string path) {
+		public sealed override async Task Save(string path) {
 			var saveGamePath = Path.Combine(path, this.SaveGameName);
 			var directory = Path.GetDirectoryName(saveGamePath);
 			if (!Directory.Exists(directory))
@@ -28,11 +29,10 @@ namespace Mediabox.GameKit.Game {
 			File.WriteAllText(saveGamePath, JsonUtility.ToJson(CreateSaveGame()));
 		}
 
-		public sealed override void Load(string path) {
+		public sealed override async Task Load(string path) {
 			var saveGamePath = Path.Combine(path, this.SaveGameName);
-			if (!File.Exists(saveGamePath))
-				return;
-			LoadSaveGame(JsonUtility.FromJson<TSaveGame>(File.ReadAllText(saveGamePath)));
+			if (File.Exists(saveGamePath))
+				await LoadSaveGame(JsonUtility.FromJson<TSaveGame>(File.ReadAllText(saveGamePath)));
 		}
 	}
 }

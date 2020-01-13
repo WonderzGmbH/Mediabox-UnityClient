@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Mediabox.GameKit.Game;
 using UnityEngine;
 
@@ -9,11 +10,11 @@ namespace Mediabox.Samples {
 	/// </summary>
 	public class Game : GameWithSaveGame<GameDefinition, SaveGame> {
 		int level;
-		public override void StartGame(string contentBundleFolderPath, GameDefinition gameDefinition) {
+		public override async Task StartGame(string contentBundleFolderPath, GameDefinition gameDefinition) {
 			Debug.Log("[Game] Started.");
 		}
 
-		public override void SetLanguage(string language) {
+		public override async Task SetLanguage(string language) {
 			Debug.Log($"[Game] Set language to {language}.");
 		}
 
@@ -24,7 +25,7 @@ namespace Mediabox.Samples {
 			};
 		}
 
-		protected override void LoadSaveGame(SaveGame saveGame) {
+		protected override async Task LoadSaveGame(SaveGame saveGame) {
 			this.level = saveGame.level;
 		}
 	}
