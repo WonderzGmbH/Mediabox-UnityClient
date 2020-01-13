@@ -9,8 +9,9 @@ namespace Mediabox.Samples {
 	/// Details to this class can be found in the base class.
 	/// </summary>
 	public class GameManager : GameManagerBase<GameDefinition> {
-		protected override async Task OnStartGame(string contentBundleFolderPath, GameDefinition definition, string saveGamePath) {
+		protected override Task OnStartGame(string contentBundleFolderPath, GameDefinition definition, string saveGamePath) {
 			Debug.Log($"[GameManager] Starting Game: {JsonUtility.ToJson(definition)} at contentBundleFolderPath {contentBundleFolderPath} with saveGamePath {saveGamePath}");
+			return Task.CompletedTask;
 		}
 	}
 }

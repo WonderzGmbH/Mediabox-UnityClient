@@ -84,6 +84,12 @@ namespace Mediabox.GameManager.Editor {
 			this.state = State.Startable;
 		}
 
+		public void StopSimulation() {
+			if (this.state != State.Stoppable)
+				return;
+			Stop();
+		}
+		
 		public void AutoSimulate(string contentBundleFolder) {
 			if (this.state == State.Startable) {
 				Start(contentBundleFolder);

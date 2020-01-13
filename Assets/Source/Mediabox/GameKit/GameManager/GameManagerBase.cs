@@ -90,24 +90,21 @@ namespace Mediabox.GameKit.GameManager {
             }
         }
 
-        public void WriteSaveData(string path) {
-            FindGame()?.Save(path);
+        public async void WriteSaveData(string path) {
+            await FindGame()?.Save(path);
             this.nativeApi.OnSaveDataWritten();
         }
 
-        public void UnloadGameContent() {
-            StartCoroutine(UnloadGameContentInternal());
-        }
-
-        protected virtual IEnumerator UnloadGameContentInternal() {
-            SceneManager.LoadScene("StartScene");
+        public async void UnloadGameContent() {
+            await SceneManager.LoadSceneAsync("StartScene");
             if (this.loadedBundle != null) {
                 this.loadedBundle.Unload(true);
                 this.loadedBundle = null;
             }
-            yield return Resources.UnloadUnusedAssets();
+            await Resources.UnloadUnusedAssets();
             this.nativeApi.OnUnloadingSucceeded();
         }
+        
         #endregion // IMediaboxCallbacks
         
         /// <summary>

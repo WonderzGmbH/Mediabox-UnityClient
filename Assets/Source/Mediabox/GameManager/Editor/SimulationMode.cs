@@ -21,6 +21,7 @@ namespace Mediabox.GameManager.Editor {
 		}
 
 		static bool _autoSimulate;
+		static bool isQuitting;
 
 		public static bool AutoSimulate {
 			get => _autoSimulate;
@@ -37,6 +38,16 @@ namespace Mediabox.GameManager.Editor {
 			_autoSimulate = EditorPrefs.GetBool(autoSimulateEditorPrefKey, true);
 			_contentBundleFolder = EditorPrefs.GetString(contentBundleFolderEditorPrefKey, null);
 			EditorApplication.update += Update;
+			EditorApplication.playModeStateChanged += OnplayModeStateChanged;
+		}
+
+		static void OnplayModeStateChanged(PlayModeStateChange change) {
+			if (change == PlayModeStateChange.ExitingPlayMode) {
+				StopSimulationMode();
+				isQuitting = true;
+			} else if (change == PlayModeStateChange.EnteredEditMode) {
+				isQuitting = false;
+			}
 		}
 
 		static void Update() {
@@ -47,7 +58,7 @@ namespace Mediabox.GameManager.Editor {
 		static void UpdateAutoSimulationMode() {
 			if (!AutoSimulate)
 				return;
-			if (!EditorApplication.isPlaying)
+			if (!EditorApplication.isPlaying || isQuitting)
 				return;
 			if (!IsInSimulationMode) {
 				StartSimulationMode();
@@ -62,6 +73,9 @@ namespace Mediabox.GameManager.Editor {
 		}
 
 		public static void StopSimulationMode() {
+			if (SimulationModeNativeApi == null)
+				return;
+			SimulationModeNativeApi.StopSimulation();
 			SimulationModeNativeApi = null;
 		}
 	}

@@ -10,23 +10,27 @@ namespace Mediabox.Samples {
 	/// </summary>
 	public class Game : GameWithSaveGame<GameDefinition, SaveGame> {
 		int level;
-		public override async Task StartGame(string contentBundleFolderPath, GameDefinition gameDefinition) {
+		public override Task StartGame(string contentBundleFolderPath, GameDefinition gameDefinition) {
 			Debug.Log("[Game] Started.");
+			return Task.CompletedTask;
 		}
 
-		public override async Task SetLanguage(string language) {
+		public override Task SetLanguage(string language) {
 			Debug.Log($"[Game] Set language to {language}.");
+			return Task.CompletedTask;
 		}
 
 		protected override string SaveGameName => "save.json";
 		protected override SaveGame CreateSaveGame() {
+			Debug.Log("[Game] Saving.");
 			return new SaveGame {
 				level = ++this.level
 			};
 		}
 
-		protected override async Task LoadSaveGame(SaveGame saveGame) {
+		protected override Task LoadSaveGame(SaveGame saveGame) {
 			this.level = saveGame.level;
+			return Task.CompletedTask;
 		}
 	}
 }
