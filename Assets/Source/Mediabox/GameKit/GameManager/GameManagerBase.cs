@@ -120,9 +120,7 @@ namespace Mediabox.GameKit.GameManager {
         protected abstract Task OnStartGame(string contentBundleFolderPath, [CanBeNull] TGameDefinition definition, string saveGamePath);
 
         static async Task LoadGameDefinitionScene(IGameSceneDefinition gameSceneDefinition) {
-            var loadScene = SceneManager.LoadSceneAsync(gameSceneDefinition.SceneName);
-            await loadScene;
-            Debug.Log(SceneManager.GetActiveScene().name);
+            await SceneManager.LoadSceneAsync(gameSceneDefinition.SceneName);
         }
 
         async Task LoadGameDefinitionBundle(string path, IGameBundleDefinition gameBundleDefinition) {
