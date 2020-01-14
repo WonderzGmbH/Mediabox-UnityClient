@@ -82,6 +82,8 @@ namespace Mediabox.GameManager.Editor {
 				    !EditorUtility.DisplayDialog("There have been errors", "Some GameDefinitions had errors. Do you still want to continue?", "OK", "Cancel"))
 					return;
 				if (typeof(IGameBundleDefinition).IsAssignableFrom(typeof(TGameDefinition))) {
+					if (!Directory.Exists("AssetBundles"))
+						Directory.CreateDirectory("AssetBundles");
 					BuildPipeline.BuildAssetBundles("AssetBundles", gameDefinitions.Select(definition => new AssetBundleBuild {
 						assetBundleName = (definition.gameDefinition as IGameBundleDefinition).BundleName,
 						assetNames = AssetDatabase.GetAssetPathsFromAssetBundle((definition.gameDefinition as IGameBundleDefinition).BundleName)
@@ -172,7 +174,7 @@ namespace Mediabox.GameManager.Editor {
 
 		static bool ValidateScene(GameDefinitionBuildInfo gameDefinitionBuildInfo, TGameDefinition gameDefinition) {
 			if (gameDefinition is IGameSceneDefinition gameSceneDefinition) {
-				var fullScenePath = Path.Combine("Assets/", gameSceneDefinition.SceneName) + ".unity";
+				var fullScenePath = Path.ChangeExtension(Path.Combine("Assets", gameSceneDefinition.SceneName), "unity");
 				var scene = (SceneAsset) AssetDatabase.LoadAssetAtPath(fullScenePath, typeof(SceneAsset));
 				if (scene == null) {
 					Debug.LogError($"Invalid GameDefinition at path '{gameDefinitionBuildInfo.path}', the scene at path {fullScenePath} does not exist.");
