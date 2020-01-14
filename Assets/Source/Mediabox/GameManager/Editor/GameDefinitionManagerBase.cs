@@ -5,6 +5,7 @@ using Mediabox.GameKit.GameDefinition;
 using Mediabox.GameKit.GameManager;
 using UnityEditor;
 using UnityEngine;
+using CompressionLevel = System.IO.Compression.CompressionLevel;
 
 namespace Mediabox.GameManager.Editor {
 	/// <summary>
@@ -102,7 +103,7 @@ namespace Mediabox.GameManager.Editor {
 					var path = Path.Combine("GameDefinitionBuild", diff + ".zip");
 					if(File.Exists(path))
 						File.Delete(path);
-					System.IO.Compression.ZipFile.CreateFromDirectory(gameDefinition.path, path);
+					System.IO.Compression.ZipFile.CreateFromDirectory(gameDefinition.path, path, CompressionLevel.Optimal, false);
 				}
 			}
 		}
