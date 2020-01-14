@@ -22,6 +22,7 @@
       <Path>.git</Path>
       <Path>.idea</Path>
       <Path>AssetBundles</Path>
+      <Path>GameDefinitionBuild</Path>
       <Path>GameDefinitions</Path>
       <Path>Library</Path>
       <Path>Logs</Path>

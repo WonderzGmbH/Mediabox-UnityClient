@@ -67,22 +67,125 @@ namespace Mediabox.GameManager.Editor {
 			if (directories.Length == 0) {
 				EditorGUILayout.HelpBox("Create a new GameDefinition to begin work.", MessageType.Info);
 			} else {
-				DrawEditorArea(directories);
+				directories = DrawEditorArea(directories);
 				SimulationMode.ContentBundleFolder = directories[this.selectedIndex];
 				DrawSimulationArea();
 			}
-			DrawBuildArea();
+			DrawBuildArea(directories);
 		}
 
-		static void DrawBuildArea() {
+		void DrawBuildArea(string[] directories) {
 			if (GUILayout.Button("Build GameDefinitions")) {
-				EditorUtility.DisplayDialog(
-                    "Not implemented yet 🤗",
-                    "Please build the bundles via\n" +
-                    "Window > Asset Bundle Browser > Build > Target iOS\n" +
-                    "and copy the generated files to your GameDefinitions folder.",
-                    "👍");
+				var gameDefinitions = LoadAllValidGameDefinitions(directories);
+				if (!ValidateGameDefinitionComplete(gameDefinitions, directories) &&
+				    !EditorUtility.DisplayDialog("There have been errors", "Some GameDefinitions had errors. Do you still want to continue?", "OK", "Cancel"))
+					return;
+				if (typeof(IGameBundleDefinition).IsAssignableFrom(typeof(TGameDefinition))) {
+					BuildPipeline.BuildAssetBundles("AssetBundles", gameDefinitions.Select(definition => new AssetBundleBuild {
+						assetBundleName = (definition.gameDefinition as IGameBundleDefinition).BundleName,
+						assetNames = AssetDatabase.GetAssetPathsFromAssetBundle((definition.gameDefinition as IGameBundleDefinition).BundleName)
+					}).ToArray(), BuildAssetBundleOptions.None, EditorUserBuildSettings.activeBuildTarget);
+					foreach (var gameDefinition in gameDefinitions) {
+						var bundlePath = Path.Combine("AssetBundles", (gameDefinition.gameDefinition as IGameBundleDefinition).BundleName);
+						var targetPath = Path.Combine(gameDefinition.path, (gameDefinition.gameDefinition as IGameBundleDefinition).BundleName);
+						File.Copy(bundlePath, targetPath, true);
+					}
+				}
+				
+				if (Directory.Exists("GameDefinitionBuild"))
+					Directory.Delete("GameDefinitionBuild", true);
+				Directory.CreateDirectory("GameDefinitionBuild");
+				foreach (var gameDefinition in gameDefinitions) {
+					var path1 = new Uri(Path.GetFullPath(gameDefinition.path));
+					var path2 = new Uri(Path.GetFullPath(this.settings.gameDefinitionDirectoryPath));
+					var diff = path2.MakeRelativeUri(path1).ToString();
+					var path = Path.Combine("GameDefinitionBuild", diff + ".zip");
+					if(File.Exists(path))
+						File.Delete(path);
+					System.IO.Compression.ZipFile.CreateFromDirectory(gameDefinition.path, path);
+				}
 			}
+		}
+
+		bool ValidateGameDefinitionComplete(GameDefinitionBuildInfo[] gameDefinitions, string[] directories) {
+			return false;
+		}
+
+		class GameDefinitionBuildInfo {
+			public readonly TGameDefinition gameDefinition;
+			public readonly string path;
+
+			public GameDefinitionBuildInfo(TGameDefinition gameDefinition, string path) {
+				this.gameDefinition = gameDefinition;
+				this.path = path;
+			}
+		}
+		
+		GameDefinitionBuildInfo TryLoadGameDefinitionBuildInfo(string path) {
+			var filePath = Path.Combine(path, this.settings.gameDefinitionFileName);
+			if (!File.Exists(filePath)) {
+				Debug.LogError($"Invalid GameDefinition at path '{path}', you can repair it using the Game Definition Manager.");
+				return null;
+			}
+			return new GameDefinitionBuildInfo(JsonUtility.FromJson<TGameDefinition>(File.ReadAllText(filePath)), path);
+		}
+
+		GameDefinitionBuildInfo[] LoadAllValidGameDefinitions(string[] directories) {
+			return directories.Select(TryLoadGameDefinitionBuildInfo).Where(IsGameDefinitionCorrectlySetUp).ToArray();
+		}
+
+		bool IsGameDefinitionCorrectlySetUp(GameDefinitionBuildInfo gameDefinitionBuildInfo) {
+			var gameDefinition = gameDefinitionBuildInfo.gameDefinition;
+
+			if (!ValidateBundleIsSpecified(gameDefinitionBuildInfo, gameDefinition)) 
+				return false;
+			
+			
+			if (!ValidateScene(gameDefinitionBuildInfo, gameDefinition)) 
+				return false;
+
+			if (!ValidateBundleExists(gameDefinitionBuildInfo, gameDefinition)) 
+				return false;
+
+			return true;
+		}
+
+		static bool ValidateBundleIsSpecified(GameDefinitionBuildInfo gameDefinitionBuildInfo, TGameDefinition gameDefinition) {
+			if (gameDefinition is IGameBundleDefinition gameBundleDefinition && string.IsNullOrEmpty(gameBundleDefinition.BundleName)) {
+				Debug.LogError($"Invalid GameDefinition at path '{gameDefinitionBuildInfo.path}', no bundle name specified.");
+				return false;
+			}
+
+			return true;
+		}
+
+		static bool ValidateBundleExists(GameDefinitionBuildInfo gameDefinitionBuildInfo, TGameDefinition gameDefinition) {
+			if (gameDefinition is IGameBundleDefinition gameBundleDefinition) {
+				if (!AssetDatabase.GetAllAssetBundleNames().Contains(gameBundleDefinition.BundleName)) {
+					Debug.LogError($"Invalid GameDefinition at path '{gameDefinitionBuildInfo.path}', the bundle named {gameBundleDefinition.BundleName} does not exist.");
+					return false;
+				}
+			}
+			return true;
+		}
+
+		static bool ValidateScene(GameDefinitionBuildInfo gameDefinitionBuildInfo, TGameDefinition gameDefinition) {
+			if (gameDefinition is IGameSceneDefinition gameSceneDefinition) {
+				var fullScenePath = Path.Combine("Assets/", gameSceneDefinition.SceneName) + ".unity";
+				var scene = (SceneAsset) AssetDatabase.LoadAssetAtPath(fullScenePath, typeof(SceneAsset));
+				if (scene == null) {
+					Debug.LogError($"Invalid GameDefinition at path '{gameDefinitionBuildInfo.path}', the scene at path {fullScenePath} does not exist.");
+					return false;
+				}
+				if (gameDefinition is IGameBundleSceneDefinition gameBundleSceneDefinition) {
+					var importAsset = AssetImporter.GetAtPath(fullScenePath);
+					if (importAsset.assetBundleName != gameBundleSceneDefinition.BundleName) {
+						importAsset.SetAssetBundleNameAndVariant(gameBundleSceneDefinition.BundleName, null);
+					}
+				}
+			}
+
+			return true;
 		}
 
 		string[] LoadGameDefinitions() {
@@ -90,14 +193,14 @@ namespace Mediabox.GameManager.Editor {
 			return directories;
 		}
 
-		void DrawEditorArea(string[] directories) {
+		string[] DrawEditorArea(string[] directories) {
 			ValidateSelectedGameDefinition(directories);
 			directories = DrawSelector(directories);
 			if (directories.Length == 0)
-				return;
+				return directories;
 			LoadGameDefinition(directories);
 			DrawGameDefinitionEditor(directories);
-
+			return directories;
 		}
 
 		void DrawSimulationArea() {

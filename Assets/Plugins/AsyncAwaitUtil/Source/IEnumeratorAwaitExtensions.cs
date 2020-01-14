@@ -379,6 +379,7 @@ public static class IEnumeratorAwaitExtensions
             SimpleCoroutineAwaiter<T> awaiter, T instruction)
         {
             yield return instruction;
+            yield return null;
             awaiter.Complete(instruction, null);
         }
 

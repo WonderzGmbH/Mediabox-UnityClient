@@ -11,12 +11,13 @@ namespace Mediabox.Samples {
 	/// Details to this class can be found in the base class.
 	/// </summary>
 	[System.Serializable]
-	public class GameDefinition : IGameBundleDefinition, IGameSceneDefinition {
+	public class GameDefinition : IGameBundleSceneDefinition {
 		public string game;
 		public string skin;
 		public string bundlePath;
 		public string scenePath;
 		public string BundleName => this.bundlePath;
 		public string SceneName => this.scenePath;
+		public string[] AdditionalBundles => new string[0];
 	}
 }
