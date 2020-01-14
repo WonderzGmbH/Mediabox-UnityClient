@@ -109,7 +109,7 @@ namespace Mediabox.GameManager.Editor {
 		}
 
 		bool ValidateGameDefinitionComplete(GameDefinitionBuildInfo[] gameDefinitions, string[] directories) {
-			return false;
+			return gameDefinitions.Length == directories.Length;
 		}
 
 		class GameDefinitionBuildInfo {
