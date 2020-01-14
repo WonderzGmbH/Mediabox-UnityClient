@@ -29,6 +29,8 @@ namespace Mediabox.GameKit.Game {
 
 		public sealed override async Task Load(string path) {
 			await base.Load(path);
+			if (!DataExists(this.SaveGameName))
+				return;
 			await LoadSaveGame(LoadData<TSaveGame>(this.SaveGameName));
 		}
 	}

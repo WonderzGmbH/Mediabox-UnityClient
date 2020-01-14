@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+﻿using System.IO;
+using UnityEditor;
 using UnityEngine;
 
 namespace Mediabox.GameManager.Editor
@@ -18,7 +19,10 @@ namespace Mediabox.GameManager.Editor
                 Debug.Log("BuildMethodException caught: " + e);
                 return;
             }
-            buildPlayerOptions.assetBundleManifestPath = "AssetBundles/iOS/iOS.manifest";
+
+            if (!File.Exists("AssetBundles/AssetBundles.manifest") && !EditorUtility.DisplayDialog("Warning", "It is recommended to build Asset Bundles first, using the GameDefinitionManager-Window. Continuing without may ", "OK", "Cancel"))
+                return;
+            buildPlayerOptions.assetBundleManifestPath = "AssetBundles/AssetBundles.manifest";
             BuildPipeline.BuildPlayer(buildPlayerOptions);
         }
     }
