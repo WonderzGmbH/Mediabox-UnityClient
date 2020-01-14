@@ -1,5 +1,4 @@
-﻿using Mediabox.API;
-using Mediabox.GameKit.GameManager;
+﻿using Mediabox.GameKit.GameManager;
 using UnityEditor;
 
 namespace Mediabox.GameManager.Editor {
@@ -42,11 +41,14 @@ namespace Mediabox.GameManager.Editor {
 		}
 
 		static void OnplayModeStateChanged(PlayModeStateChange change) {
-			if (change == PlayModeStateChange.ExitingPlayMode) {
-				StopSimulationMode();
-				isQuitting = true;
-			} else if (change == PlayModeStateChange.EnteredEditMode) {
-				isQuitting = false;
+			switch (change) {
+				case PlayModeStateChange.ExitingPlayMode:
+					StopSimulationMode();
+					isQuitting = true;
+					break;
+				case PlayModeStateChange.EnteredEditMode:
+					isQuitting = false;
+					break;
 			}
 		}
 

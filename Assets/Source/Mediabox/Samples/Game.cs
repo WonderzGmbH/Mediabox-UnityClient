@@ -10,6 +10,13 @@ namespace Mediabox.Samples {
 	/// </summary>
 	public class Game : GameWithSaveGame<GameDefinition, SaveGame> {
 		int level;
+
+		[ContextMenu(nameof(SaveTestFunction))]
+		public void SaveTestFunction() {
+			SaveData("some/sample/path.json", ("Some", "Data", "Can", "Be", "Saved", "Here"));
+			SaveData("some/sample/path2.json", ("SomeString",3f, 5, new []{3, 2, 1}));
+		}
+		
 		public override Task StartGame(string contentBundleFolderPath, GameDefinition gameDefinition) {
 			Debug.Log("[Game] Started.");
 			return Task.CompletedTask;

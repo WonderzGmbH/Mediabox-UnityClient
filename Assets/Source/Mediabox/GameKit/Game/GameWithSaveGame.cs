@@ -23,17 +23,13 @@ namespace Mediabox.GameKit.Game {
     
 		public sealed override Task Save(string path) {
 			var saveGamePath = Path.Combine(path, this.SaveGameName);
-			var directory = Path.GetDirectoryName(saveGamePath);
-			if (!Directory.Exists(directory))
-				Directory.CreateDirectory(directory);
-			File.WriteAllText(saveGamePath, JsonUtility.ToJson(CreateSaveGame()));
+			SaveData(this.SaveGameName, CreateSaveGame());
 			return Task.CompletedTask;
 		}
 
 		public sealed override async Task Load(string path) {
-			var saveGamePath = Path.Combine(path, this.SaveGameName);
-			if (File.Exists(saveGamePath))
-				await LoadSaveGame(JsonUtility.FromJson<TSaveGame>(File.ReadAllText(saveGamePath)));
+			await base.Load(path);
+			await LoadSaveGame(LoadData<TSaveGame>(this.SaveGameName));
 		}
 	}
 }

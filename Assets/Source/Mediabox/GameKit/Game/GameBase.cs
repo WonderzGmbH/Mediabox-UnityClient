@@ -1,8 +1,11 @@
-﻿using System.Threading.Tasks;
+﻿using System.IO;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Mediabox.GameKit.Game {
 	public abstract class GameBase<TGameDefinition> : MonoBehaviour, IGame<TGameDefinition> {
+		string savePath;
+
 		/// <summary>
 		/// This method is called when the game is supposed to start and it sends all necessary information.
 		/// </summary>
@@ -20,10 +23,37 @@ namespace Mediabox.GameKit.Game {
 		/// </summary>
 		/// <param name="path">The directory in which to store any relevant savegame data.</param>
 		public abstract Task Save(string path);
+
 		/// <summary>
 		/// This method will be called to notify you to load the game progress before starting the game.
 		/// </summary>
 		/// <param name="path">The directory from which to load any relevant savegame data.</param>
-		public abstract Task Load(string path);
+		public virtual Task Load(string path) {
+			this.savePath = path;
+			return Task.CompletedTask;
+		}
+
+		public void SaveData<T>(string path, T value) {
+			var saveGamePath = Path.Combine(this.savePath, path);
+			var directory = Path.GetDirectoryName(saveGamePath);
+			if (!Directory.Exists(directory))
+				Directory.CreateDirectory(directory);
+			File.WriteAllText(saveGamePath, JsonUtility.ToJson(value));
+		}
+
+		public bool DataExists(string path) {
+			var saveGamePath = Path.Combine(path, path);
+			return File.Exists(saveGamePath);
+		}
+		
+		public T LoadData<T>(string path) {
+			var saveGamePath = Path.Combine(this.savePath, path);
+			return JsonUtility.FromJson<T>(File.ReadAllText(saveGamePath));
+		}
+
+		public void DeleteData(string path) {
+			var saveGamePath = Path.Combine(this.savePath, path);
+			File.Delete(saveGamePath);
+		}
 	}
 }
