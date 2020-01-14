@@ -31,6 +31,6 @@ namespace Mediabox.API {
         // the app is sent to background and might be killed by the system.
         // You can rely on path being the same as passed by SetSaveDataFolder.
         // When saving is done, NativeAPI.OnSaveDataWritten() must be called.
-        void WriteSaveData(string path);
+        void WriteSave(string path);
     }
 }
