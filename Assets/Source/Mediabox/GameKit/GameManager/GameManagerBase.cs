@@ -90,7 +90,7 @@ namespace Mediabox.GameKit.GameManager {
             }
         }
 
-        public async void WriteSave(string path) {
+        public async void WriteSaveData(string path) {
             await FindGame()?.Save(path);
             this.nativeApi.OnSaveDataWritten();
         }
