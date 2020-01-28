@@ -53,6 +53,12 @@ namespace Mediabox.GameManager.Editor {
 			return AssetDatabase.LoadAssetAtPath<GameDefinitionSettings>(GameDefinitionSettings.SettingsPath);
 		}
 
+		void LoadSelectedIndex(string[] directories) {
+			var contentBundleFolder = SimulationMode.ContentBundleFolder;
+			var index = Array.IndexOf(directories, contentBundleFolder);
+			this.selectedIndex = index > 0 ? index : 0;
+		}
+		
 		void OnGUI() {
 			LoadOrCreateSettings();
 			if (this.settings == null) {
@@ -64,6 +70,7 @@ namespace Mediabox.GameManager.Editor {
 			EnsureDirectory();
 			DrawDirectoryArea();
 			var directories = LoadGameDefinitions();
+			LoadSelectedIndex(directories);
 			directories = DrawCreateNew(directories);
 			if (directories.Length == 0) {
 				EditorGUILayout.HelpBox("Create a new GameDefinition to begin work.", MessageType.Info);
