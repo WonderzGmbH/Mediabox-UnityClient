@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Mediabox.API;
+using Mediabox.GameKit.Bundles;
 using Mediabox.GameKit.Game;
 using Mediabox.GameKit.GameDefinition;
 using UnityEngine;
@@ -22,7 +23,7 @@ namespace Mediabox.GameKit.GameManager {
         INativeAPI nativeApi;
         string language;
         string saveGamePath;
-        AssetBundle loadedBundle;
+        IBundle loadedBundle;
         static GameManagerBase<TGameDefinition> instance;
 
         /// <summary>
@@ -63,9 +64,12 @@ namespace Mediabox.GameKit.GameManager {
                     if (definition is IGameBundleDefinition gameBundleDefinition) {
                         await LoadGameDefinitionBundle(path, gameBundleDefinition);
                         if (definition is IGameSceneDefinition gameSceneDefinition) {
-                            await LoadGameDefinitionScene(gameSceneDefinition);
+                            if (definition is IGameBundleSceneDefinition gameBundleSceneDefinition)
+                                await this.loadedBundle.LoadScene(gameBundleSceneDefinition.SceneName);
+                            else
+                                await LoadGameDefinitionScene(gameSceneDefinition);
                         } else {
-                            await LoadAllScenesInBundle(this.loadedBundle);
+                            //await LoadAllScenesInBundle(this.loadedBundle);
                         }
                     }
                 }
@@ -80,15 +84,15 @@ namespace Mediabox.GameKit.GameManager {
             }
         }
 
-        static async Task LoadAllScenesInBundle(AssetBundle bundle) {
-            var scenePaths = bundle.GetAllScenePaths();
-            if (scenePaths.Length <= 0) 
-                return;
-            await SceneManager.LoadSceneAsync(scenePaths[0]);
-            for (var i = 1; i < scenePaths.Length; i++) {
-                await SceneManager.LoadSceneAsync(scenePaths[i], LoadSceneMode.Additive);
-            }
-        }
+        // static async Task LoadAllScenesInBundle(IBundle bundle) {
+        //     var scenePaths = bundle.GetAllScenePaths();
+        //     if (scenePaths.Length <= 0) 
+        //         return;
+        //     await SceneManager.LoadSceneAsync(scenePaths[0]);
+        //     for (var i = 1; i < scenePaths.Length; i++) {
+        //         await SceneManager.LoadSceneAsync(scenePaths[i], LoadSceneMode.Additive);
+        //     }
+        // }
 
         public async void WriteSaveData(string path) {
             await FindGame()?.Save(path);
@@ -98,7 +102,7 @@ namespace Mediabox.GameKit.GameManager {
         public async void UnloadGameContent() {
             await SceneManager.LoadSceneAsync("StartScene");
             if (this.loadedBundle != null) {
-                this.loadedBundle.Unload(true);
+                this.loadedBundle.Unload();
                 this.loadedBundle = null;
             }
             await Resources.UnloadUnusedAssets();
@@ -106,6 +110,11 @@ namespace Mediabox.GameKit.GameManager {
         }
         
         #endregion // IMediaboxCallbacks
+
+        public bool HasContentBundle => this.loadedBundle != null;
+        public async Task<T> LoadAssetFromContentBundle<T>(string assetPath) where T:UnityEngine.Object {
+            return await this.loadedBundle.LoadAssetAsync<T>(assetPath);
+        }
         
         /// <summary>
         /// Implement this method to add your custom StartGame-Logic.
@@ -122,14 +131,14 @@ namespace Mediabox.GameKit.GameManager {
 
         async Task LoadGameDefinitionBundle(string path, IGameBundleDefinition gameBundleDefinition) {
             var bundlePath = Path.Combine(path, gameBundleDefinition.BundleName);
-            var bundle = AssetBundle.LoadFromFileAsync(bundlePath);
+            var bundle = BundleManager.Load(bundlePath);
             if (bundle == null) {
                 this.nativeApi.OnLoadingFailed();
                 throw new Exception($"No AssetBundle found at contentBundleFolderPath {bundlePath}. Either, the contentBundleFolderPath has not been set up correctly in the GameDefinition, or the bundle has not been placed in the correct place.");
             }
 
             await bundle;
-            this.loadedBundle = bundle.assetBundle;
+            this.loadedBundle = bundle.Result;
         }
 
         static TGameDefinition LoadGameDefinition(string path, GameDefinitionSettings settings) {

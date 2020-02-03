@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using Mediabox.GameKit.Bundles;
 using Mediabox.GameKit.GameDefinition;
 using Mediabox.GameKit.GameManager;
 using UnityEditor;
@@ -76,10 +77,15 @@ namespace Mediabox.GameManager.Editor {
 				EditorGUILayout.HelpBox("Create a new GameDefinition to begin work.", MessageType.Info);
 			} else {
 				directories = DrawEditorArea(directories);
+				DrawBundlesArea();
 				SimulationMode.ContentBundleFolder = directories[this.selectedIndex];
 				DrawSimulationArea();
 			}
 			DrawBuildArea(directories);
+		}
+
+		void DrawBundlesArea() {
+			BundleManager.EditorBundles = EditorGUILayout.Toggle("Use Editor Bundles", BundleManager.EditorBundles);
 		}
 
 		void DrawBuildArea(string[] directories) {
@@ -181,7 +187,7 @@ namespace Mediabox.GameManager.Editor {
 
 		static bool ValidateScene(GameDefinitionBuildInfo gameDefinitionBuildInfo, TGameDefinition gameDefinition) {
 			if (gameDefinition is IGameSceneDefinition gameSceneDefinition) {
-				var fullScenePath = Path.ChangeExtension(Path.Combine("Assets", gameSceneDefinition.SceneName), "unity");
+				var fullScenePath = Path.ChangeExtension(Path.Combine(gameSceneDefinition.SceneName), "unity");
 				var scene = (SceneAsset) AssetDatabase.LoadAssetAtPath(fullScenePath, typeof(SceneAsset));
 				if (scene == null) {
 					Debug.LogError($"Invalid GameDefinition at path '{gameDefinitionBuildInfo.path}', the scene at path {fullScenePath} does not exist.");
@@ -215,7 +221,7 @@ namespace Mediabox.GameManager.Editor {
 
 		void DrawSimulationArea() {
 			EditorGUI.BeginChangeCheck();
-			SimulationMode.AutoSimulate = GUILayout.Toggle(SimulationMode.AutoSimulate, "Auto-Simulate");
+			SimulationMode.AutoSimulate = EditorGUILayout.Toggle("Auto-Simulate", SimulationMode.AutoSimulate);
 			if (!Application.isPlaying) {
 				SimulationMode.StopSimulationMode();
 				DrawStartPlayMode();
