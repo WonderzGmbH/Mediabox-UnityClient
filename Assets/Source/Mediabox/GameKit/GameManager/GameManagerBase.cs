@@ -56,6 +56,7 @@ namespace Mediabox.GameKit.GameManager {
         
         public async void SetContentBundleFolder(string path){
             try {
+                await ResetGame();
                 var definition = default(TGameDefinition);
                 var settings = GameDefinitionSettings.Load();
                 path = FixWronglyZippedArchive(path);
@@ -100,15 +101,20 @@ namespace Mediabox.GameKit.GameManager {
         }
 
         public async void UnloadGameContent() {
-            await SceneManager.LoadSceneAsync("StartScene");
+            await ResetGame();
+            await Resources.UnloadUnusedAssets();
+            this.nativeApi.OnUnloadingSucceeded();
+        }
+
+        async Task ResetGame() {
+            if (SceneManager.GetActiveScene().name != "StartScene")
+                await SceneManager.LoadSceneAsync("StartScene");
             if (this.loadedBundle != null) {
                 this.loadedBundle.Unload();
                 this.loadedBundle = null;
             }
-            await Resources.UnloadUnusedAssets();
-            this.nativeApi.OnUnloadingSucceeded();
         }
-        
+
         #endregion // IMediaboxCallbacks
 
         public bool HasContentBundle => this.loadedBundle != null;
