@@ -4,6 +4,7 @@ using System.Linq;
 using Mediabox.GameKit.Bundles;
 using Mediabox.GameKit.GameDefinition;
 using Mediabox.GameKit.GameManager;
+using Mediabox.Samples;
 using UnityEditor;
 using UnityEngine;
 using CompressionLevel = System.IO.Compression.CompressionLevel;
@@ -89,38 +90,86 @@ namespace Mediabox.GameManager.Editor {
 		}
 
 		void DrawBuildArea(string[] directories) {
-			if (GUILayout.Button("Build GameDefinitions")) {
-				var gameDefinitions = LoadAllValidGameDefinitions(directories);
-				if (!ValidateGameDefinitionComplete(gameDefinitions, directories) &&
-				    !EditorUtility.DisplayDialog("There have been errors", "Some GameDefinitions had errors. Do you still want to continue?", "OK", "Cancel"))
-					return;
-				if (typeof(IGameBundleDefinition).IsAssignableFrom(typeof(TGameDefinition))) {
-					if (!Directory.Exists("AssetBundles"))
-						Directory.CreateDirectory("AssetBundles");
-					BuildPipeline.BuildAssetBundles("AssetBundles", gameDefinitions.Select(definition => new AssetBundleBuild {
-						assetBundleName = (definition.gameDefinition as IGameBundleDefinition).BundleName,
-						assetNames = AssetDatabase.GetAssetPathsFromAssetBundle((definition.gameDefinition as IGameBundleDefinition).BundleName)
-					}).ToArray(), BuildAssetBundleOptions.None, EditorUserBuildSettings.activeBuildTarget);
-					foreach (var gameDefinition in gameDefinitions) {
-						var bundlePath = Path.Combine("AssetBundles", (gameDefinition.gameDefinition as IGameBundleDefinition).BundleName);
-						var targetPath = Path.Combine(gameDefinition.path, (gameDefinition.gameDefinition as IGameBundleDefinition).BundleName);
-						File.Copy(bundlePath, targetPath, true);
-					}
-				}
-				
-				if (Directory.Exists("GameDefinitionBuild"))
-					Directory.Delete("GameDefinitionBuild", true);
-				Directory.CreateDirectory("GameDefinitionBuild");
+			DrawPlayerVersionField();
+			if (GUILayout.Button("Build All")) {
+				BuildGameDefinitions(directories, true);
+			}
+
+			if (this.gameDefinition != null & GUILayout.Button($"Build {Path.GetFileName(directories[this.selectedIndex])}")) {
+				BuildGameDefinitions(new []{directories[this.selectedIndex]}, false);
+			}
+		}
+
+		void BuildGameDefinitions(string[] directories, bool clearDirectory) {
+			var gameDefinitions = LoadAllValidGameDefinitions(directories);
+			if (!ValidateGameDefinitionComplete(gameDefinitions, directories) &&
+			    !EditorUtility.DisplayDialog("There have been errors", "Some GameDefinitions had errors. Do you still want to continue?", "OK", "Cancel"))
+				return;
+			if (typeof(IGameBundleDefinition).IsAssignableFrom(typeof(TGameDefinition))) {
+				if (!Directory.Exists("AssetBundles"))
+					Directory.CreateDirectory("AssetBundles");
+				else
+					RepairBundleConflicts(gameDefinitions);
+				BuildPipeline.BuildAssetBundles("AssetBundles", gameDefinitions.Select(definition => new AssetBundleBuild {
+					assetBundleName = (definition.gameDefinition as IGameBundleDefinition).BundleName,
+					assetNames = AssetDatabase.GetAssetPathsFromAssetBundle((definition.gameDefinition as IGameBundleDefinition).BundleName)
+				}).ToArray(), BuildAssetBundleOptions.None, EditorUserBuildSettings.activeBuildTarget);
 				foreach (var gameDefinition in gameDefinitions) {
-					var path1 = new Uri(Path.GetFullPath(gameDefinition.path));
-					var path2 = new Uri(Path.GetFullPath(this.settings.gameDefinitionDirectoryPath));
-					var diff = path2.MakeRelativeUri(path1).ToString();
-					var path = Path.Combine("GameDefinitionBuild", diff + ".zip");
-					if(File.Exists(path))
-						File.Delete(path);
-					System.IO.Compression.ZipFile.CreateFromDirectory(gameDefinition.path, path, CompressionLevel.Optimal, false);
+					var bundleName = (gameDefinition.gameDefinition as IGameBundleDefinition).BundleName;
+					var bundlePath = Path.Combine("AssetBundles", bundleName);
+					var targetPath = Path.Combine(gameDefinition.path, bundleName);
+					if (!Directory.Exists(Path.GetDirectoryName(targetPath)))
+						Directory.CreateDirectory(Path.GetDirectoryName(targetPath));
+					File.Copy(bundlePath, targetPath, true);
 				}
 			}
+
+			if (clearDirectory && Directory.Exists("GameDefinitionBuild"))
+				Directory.Delete("GameDefinitionBuild", true);
+			if(!Directory.Exists("GameDefinitionBuild"))
+				Directory.CreateDirectory("GameDefinitionBuild");
+			foreach (var gameDefinition in gameDefinitions) {
+				var path1 = new Uri(Path.GetFullPath(gameDefinition.path));
+				var path2 = new Uri(Path.GetFullPath(this.settings.gameDefinitionDirectoryPath));
+				var diff = path2.MakeRelativeUri(path1).ToString();
+				var path = Path.Combine("GameDefinitionBuild", diff + ".zip");
+				if (File.Exists(path))
+					File.Delete(path);
+				System.IO.Compression.ZipFile.CreateFromDirectory(gameDefinition.path, path, CompressionLevel.Optimal, false);
+			}
+		}
+
+		static void RepairBundleConflicts(GameDefinitionBuildInfo[] buildInfos) {
+			foreach (var buildInfo in buildInfos) {
+				var splitPath = (buildInfo.gameDefinition as IGameBundleDefinition).BundleName.Split('/');
+				for (var i = 0; i < splitPath.Length-1; i++) {
+					var bundlePath = "AssetBundles";
+					var definitionPath = buildInfo.path;
+					for (var j = 0; j <= i; j++) {
+						bundlePath = Path.Combine(bundlePath, splitPath[j]);
+						definitionPath = Path.Combine(definitionPath, splitPath[j]);
+					}
+
+					if (File.Exists(bundlePath)) {
+						File.Delete(bundlePath);
+					}
+					if (File.Exists(definitionPath)) {
+						File.Delete(definitionPath);
+					}
+				}
+			}
+		}
+
+		void DrawPlayerVersionField() {
+			EditorGUILayout.BeginHorizontal();
+			if (this.usePlayerSettingVersion) {
+				EditorGUILayout.LabelField("Data Version", PlayerSettings.bundleVersion, GUILayout.MinWidth(230f), GUILayout.MaxWidth(250f));
+			} else {
+				this.bundleVersion = EditorGUILayout.TextField("Version", this.bundleVersion, GUILayout.MinWidth(230f), GUILayout.MaxWidth(250f));
+			}
+
+			this.usePlayerSettingVersion = EditorGUILayout.ToggleLeft("Use PlaySetting Version", this.usePlayerSettingVersion);
+			EditorGUILayout.EndHorizontal();
 		}
 
 		bool ValidateGameDefinitionComplete(GameDefinitionBuildInfo[] gameDefinitions, string[] directories) {
@@ -298,6 +347,9 @@ namespace Mediabox.GameManager.Editor {
 		}
 
 		string declinedRepairPath;
+		bool usePlayerSettingVersion;
+		string bundleVersion;
+
 		void LoadGameDefinition(string[] directories) {
 			var filePath = Path.Combine(directories[this.selectedIndex], this.settings.gameDefinitionFileName);
 			if (!File.Exists(filePath)) {
@@ -345,5 +397,5 @@ namespace Mediabox.GameManager.Editor {
 			GUILayout.EndHorizontal();
 			return directories;
 		}
-	}
+	} 
 }
