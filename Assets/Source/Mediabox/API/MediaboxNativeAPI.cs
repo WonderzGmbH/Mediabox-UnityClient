@@ -19,6 +19,14 @@ namespace Mediabox.API {
         public void OnSaveDataWritten() {
             NativeAPI.OnSaveDataWritten();
         }
+
+        public void OnCreateScreenshotSucceeded(string path) {
+            NativeAPI.OnCreateScreenshotSucceeded(path);
+        }
+
+        public void OnCreateScreenshotFailed() {
+            NativeAPI.OnCreateScreenshotFailed();
+        }
     }
     
 }

@@ -24,5 +24,13 @@ namespace Mediabox.API {
         // Report to Mediabox that save data writing has finished.
         // This method should be called as a reply to WriteSaveData().
         [DllImport("__Internal")] public static extern void OnSaveDataWritten();
+        
+        // Report to Mediabox that creating a screenshot has finished.
+        // This method should be called as a reply to CreateScreenshot().
+        // The path to the screenshot should be passed as a parameter.
+        [DllImport("__Internal")] public static extern void OnCreateScreenshotSucceeded(string path);
+        
+        // Report to Mediabox that creating a screenshot has finished.
+        [DllImport("__Internal")] public static extern void OnCreateScreenshotFailed();
     }
 }

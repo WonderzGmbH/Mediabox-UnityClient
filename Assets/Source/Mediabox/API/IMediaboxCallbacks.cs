@@ -32,5 +32,11 @@ namespace Mediabox.API {
         // You can rely on path being the same as passed by SetSaveDataFolder.
         // When saving is done, NativeAPI.OnSaveDataWritten() must be called.
         void WriteSaveData(string path);
+
+        void PauseApplication();
+
+        void UnpauseApplication();
+
+        void CreateScreenshot();
     }
 }

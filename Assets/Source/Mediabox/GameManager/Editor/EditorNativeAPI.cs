@@ -1,4 +1,5 @@
-﻿using Mediabox.API;
+﻿using System.IO;
+using Mediabox.API;
 using UnityEditor;
 using UnityEngine;
 
@@ -55,6 +56,18 @@ namespace Mediabox.GameManager.Editor {
 			SendEvent(nameof(IMediaboxCallbacks.UnloadGameContent), null);
 		}
 
+		void CreateScreenshot() {
+			SendEvent(nameof(IMediaboxCallbacks.CreateScreenshot), null);
+		}
+		
+		void PauseApplication() {
+			SendEvent(nameof(IMediaboxCallbacks.PauseApplication), null);
+		}
+		
+		void UnpauseApplication() {
+			SendEvent(nameof(IMediaboxCallbacks.UnpauseApplication), null);
+		}
+
 		public void OnLoadingSucceeded() {
 			this.state = State.Stoppable;
 			this.waitingForLoadingCallback = false;
@@ -74,6 +87,26 @@ namespace Mediabox.GameManager.Editor {
 		public void OnSaveDataWritten() {
 			this.waitingForSaveDataCallback = false;
 			SwitchStateIfDone();
+		}
+
+		public void OnCreateScreenshotSucceeded(string path) {
+			var dialogResult = EditorUtility.DisplayDialogComplex("Screenshot creation succeeded", $"Screenshot can be found at '{path}'.", "Open", "Delete", "Continue");
+			switch (dialogResult) {
+				case 0:
+					EditorUtility.RevealInFinder(path);
+					break;
+				case 1:
+					File.Delete(path);
+					break;
+				case 2:
+					break;
+				default:
+					throw new System.ArgumentOutOfRangeException(nameof(dialogResult), dialogResult, "Value not expected.");
+			}
+		}
+
+		public void OnCreateScreenshotFailed() {
+			EditorUtility.DisplayDialog("Screenshot creation failed", "An unknown error occured", "OK");
 		}
 
 		void SwitchStateIfDone() {
@@ -115,6 +148,12 @@ namespace Mediabox.GameManager.Editor {
 				case State.Stoppable:
 					if (GUILayout.Button("Stop Game"))
 						Stop();
+					if (GUILayout.Button("Create Screenshot"))
+						CreateScreenshot();
+					if (GUILayout.Button("Pause Game"))
+						PauseApplication();
+					if (GUILayout.Button("Unpause Game"))
+						UnpauseApplication();
 					break;
 				case State.Starting:
 					if (this.waitingForLoadingCallback)

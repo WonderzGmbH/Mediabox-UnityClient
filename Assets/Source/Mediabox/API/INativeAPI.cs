@@ -5,5 +5,7 @@ namespace Mediabox.API {
         void OnLoadingFailed();
         void OnUnloadingSucceeded();
         void OnSaveDataWritten();
+        void OnCreateScreenshotSucceeded(string path);
+        void OnCreateScreenshotFailed();
     }
 }

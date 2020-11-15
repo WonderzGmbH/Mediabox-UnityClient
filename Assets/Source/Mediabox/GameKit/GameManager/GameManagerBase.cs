@@ -100,6 +100,41 @@ namespace Mediabox.GameKit.GameManager {
             this.nativeApi.OnSaveDataWritten();
         }
 
+        float timeScaleBeforePause;
+        float volumeBeforePause;
+        
+        public void PauseApplication() {
+            this.timeScaleBeforePause = Time.timeScale;
+            Time.timeScale = 0f;
+            this.volumeBeforePause = AudioListener.volume;
+            AudioListener.volume = 0f;
+        }
+
+        public void UnpauseApplication() {
+            Time.timeScale = this.timeScaleBeforePause;
+            AudioListener.volume = this.volumeBeforePause;
+        }
+
+        public void CreateScreenshot() {
+            _ = CreateScreenshotAsync();
+        }
+
+        async Task CreateScreenshotAsync() {
+            var fileName = $"{Application.productName}-{DateTime.Now.ToString(("yyyyMMddHHmmssfff"))}.png";
+            var fullFilePath = Application.installMode == ApplicationInstallMode.Editor ? fileName : Path.Combine(Application.persistentDataPath, fileName);
+            ScreenCapture.CaptureScreenshot(fileName);
+            var startTime = Time.realtimeSinceStartup;
+            const float timeout = 5f;
+            while (!File.Exists(fullFilePath)) {
+                if (Time.realtimeSinceStartup > startTime + timeout) {
+                    this.nativeApi.OnCreateScreenshotFailed();
+                    return;
+                }
+                await Task.Delay(100);
+            }
+            this.nativeApi.OnCreateScreenshotSucceeded(fullFilePath);
+        }
+
         public async void UnloadGameContent() {
             await ResetGame();
             await Resources.UnloadUnusedAssets();
