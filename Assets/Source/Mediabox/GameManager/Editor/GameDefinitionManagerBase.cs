@@ -3,8 +3,6 @@ using System.IO;
 using System.Linq;
 using Mediabox.GameKit.Bundles;
 using Mediabox.GameKit.GameDefinition;
-using Mediabox.GameKit.GameManager;
-using Mediabox.Samples;
 using UnityEditor;
 using UnityEngine;
 using CompressionLevel = System.IO.Compression.CompressionLevel;
@@ -26,15 +24,14 @@ namespace Mediabox.GameManager.Editor {
 	/// <typeparam name="TWindow">Your inherited class type.</typeparam>
 	/// <typeparam name="TGameDefinition">The type of GameDefinition that you're using.</typeparam>
 	public class GameDefinitionManagerBase<TWindow, TGameDefinition> : EditorWindow where TWindow : GameDefinitionManagerBase<TWindow, TGameDefinition> where TGameDefinition : class, new() {
-
 		int selectedIndex;
 		string newDefinitionName;
 
 		public TGameDefinition gameDefinition;
 		static TWindow window;
 		GameDefinitionSettings settings;
-		protected static TWindow ShowWindow()
-		{
+
+		protected static TWindow ShowWindow() {
 			window = GetWindow<TWindow>();
 			window.titleContent = new GUIContent("Game Definition Manager");
 			window.Show();
@@ -43,6 +40,7 @@ namespace Mediabox.GameManager.Editor {
 
 		void LoadOrCreateSettings() {
 			this.settings = AssetDatabase.LoadAssetAtPath<GameDefinitionSettings>(GameDefinitionSettings.SettingsPath) ?? TryCreateSettings();
+			this.buildSettings = AssetDatabase.LoadAssetAtPath<GameDefinitionBuildSettings>(GameDefinitionBuildSettings.SettingsPath) ?? TryCreateBuildSettings();
 		}
 
 		static GameDefinitionSettings TryCreateSettings() {
@@ -55,20 +53,32 @@ namespace Mediabox.GameManager.Editor {
 			return AssetDatabase.LoadAssetAtPath<GameDefinitionSettings>(GameDefinitionSettings.SettingsPath);
 		}
 
+		static GameDefinitionBuildSettings TryCreateBuildSettings() {
+			var settingsDirectory = Path.GetDirectoryName(GameDefinitionBuildSettings.SettingsPath);
+			if (settingsDirectory == null)
+				return null;
+			if (!Directory.Exists(settingsDirectory))
+				Directory.CreateDirectory(settingsDirectory);
+			AssetDatabase.CreateAsset(CreateInstance<GameDefinitionBuildSettings>(), GameDefinitionBuildSettings.SettingsPath);
+			return AssetDatabase.LoadAssetAtPath<GameDefinitionBuildSettings>(GameDefinitionBuildSettings.SettingsPath);
+		}
+
 		void LoadSelectedIndex(string[] directories) {
 			var contentBundleFolder = SimulationMode.ContentBundleFolder;
 			var index = Array.IndexOf(directories, contentBundleFolder);
 			this.selectedIndex = index > 0 ? index : 0;
 		}
-		
+
 		void OnGUI() {
 			LoadOrCreateSettings();
 			if (this.settings == null) {
 				EditorGUILayout.HelpBox("Could not find or create GameDefinitionSettings. This might be caused by invalid SettingsPath in GameDefinitionSettings.cs-File.", MessageType.Error);
 				return;
 			}
+
 			DrawSettingsArea();
-			
+			DrawBuildSettingsArea();
+
 			EnsureDirectory();
 			DrawDirectoryArea();
 			var directories = LoadGameDefinitions();
@@ -82,6 +92,7 @@ namespace Mediabox.GameManager.Editor {
 				SimulationMode.ContentBundleFolder = directories[this.selectedIndex];
 				DrawSimulationArea();
 			}
+
 			DrawBuildArea(directories);
 		}
 
@@ -89,60 +100,122 @@ namespace Mediabox.GameManager.Editor {
 			BundleManager.EditorBundles = EditorGUILayout.Toggle("Use Editor Bundles", BundleManager.EditorBundles);
 		}
 
-		void DrawBuildArea(string[] directories) {
-			DrawPlayerVersionField();
-			if (GUILayout.Button("Build All")) {
-				BuildGameDefinitions(directories, true);
-			}
+		enum BuildPlatformOption {
+			AllSupportedPlatforms,
+			CurrentPlatform,
+			ManualPlatforms
+		}
 
-			if (this.gameDefinition != null & GUILayout.Button($"Build {Path.GetFileName(directories[this.selectedIndex])}")) {
-				BuildGameDefinitions(new []{directories[this.selectedIndex]}, false);
+		BuildPlatformOption buildPlatformOption;
+		BuildTarget manualPlatform;
+
+		BuildTarget[] GetSelectedBuildTargets() {
+			switch (this.buildPlatformOption) {
+				case BuildPlatformOption.AllSupportedPlatforms:
+					return this.buildSettings.supportedBuildTargets.Concat(this.customPlatformSettings?.supportedPlatforms ?? new BuildTarget[0]).Where(buildTarget => this.customPlatformSettings?.unsupportedPlatforms?.Contains(buildTarget) != true).ToArray();
+				case BuildPlatformOption.CurrentPlatform:
+					return new[] {EditorUserBuildSettings.activeBuildTarget};
+				case BuildPlatformOption.ManualPlatforms:
+					return new[] {this.manualPlatform};
+				default:
+					throw new ArgumentOutOfRangeException();
 			}
 		}
 
-		void BuildGameDefinitions(string[] directories, bool clearDirectory) {
+		void DrawBuildArea(string[] directories) {
+			EditorGUILayout.Separator();
+			EditorGUILayout.Separator();
+			EditorGUILayout.LabelField("Build");
+			//DrawPlayerVersionField();
+			DrawBuildPlatformsArea();
+			GUILayout.Label($"Building: {string.Join(", ", GetSelectedBuildTargets())}");
+			EditorGUI.EndDisabledGroup();
+			if (GUILayout.Button($"Build All")) {
+				BuildGameDefinitions(directories, true, GetSelectedBuildTargets());
+			}
+
+			if (this.gameDefinition != null & GUILayout.Button($"Build {Path.GetFileName(directories[this.selectedIndex])}")) {
+				BuildGameDefinitions(new[] {directories[this.selectedIndex]}, false, GetSelectedBuildTargets());
+			}
+		}
+
+		void DrawBuildPlatformsArea() {
+			this.buildPlatformOption = (BuildPlatformOption) EditorGUILayout.EnumPopup(this.buildPlatformOption);
+			if (this.buildPlatformOption == BuildPlatformOption.ManualPlatforms) {
+				this.manualPlatform = (BuildTarget) EditorGUILayout.EnumPopup(this.manualPlatform);
+			} else if (this.buildPlatformOption == BuildPlatformOption.CurrentPlatform) {
+				GUILayout.Label("Current Platform: " + EditorUserBuildSettings.activeBuildTarget);
+			}
+		}
+
+		void BuildGameDefinitions(string[] directories, bool clearDirectory, BuildTarget[] buildTargets) {
 			var gameDefinitions = LoadAllValidGameDefinitions(directories);
 			if (!ValidateGameDefinitionComplete(gameDefinitions, directories) &&
 			    !EditorUtility.DisplayDialog("There have been errors", "Some GameDefinitions had errors. Do you still want to continue?", "OK", "Cancel"))
 				return;
-			if (typeof(IGameBundleDefinition).IsAssignableFrom(typeof(TGameDefinition))) {
-				if (!Directory.Exists("AssetBundles"))
-					Directory.CreateDirectory("AssetBundles");
-				else
-					RepairBundleConflicts(gameDefinitions);
-				BuildPipeline.BuildAssetBundles("AssetBundles", gameDefinitions.Select(definition => new AssetBundleBuild {
-					assetBundleName = (definition.gameDefinition as IGameBundleDefinition).BundleName,
-					assetNames = AssetDatabase.GetAssetPathsFromAssetBundle((definition.gameDefinition as IGameBundleDefinition).BundleName)
-				}).ToArray(), BuildAssetBundleOptions.None, EditorUserBuildSettings.activeBuildTarget);
+
+			var tempBuildPath = Path.Combine("GameDefinitionBuild", "_TMP_");
+			if (Directory.Exists(tempBuildPath))
+				Directory.Delete(tempBuildPath, true);
+			if (!Directory.Exists(tempBuildPath))
+				Directory.CreateDirectory(tempBuildPath);
+
+			foreach (var buildTarget in buildTargets) {
+				var bundleBuildPath = Path.Combine("AssetBundles", buildTarget.ToString());
+				if (typeof(IGameBundleDefinition).IsAssignableFrom(typeof(TGameDefinition))) {
+					if (!Directory.Exists(bundleBuildPath))
+						Directory.CreateDirectory(bundleBuildPath);
+					else
+						RepairBundleConflicts(gameDefinitions);
+					BuildPipeline.BuildAssetBundles(bundleBuildPath, gameDefinitions.Select(definition => new AssetBundleBuild {
+						assetBundleName = (definition.gameDefinition as IGameBundleDefinition).BundleName,
+						assetNames = AssetDatabase.GetAssetPathsFromAssetBundle((definition.gameDefinition as IGameBundleDefinition).BundleName)
+					}).ToArray(), BuildAssetBundleOptions.None, buildTarget);
+					foreach (var gameDefinition in gameDefinitions) {
+						var bundleName = (gameDefinition.gameDefinition as IGameBundleDefinition).BundleName;
+						var bundlePath = Path.Combine(bundleBuildPath, bundleName);
+						var targetPath = Path.Combine(gameDefinition.path, bundleName);
+						if (!Directory.Exists(Path.GetDirectoryName(targetPath)))
+							Directory.CreateDirectory(Path.GetDirectoryName(targetPath));
+						File.Copy(bundlePath, targetPath, true);
+					}
+				}
+
+				var buildPath = Path.Combine("GameDefinitionBuild", buildTarget.ToString());
+				if (clearDirectory && Directory.Exists(buildPath))
+					Directory.Delete(buildPath, true);
+				if (!Directory.Exists(buildPath))
+					Directory.CreateDirectory(buildPath);
 				foreach (var gameDefinition in gameDefinitions) {
-					var bundleName = (gameDefinition.gameDefinition as IGameBundleDefinition).BundleName;
-					var bundlePath = Path.Combine("AssetBundles", bundleName);
-					var targetPath = Path.Combine(gameDefinition.path, bundleName);
-					if (!Directory.Exists(Path.GetDirectoryName(targetPath)))
-						Directory.CreateDirectory(Path.GetDirectoryName(targetPath));
-					File.Copy(bundlePath, targetPath, true);
+					var path1 = new Uri(Path.GetFullPath(gameDefinition.path));
+					var path2 = new Uri(Path.GetFullPath(this.settings.gameDefinitionDirectoryPath));
+					var diff = path2.MakeRelativeUri(path1).ToString();
+					var path = Path.Combine(buildPath, diff + ".zip");
+					if (File.Exists(path))
+						File.Delete(path);
+					var customPlatformSettingsPath = Path.Combine(gameDefinition.path, GameDefinitionBuildSettings.customPlatformSettings);
+					var tempCustomPlatformSettingsPath = Path.Combine(tempBuildPath, customPlatformSettingsPath);
+					var moveCustomPlatformSettings = File.Exists(customPlatformSettingsPath);
+					if (moveCustomPlatformSettings) {
+						if (!Directory.Exists(Path.GetDirectoryName(tempCustomPlatformSettingsPath)))
+							Directory.CreateDirectory(Path.GetDirectoryName(tempCustomPlatformSettingsPath));
+						File.Move(customPlatformSettingsPath, tempCustomPlatformSettingsPath);
+					}
+
+					System.IO.Compression.ZipFile.CreateFromDirectory(gameDefinition.path, path, CompressionLevel.Optimal, false);
+					if (moveCustomPlatformSettings)
+						File.Move(tempCustomPlatformSettingsPath, customPlatformSettingsPath);
 				}
 			}
 
-			if (clearDirectory && Directory.Exists("GameDefinitionBuild"))
-				Directory.Delete("GameDefinitionBuild", true);
-			if(!Directory.Exists("GameDefinitionBuild"))
-				Directory.CreateDirectory("GameDefinitionBuild");
-			foreach (var gameDefinition in gameDefinitions) {
-				var path1 = new Uri(Path.GetFullPath(gameDefinition.path));
-				var path2 = new Uri(Path.GetFullPath(this.settings.gameDefinitionDirectoryPath));
-				var diff = path2.MakeRelativeUri(path1).ToString();
-				var path = Path.Combine("GameDefinitionBuild", diff + ".zip");
-				if (File.Exists(path))
-					File.Delete(path);
-				System.IO.Compression.ZipFile.CreateFromDirectory(gameDefinition.path, path, CompressionLevel.Optimal, false);
-			}
+			if (Directory.Exists(tempBuildPath))
+				Directory.Delete(tempBuildPath, true);
 		}
 
 		static void RepairBundleConflicts(GameDefinitionBuildInfo[] buildInfos) {
 			foreach (var buildInfo in buildInfos) {
 				var splitPath = (buildInfo.gameDefinition as IGameBundleDefinition).BundleName.Split('/');
-				for (var i = 0; i < splitPath.Length-1; i++) {
+				for (var i = 0; i < splitPath.Length - 1; i++) {
 					var bundlePath = "AssetBundles";
 					var definitionPath = buildInfo.path;
 					for (var j = 0; j <= i; j++) {
@@ -153,6 +226,7 @@ namespace Mediabox.GameManager.Editor {
 					if (File.Exists(bundlePath)) {
 						File.Delete(bundlePath);
 					}
+
 					if (File.Exists(definitionPath)) {
 						File.Delete(definitionPath);
 					}
@@ -168,7 +242,7 @@ namespace Mediabox.GameManager.Editor {
 				this.bundleVersion = EditorGUILayout.TextField("Version", this.bundleVersion, GUILayout.MinWidth(230f), GUILayout.MaxWidth(250f));
 			}
 
-			this.usePlayerSettingVersion = EditorGUILayout.ToggleLeft("Use PlaySetting Version", this.usePlayerSettingVersion);
+			this.usePlayerSettingVersion = EditorGUILayout.ToggleLeft("Use PlayerSettings Version", this.usePlayerSettingVersion);
 			EditorGUILayout.EndHorizontal();
 		}
 
@@ -185,13 +259,14 @@ namespace Mediabox.GameManager.Editor {
 				this.path = path;
 			}
 		}
-		
+
 		GameDefinitionBuildInfo TryLoadGameDefinitionBuildInfo(string path) {
 			var filePath = Path.Combine(path, this.settings.gameDefinitionFileName);
 			if (!File.Exists(filePath)) {
 				Debug.LogError($"Invalid GameDefinition at path '{path}', you can repair it using the Game Definition Manager.");
 				return null;
 			}
+
 			return new GameDefinitionBuildInfo(JsonUtility.FromJson<TGameDefinition>(File.ReadAllText(filePath)), path);
 		}
 
@@ -202,14 +277,14 @@ namespace Mediabox.GameManager.Editor {
 		bool IsGameDefinitionCorrectlySetUp(GameDefinitionBuildInfo gameDefinitionBuildInfo) {
 			var gameDefinition = gameDefinitionBuildInfo.gameDefinition;
 
-			if (!ValidateBundleIsSpecified(gameDefinitionBuildInfo, gameDefinition)) 
-				return false;
-			
-			
-			if (!ValidateScene(gameDefinitionBuildInfo, gameDefinition)) 
+			if (!ValidateBundleIsSpecified(gameDefinitionBuildInfo, gameDefinition))
 				return false;
 
-			if (!ValidateBundleExists(gameDefinitionBuildInfo, gameDefinition)) 
+
+			if (!ValidateScene(gameDefinitionBuildInfo, gameDefinition))
+				return false;
+
+			if (!ValidateBundleExists(gameDefinitionBuildInfo, gameDefinition))
 				return false;
 
 			return true;
@@ -231,6 +306,7 @@ namespace Mediabox.GameManager.Editor {
 					return false;
 				}
 			}
+
 			return true;
 		}
 
@@ -242,6 +318,7 @@ namespace Mediabox.GameManager.Editor {
 					Debug.LogError($"Invalid GameDefinition at path '{gameDefinitionBuildInfo.path}', the scene at path {fullScenePath} does not exist.");
 					return false;
 				}
+
 				if (gameDefinition is IGameBundleSceneDefinition gameBundleSceneDefinition) {
 					var importAsset = AssetImporter.GetAtPath(fullScenePath);
 					if (importAsset.assetBundleName != gameBundleSceneDefinition.BundleName) {
@@ -265,6 +342,9 @@ namespace Mediabox.GameManager.Editor {
 				return directories;
 			LoadGameDefinition(directories);
 			DrawGameDefinitionEditor(directories);
+			LoadCustomPlatformSettings(directories);
+			DrawCreateCustomPlatformSettings(directories);
+			DrawCustomPlatformSettingsEditor(directories);
 			return directories;
 		}
 
@@ -311,6 +391,12 @@ namespace Mediabox.GameManager.Editor {
 			}
 		}
 
+		void DrawBuildSettingsArea() {
+			if (GUILayout.Button("Edit Build Settings")) {
+				Selection.activeObject = this.buildSettings;
+			}
+		}
+
 		void DrawStartSimulationMode() {
 			if (GUILayout.Button("Start Simulation")) {
 				SimulationMode.StartSimulationMode();
@@ -340,15 +426,29 @@ namespace Mediabox.GameManager.Editor {
 			ScriptableObject target = this;
 			var so = new SerializedObject(target);
 			so.ApplyModifiedProperties();
-			var property = so.FindProperty("gameDefinition");
+			var property = so.FindProperty(nameof(this.gameDefinition));
 			EditorGUILayout.PropertyField(property, true);
 			so.ApplyModifiedProperties();
 			File.WriteAllText(Path.Combine(directories[this.selectedIndex], this.settings.gameDefinitionFileName), JsonUtility.ToJson(this.gameDefinition));
 		}
 
+		void DrawCustomPlatformSettingsEditor(string[] directories) {
+			if (this.customPlatformSettings == null)
+				return;
+			ScriptableObject target = this;
+			var so = new SerializedObject(target);
+			so.ApplyModifiedProperties();
+			var property = so.FindProperty(nameof(this.customPlatformSettings));
+			EditorGUILayout.PropertyField(property, true);
+			so.ApplyModifiedProperties();
+			File.WriteAllText(Path.Combine(directories[this.selectedIndex], GameDefinitionBuildSettings.customPlatformSettings), JsonUtility.ToJson(this.customPlatformSettings));
+		}
+
 		string declinedRepairPath;
 		bool usePlayerSettingVersion;
 		string bundleVersion;
+		GameDefinitionBuildSettings buildSettings;
+		[SerializeField] CustomPlatformSettings customPlatformSettings;
 
 		void LoadGameDefinition(string[] directories) {
 			var filePath = Path.Combine(directories[this.selectedIndex], this.settings.gameDefinitionFileName);
@@ -363,7 +463,31 @@ namespace Mediabox.GameManager.Editor {
 			} else {
 				this.declinedRepairPath = null;
 			}
+
 			this.gameDefinition = JsonUtility.FromJson<TGameDefinition>(File.ReadAllText(filePath));
+		}
+
+		void LoadCustomPlatformSettings(string[] directories) {
+			var filePath = Path.Combine(directories[this.selectedIndex], GameDefinitionBuildSettings.customPlatformSettings);
+			if (!File.Exists(filePath)) {
+				this.customPlatformSettings = null;
+				return;
+			}
+
+			this.customPlatformSettings = JsonUtility.FromJson<CustomPlatformSettings>(File.ReadAllText(filePath));
+		}
+
+		void DrawCreateCustomPlatformSettings(string[] directories) {
+			var hasPlatformSettings = this.customPlatformSettings != null;
+			var createPlatformSettings = EditorGUILayout.Toggle("Override platforms", hasPlatformSettings);
+			if (createPlatformSettings == hasPlatformSettings)
+				return;
+			if (createPlatformSettings) {
+				this.customPlatformSettings = new CustomPlatformSettings();
+			} else {
+				this.customPlatformSettings = null;
+				File.Delete(Path.Combine(directories[this.selectedIndex], GameDefinitionBuildSettings.customPlatformSettings));
+			}
 		}
 
 		string[] DrawSelector(string[] directories) {
@@ -372,10 +496,11 @@ namespace Mediabox.GameManager.Editor {
 			if (GUILayout.Button("Delete")) {
 				Directory.Delete(directories[this.selectedIndex], true);
 				directories = directories.Where(dir => dir != directories[this.selectedIndex]).ToArray();
-                if (directories.Length > 0 && this.selectedIndex >= directories.Length - 1) {
-                    this.selectedIndex = directories.Length - 1;
-                }
-            }
+				if (directories.Length > 0 && this.selectedIndex >= directories.Length - 1) {
+					this.selectedIndex = directories.Length - 1;
+				}
+			}
+
 			GUILayout.EndHorizontal();
 			return directories;
 		}
@@ -389,7 +514,7 @@ namespace Mediabox.GameManager.Editor {
 				Directory.CreateDirectory(newDirectory);
 				directories = Directory.GetDirectories(this.settings.gameDefinitionDirectoryPath);
 				this.selectedIndex = Array.IndexOf(directories, newDirectory);
-                Debug.Log("selected index: " + this.selectedIndex);
+				Debug.Log("selected index: " + this.selectedIndex);
 				this.gameDefinition = new TGameDefinition();
 				File.WriteAllText(Path.Combine(newDirectory, this.settings.gameDefinitionFileName), JsonUtility.ToJson(this.gameDefinition));
 			}
@@ -397,5 +522,5 @@ namespace Mediabox.GameManager.Editor {
 			GUILayout.EndHorizontal();
 			return directories;
 		}
-	} 
+	}
 }
