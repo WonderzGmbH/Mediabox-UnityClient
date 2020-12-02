@@ -112,7 +112,7 @@ namespace Mediabox.GameManager.Editor {
 		BuildTarget[] GetSelectedBuildTargets() {
 			switch (this.buildPlatformOption) {
 				case BuildPlatformOption.AllSupportedPlatforms:
-					return this.buildSettings.supportedBuildTargets.Concat(this.customPlatformSettings?.supportedPlatforms ?? new BuildTarget[0]).Where(buildTarget => this.customPlatformSettings?.unsupportedPlatforms?.Contains(buildTarget) != true).ToArray();
+					return this.buildSettings.supportedBuildTargets;
 				case BuildPlatformOption.CurrentPlatform:
 					return new[] {EditorUserBuildSettings.activeBuildTarget};
 				case BuildPlatformOption.ManualPlatforms:
@@ -120,6 +120,12 @@ namespace Mediabox.GameManager.Editor {
 				default:
 					throw new ArgumentOutOfRangeException();
 			}
+		}
+
+		BuildTarget[] GetBuildTargetsForGameDefinition(GameDefinitionBuildInfo gameDefinition, BuildTarget[] buildTargets) {
+			var platformSettingsPath = Path.Combine(gameDefinition.path, GameDefinitionBuildSettings.customPlatformSettings);
+			var customPlatformSettings = File.Exists(platformSettingsPath) ? JsonUtility.FromJson<CustomPlatformSettings>(File.ReadAllText(platformSettingsPath)) : null;
+			return buildTargets.Concat(customPlatformSettings?.supportedPlatforms ?? new BuildTarget[0]).Where(buildTarget => customPlatformSettings?.unsupportedPlatforms?.Contains(buildTarget) != true).ToArray();
 		}
 
 		void DrawBuildArea(string[] directories) {
@@ -149,19 +155,23 @@ namespace Mediabox.GameManager.Editor {
 		}
 
 		void BuildGameDefinitions(string[] directories, bool clearDirectory, BuildTarget[] buildTargets) {
-			var gameDefinitions = LoadAllValidGameDefinitions(directories);
-			if (!ValidateGameDefinitionComplete(gameDefinitions, directories) &&
+			var gameDefinitionsX = LoadAllValidGameDefinitions(directories);
+			if (!ValidateGameDefinitionComplete(gameDefinitionsX, directories) &&
 			    !EditorUtility.DisplayDialog("There have been errors", "Some GameDefinitions had errors. Do you still want to continue?", "OK", "Cancel"))
 				return;
+			var gameDefinitionsPerPlatform = gameDefinitionsX.SelectMany(gameDefinition => GetBuildTargetsForGameDefinition(gameDefinition, buildTargets).Select(buildTarget => (buildTarget, gameDefinition))).GroupBy(touple => touple.buildTarget);
 
 			var tempBuildPath = Path.Combine("GameDefinitionBuild", "_TMP_");
 			if (Directory.Exists(tempBuildPath))
 				Directory.Delete(tempBuildPath, true);
 			if (!Directory.Exists(tempBuildPath))
 				Directory.CreateDirectory(tempBuildPath);
+			if (clearDirectory && Directory.Exists("GameDefinitionBuild"))
+				Directory.Delete("GameDefinitionBuild", true);
 
-			foreach (var buildTarget in buildTargets) {
-				var bundleBuildPath = Path.Combine("AssetBundles", buildTarget.ToString());
+			foreach (var group in gameDefinitionsPerPlatform) {
+				var bundleBuildPath = Path.Combine("AssetBundles", group.Key.ToString());
+				var gameDefinitions = group.Select(pair => pair.gameDefinition).ToArray();
 				if (typeof(IGameBundleDefinition).IsAssignableFrom(typeof(TGameDefinition))) {
 					if (!Directory.Exists(bundleBuildPath))
 						Directory.CreateDirectory(bundleBuildPath);
@@ -170,7 +180,7 @@ namespace Mediabox.GameManager.Editor {
 					BuildPipeline.BuildAssetBundles(bundleBuildPath, gameDefinitions.Select(definition => new AssetBundleBuild {
 						assetBundleName = (definition.gameDefinition as IGameBundleDefinition).BundleName,
 						assetNames = AssetDatabase.GetAssetPathsFromAssetBundle((definition.gameDefinition as IGameBundleDefinition).BundleName)
-					}).ToArray(), BuildAssetBundleOptions.None, buildTarget);
+					}).ToArray(), BuildAssetBundleOptions.None, group.Key);
 					foreach (var gameDefinition in gameDefinitions) {
 						var bundleName = (gameDefinition.gameDefinition as IGameBundleDefinition).BundleName;
 						var bundlePath = Path.Combine(bundleBuildPath, bundleName);
@@ -181,7 +191,7 @@ namespace Mediabox.GameManager.Editor {
 					}
 				}
 
-				var buildPath = Path.Combine("GameDefinitionBuild", buildTarget.ToString());
+				var buildPath = Path.Combine("GameDefinitionBuild", group.Key.ToString());
 				if (clearDirectory && Directory.Exists(buildPath))
 					Directory.Delete(buildPath, true);
 				if (!Directory.Exists(buildPath))
