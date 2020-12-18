@@ -16,7 +16,7 @@ namespace Mediabox.GameKit.GameManager {
     /// You need to implement this class once in your project and place it in your starting scene.
     /// </summary>
     /// <typeparam name="TGameDefinition">The type of GameDefinition that you use in your project. GameDefinitions will be stored separately on the Mediabox-Backend and allow you to launch different types of game within one Unity Client. This feature can be configured and disabled using the "Game Definition Manager" folder under the "Mediabox"-Menu.</typeparam>
-    public abstract class GameManagerBase<TGameDefinition> : GameManagerBase, IMediaboxCallbacks {
+    public abstract class GameManagerBase<TGameDefinition> : GameManagerBase, IMediaboxCallbacks, IGameManager {
 
         INativeAPI nativeApi;
         string language;
