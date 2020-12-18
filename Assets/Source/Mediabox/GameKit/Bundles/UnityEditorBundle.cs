@@ -202,12 +202,12 @@ namespace Mediabox.GameKit.Bundles {
 		public void Unload() {
 		}
 
-		public async Task LoadScene(string scenePath) {
+		public async Task LoadScene(string scenePath, LoadSceneMode loadSceneMode = LoadSceneMode.Single) {
 			#if UNITY_EDITOR
 			var asset = UnityEditor.AssetDatabase.LoadAssetAtPath(scenePath,typeof(UnityEngine.Object));
 			if(asset == null)
 				throw new Exception("No asset exists at path "+scenePath);
-			var loadScene = UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(scenePath, new LoadSceneParameters(LoadSceneMode.Single));
+			var loadScene = UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(scenePath, new LoadSceneParameters(loadSceneMode));
 			#else
 			var loadScene = default(UnityEngine.AsyncOperation);
 			#endif

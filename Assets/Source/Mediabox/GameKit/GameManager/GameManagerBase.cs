@@ -9,6 +9,7 @@ using Mediabox.GameKit.Game;
 using Mediabox.GameKit.GameDefinition;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Object = UnityEngine.Object;
 
 namespace Mediabox.GameKit.GameManager {
     /// <summary>
@@ -56,6 +57,11 @@ namespace Mediabox.GameKit.GameManager {
         public async Task<T> LoadAssetFromContentBundle<T>(string assetPath) where T:UnityEngine.Object {
             return await this.loadedBundle.LoadAssetAsync<T>(assetPath);
         }
+
+        public async Task LoadSceneFromContentBundle<T>(string assetPath, LoadSceneMode loadSceneMode = LoadSceneMode.Single) where T : Object {
+            await this.loadedBundle.LoadScene(assetPath, loadSceneMode);
+        }
+
         #endregion // PublicAPI
 
         // All methods in this region will be called by the NativeAPI. Refer to NativeAPI.cs for details.

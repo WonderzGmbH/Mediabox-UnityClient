@@ -24,8 +24,8 @@ namespace Mediabox.GameKit.Bundles {
 			this.bundle.Unload(true);
 		}
 
-		public async Task LoadScene(string scenePath) {
-			await SceneManager.LoadSceneAsync(scenePath);
+		public async Task LoadScene(string scenePath, LoadSceneMode loadSceneMode = LoadSceneMode.Single) {
+			await SceneManager.LoadSceneAsync(scenePath, loadSceneMode);
 		}
 	}
 }
