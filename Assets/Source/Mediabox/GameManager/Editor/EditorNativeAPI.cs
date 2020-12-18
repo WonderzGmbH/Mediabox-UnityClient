@@ -109,6 +109,10 @@ namespace Mediabox.GameManager.Editor {
 			EditorUtility.DisplayDialog("Screenshot creation failed", "An unknown error occured", "OK");
 		}
 
+		public void OnGameExitRequested() {
+			EditorApplication.ExitPlaymode();
+		}
+
 		void SwitchStateIfDone() {
 			if (this.waitingForUnloadCallback)
 				return;

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Mediabox.GameKit.Bundles;
@@ -169,6 +170,8 @@ namespace Mediabox.GameManager.Editor {
 			if (clearDirectory && Directory.Exists("GameDefinitionBuild"))
 				Directory.Delete("GameDefinitionBuild", true);
 
+			var builtBundlePaths = new HashSet<string>();
+
 			foreach (var group in gameDefinitionsPerPlatform) {
 				var bundleBuildPath = Path.Combine("AssetBundles", group.Key.ToString());
 				var gameDefinitions = group.Select(pair => pair.gameDefinition).ToArray();
@@ -188,6 +191,7 @@ namespace Mediabox.GameManager.Editor {
 						if (!Directory.Exists(Path.GetDirectoryName(targetPath)))
 							Directory.CreateDirectory(Path.GetDirectoryName(targetPath));
 						File.Copy(bundlePath, targetPath, true);
+						builtBundlePaths.Add(targetPath);
 					}
 				}
 
@@ -216,6 +220,11 @@ namespace Mediabox.GameManager.Editor {
 					if (moveCustomPlatformSettings)
 						File.Move(tempCustomPlatformSettingsPath, customPlatformSettingsPath);
 				}
+			}
+
+			foreach (var bundlePath in builtBundlePaths) {
+				if (File.Exists(bundlePath))
+					File.Delete(bundlePath);
 			}
 
 			if (Directory.Exists(tempBuildPath))

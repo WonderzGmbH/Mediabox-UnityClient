@@ -14,7 +14,7 @@ namespace Mediabox.GameManager.Editor
             {
                 buildPlayerOptions = BuildPlayerWindow.DefaultBuildMethods.GetBuildPlayerOptions(new BuildPlayerOptions());
             }
-            catch (UnityEditor.BuildPlayerWindow.BuildMethodException e)
+            catch (BuildPlayerWindow.BuildMethodException e)
             {
                 Debug.Log("BuildMethodException caught: " + e);
                 return;

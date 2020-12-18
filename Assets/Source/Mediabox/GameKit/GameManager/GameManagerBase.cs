@@ -1,8 +1,6 @@
 using System;
-using System.Collections;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Mediabox.API;
@@ -25,7 +23,21 @@ namespace Mediabox.GameKit.GameManager {
         string saveGamePath;
         IBundle loadedBundle;
         static GameManagerBase<TGameDefinition> instance;
+        
+        #region UnityEventFunctions
+        void Awake() {
+            EnsureSingletonInstance();
+            if (!Application.isEditor) {
+                SetNativeApi(CreateNativeAPI());
+            }
+        }
 
+        void OnDestroy() {
+            CleanUpSingletonInstance();
+        }
+        #endregion // UnityEventFunctions
+        
+        #region PublicAPI
         /// <summary>
         /// This method needs to be called so the API can be initialized.
         /// </summary>
@@ -37,10 +49,14 @@ namespace Mediabox.GameKit.GameManager {
             this.nativeApi = nativeApi;
             this.nativeApi.InitializeApi(this.gameObject.name);
         }
-
-        class NativeApiAlreadySetupException : Exception {
-            public NativeApiAlreadySetupException() : base("Native API has been assigned already. Reassigning is not supported currently.") { }
+        public void QuitApplication() {
+            this.nativeApi.OnGameExitRequested();
         }
+        public bool HasContentBundle => this.loadedBundle != null;
+        public async Task<T> LoadAssetFromContentBundle<T>(string assetPath) where T:UnityEngine.Object {
+            return await this.loadedBundle.LoadAssetAsync<T>(assetPath);
+        }
+        #endregion // PublicAPI
 
         // All methods in this region will be called by the NativeAPI. Refer to NativeAPI.cs for details.
         #region IMediaboxCallbacks
@@ -114,7 +130,7 @@ namespace Mediabox.GameKit.GameManager {
             Time.timeScale = this.timeScaleBeforePause;
             AudioListener.volume = this.volumeBeforePause;
         }
-
+        
         public void CreateScreenshot() {
             _ = CreateScreenshotAsync();
         }
@@ -152,11 +168,6 @@ namespace Mediabox.GameKit.GameManager {
 
         #endregion // IMediaboxCallbacks
 
-        public bool HasContentBundle => this.loadedBundle != null;
-        public async Task<T> LoadAssetFromContentBundle<T>(string assetPath) where T:UnityEngine.Object {
-            return await this.loadedBundle.LoadAssetAsync<T>(assetPath);
-        }
-        
         /// <summary>
         /// Implement this method to add your custom StartGame-Logic.
         /// This won't be necessary in most cases, as implementing IGameSceneDefinition and IGameBundleDefinition in TGameDefinition will be enough.
@@ -166,6 +177,35 @@ namespace Mediabox.GameKit.GameManager {
         /// <param name="saveGamePath">The path from which to load and in which to store the SaveGame-File.</param>
         protected abstract Task OnStartGame(string contentBundleFolderPath, [CanBeNull] TGameDefinition definition, string saveGamePath);
 
+        /// <summary>
+        /// Overload this method, if you want to implement additional Native APIs.
+        /// </summary>
+        /// <returns>INativeAPI instance to handle Mediabox communication.</returns>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
+        protected virtual INativeAPI CreateNativeAPI() {
+            switch (Application.platform) {
+                case RuntimePlatform.Android:
+                    return new MediaboxIOSNativeAPI();
+                case RuntimePlatform.IPhonePlayer:
+                    return new MediaboxAndroidNativeAPI();
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(Application.platform), Application.platform, string.Empty);
+            }
+        }
+        
+        void EnsureSingletonInstance() {
+            DontDestroyOnLoad(this);
+            if (instance == null)
+                instance = this;
+            else
+                Destroy(this.gameObject);
+        }
+        
+        void CleanUpSingletonInstance() {
+            if (instance == this)
+                instance = null;
+        }
+        
         static async Task LoadGameDefinitionScene(IGameSceneDefinition gameSceneDefinition) {
             await SceneManager.LoadSceneAsync(gameSceneDefinition.SceneName);
         }
@@ -226,21 +266,8 @@ namespace Mediabox.GameKit.GameManager {
             return Resources.FindObjectsOfTypeAll<MonoBehaviour>().OfType<IGame<TGameDefinition>>().FirstOrDefault();
         }
 
-        /// The awake method makes sure that only one GameManager exists at all times, that it won't be destroyed on scene changes and that in Non-Editor-Environments the MediaboxNativeAPI is hooked onto this script.
-        void Awake() {
-            if (instance == null)
-                instance = this;
-            else
-                Destroy(this.gameObject);
-            if(!Application.isEditor)
-                SetNativeApi(new MediaboxNativeAPI());
-            DontDestroyOnLoad(this);
-        }
-
-        /// Cleans up the singleton instance.
-        void OnDestroy() {
-            if (instance == this)
-                instance = null;
+        class NativeApiAlreadySetupException : Exception {
+            public NativeApiAlreadySetupException() : base("Native API has been assigned already. Reassigning is not supported currently.") { }
         }
     }
 
