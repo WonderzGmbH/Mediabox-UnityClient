@@ -4,7 +4,7 @@ using Mediabox.GameKit.GameDefinition;
 using UnityEditor;
 using UnityEngine;
 
-namespace Mediabox.GameManager.Editor.Build.Plugins {
+namespace Mediabox.GameManager.Editor.HubPlugins {
 	public class GameDefinitionEditorPlugin<TGameDefinition> : IGameDefinitionManagerPlugin
 		where TGameDefinition : class, IGameDefinition, new() {
 		readonly SettingsPlugin settingsPlugin;

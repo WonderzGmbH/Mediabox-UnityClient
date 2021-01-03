@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace Mediabox.GameManager.Editor.Build.Plugins {
+namespace Mediabox.GameManager.Editor.HubPlugins {
 
 	[Serializable]
 	public class GameDefinitionManagementPlugin : IGameDefinitionManagerPlugin {

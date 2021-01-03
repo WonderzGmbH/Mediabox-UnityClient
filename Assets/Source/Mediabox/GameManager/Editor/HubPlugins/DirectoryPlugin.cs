@@ -1,10 +1,9 @@
-using System;
 using System.IO;
 using Mediabox.GameManager.Editor.Utility;
 using UnityEditor;
 using UnityEngine;
 
-namespace Mediabox.GameManager.Editor.Build.Plugins {
+namespace Mediabox.GameManager.Editor.HubPlugins {
 	public class DirectoryPlugin : IGameDefinitionManagerPlugin {
 		readonly SettingsPlugin settingsPlugin;
 

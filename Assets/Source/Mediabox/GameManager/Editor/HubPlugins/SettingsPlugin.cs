@@ -1,9 +1,10 @@
 using System.IO;
 using Mediabox.GameKit.GameDefinition;
+using Mediabox.GameManager.Editor.Build;
 using UnityEditor;
 using UnityEngine;
 
-namespace Mediabox.GameManager.Editor.Build.Plugins {
+namespace Mediabox.GameManager.Editor.HubPlugins {
 	public class SettingsPlugin : IGameDefinitionManagerPlugin {
 		public GameDefinitionSettings settings { get; private set; }
 		public GameDefinitionBuildSettings buildSettings { get; private set; }

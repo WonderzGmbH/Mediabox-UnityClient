@@ -1,9 +1,9 @@
-using System;
 using System.IO;
+using Mediabox.GameManager.Editor.Build;
 using UnityEditor;
 using UnityEngine;
 
-namespace Mediabox.GameManager.Editor.Build.Plugins {
+namespace Mediabox.GameManager.Editor.HubPlugins {
 	public class CustomPlatformSettingsPlugin : IGameDefinitionManagerPlugin {
 		readonly GameDefinitionManagementPlugin management;
 		readonly GameDefinitionHub manager;

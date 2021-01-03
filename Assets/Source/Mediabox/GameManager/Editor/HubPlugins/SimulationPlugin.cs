@@ -3,7 +3,7 @@ using Mediabox.GameManager.Editor.Utility;
 using UnityEditor;
 using UnityEngine;
 
-namespace Mediabox.GameManager.Editor.Build.Plugins {
+namespace Mediabox.GameManager.Editor.HubPlugins {
 	public class SimulationPlugin : IGameDefinitionManagerPlugin {
 		readonly GameDefinitionManagementPlugin managementPlugin;
 		readonly SettingsPlugin settingsPlugin;

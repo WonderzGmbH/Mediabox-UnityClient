@@ -1,6 +1,6 @@
 ﻿using System;
 using Mediabox.GameKit.GameDefinition;
-using Mediabox.GameManager.Editor.Build.Plugins;
+using Mediabox.GameManager.Editor.HubPlugins;
 using Mediabox.GameManager.Editor.Utility;
 using Mediabox.Samples;
 using UnityEditor;

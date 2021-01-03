@@ -1,7 +1,5 @@
 
-using UnityEngine;
-
-namespace Mediabox.GameManager.Editor.Build.Plugins {
+namespace Mediabox.GameManager.Editor.HubPlugins {
 	public interface IGameDefinitionManagerPlugin {
 		string Title { get; }
 		void Update();

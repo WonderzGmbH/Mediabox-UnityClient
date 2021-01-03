@@ -1,7 +1,7 @@
 using Mediabox.GameKit.Bundles;
 using UnityEditor;
 
-namespace Mediabox.GameManager.Editor.Build.Plugins {
+namespace Mediabox.GameManager.Editor.HubPlugins {
 	public class BundlesPlugin : IGameDefinitionManagerPlugin {
 		public string Title => "Bundles";
 		public bool ToggleableWithTitleLabel => true;
