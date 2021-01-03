@@ -25,19 +25,19 @@ namespace Mediabox.GameManager.Editor.Build.BuildStep {
 				return;
 			
 			var bundleBuildDirectory = Path.Combine(this.buildSettings.assetBundleBuildPath, buildTarget.ToString());
-			if (!PathHelper.SafeCreateDirectory(bundleBuildDirectory))
+			if (!PathUtility.EnsureDirectory(bundleBuildDirectory))
 				RepairBundleConflicts(gameDefinitions, this.buildSettings.assetBundleBuildPath);
 			BuildPipeline.BuildAssetBundles(bundleBuildDirectory, CreateAssetBundleBuilds(gameDefinitions), BuildAssetBundleOptions.None, buildTarget);
 			foreach (var gameDefinition in gameDefinitions) {
 				var bundleName = (gameDefinition.gameDefinition as IGameBundleDefinition).BundleName;
-				PathHelper.SafeCopyFile(bundleName, bundleBuildDirectory, gameDefinition.directory);
+				PathUtility.CopyFileToDirectory(bundleName, bundleBuildDirectory, gameDefinition.directory);
 				this.builtBundlePaths.Add(Path.Combine(gameDefinition.directory, bundleName));
 			}
 		}
 
 		public void PostProcess() {
 			foreach (var bundlePath in this.builtBundlePaths) {
-				PathHelper.SafeDeleteFile(bundlePath);
+				PathUtility.DeleteFileIfExists(bundlePath);
 			}
 		}
 
@@ -61,8 +61,8 @@ namespace Mediabox.GameManager.Editor.Build.BuildStep {
 						assetBundleBuildPath = Path.Combine(assetBundleBuildPath, splitPath[j]);
 						definitionPath = Path.Combine(definitionPath, splitPath[j]);
 					}
-					PathHelper.SafeDeleteFile(assetBundleBuildPath);
-					PathHelper.SafeDeleteFile(definitionPath);
+					PathUtility.DeleteFileIfExists(assetBundleBuildPath);
+					PathUtility.DeleteFileIfExists(definitionPath);
 				}
 			}
 		}

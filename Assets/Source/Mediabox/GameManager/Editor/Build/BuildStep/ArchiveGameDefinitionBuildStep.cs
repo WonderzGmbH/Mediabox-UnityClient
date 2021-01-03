@@ -18,16 +18,16 @@ namespace Mediabox.GameManager.Editor.Build.BuildStep {
 
 		public void PreProcess() {
 			if (this.clearDirectory)
-				PathHelper.SafeDeleteDirectory(this.buildSettings.gameDefinitionBuildPath);
+				PathUtility.DeleteDirectoryIfExists(this.buildSettings.gameDefinitionBuildPath);
 		}
 
 		public void Execute(BuildTarget buildTarget, GameDefinitionBuildInfo[] gameDefinitions) {
-			var buildPath = Path.Combine(this.buildSettings.gameDefinitionBuildPath, buildTarget.ToString());
+			var buildDirectory = Path.Combine(this.buildSettings.gameDefinitionBuildPath, buildTarget.ToString());
 			if (this.clearDirectory)
-				PathHelper.SafeDeleteDirectory(buildPath);
-			PathHelper.SafeCreateDirectory(buildPath);
+				PathUtility.DeleteDirectoryIfExists(buildDirectory);
+			PathUtility.EnsureDirectory(buildDirectory);
 			foreach (var gameDefinition in gameDefinitions) {
-				ZipGameDefinition(gameDefinition, buildPath);
+				ZipGameDefinition(gameDefinition, buildDirectory);
 			}
 		}
 
@@ -35,11 +35,11 @@ namespace Mediabox.GameManager.Editor.Build.BuildStep {
 		}
 
 		void ZipGameDefinition(GameDefinitionBuildInfo gameDefinition, string buildPath) {
-			var relativePath = PathHelper.GetRelativePath(gameDefinition.directory, this.settings.gameDefinitionDirectoryPath);
+			var relativePath = PathUtility.GetRelativePath(gameDefinition.directory, this.settings.gameDefinitionDirectoryPath);
 			var bundlePath = Path.ChangeExtension(Path.Combine(buildPath, relativePath), "zip");
-			PathHelper.SafeDeleteFile(bundlePath);
+			PathUtility.DeleteFileIfExists(bundlePath);
 			var customPlatformSettingsPath = Path.Combine(gameDefinition.directory, GameDefinitionBuildSettings.customPlatformSettings);
-			PathHelper.ZipDirectoryWithExcludeFile(gameDefinition.directory, bundlePath, customPlatformSettingsPath, this.buildSettings.TempGameDefinitionBuildPath);
+			PathUtility.ZipDirectoryWithExcludeFile(gameDefinition.directory, bundlePath, customPlatformSettingsPath, this.buildSettings.TempGameDefinitionBuildPath);
 		}
 	}
 }

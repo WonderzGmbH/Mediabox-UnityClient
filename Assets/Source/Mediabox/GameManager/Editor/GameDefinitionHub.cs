@@ -28,8 +28,8 @@ namespace Mediabox.GameManager.Editor {
 		IGameDefinitionManagerPlugin[] plugins;
 		static TWindow window;
 		Vector2 scrollPosition;
-		const string shortTitle = "Game Definition Hub";
-		const string title = "Mediabox "+shortTitle;
+		protected const string shortTitle = "Game Definition Hub";
+		const string fullTitle = "Mediabox "+shortTitle;
 		
 		protected static TWindow ShowWindow() {
 			window = GetWindow<TWindow>();
@@ -44,14 +44,14 @@ namespace Mediabox.GameManager.Editor {
 			var management = new GameDefinitionManagementPlugin(settings, this);
 
 			return new IGameDefinitionManagerPlugin[] {
-				new TitlePlugin(title),
+				new TitlePlugin(fullTitle),
 				settings,
 				directory,
 				management,
 				new GameDefinitionEditorPlugin<TGameDefinition>(settings, management, this),
 				new CustomPlatformSettingsPlugin(management, this),
 				new BundlesPlugin(),
-				new SimulationPlugin(management),
+				new SimulationPlugin(management, settings),
 				new BuildPlugin(settings, management, this)
 			};
 		}
@@ -67,12 +67,12 @@ namespace Mediabox.GameManager.Editor {
 			for (var i = 0; i < this.plugins.Length; i++) {
 				var plugin = this.plugins[i];
 				try {
-					EditorGUILayout.BeginVertical(Styles.GetColoredBoxStyle(this.plugins.Length, i));
+					EditorGUILayout.BeginVertical(StyleUtility.GetColoredBoxStyle(this.plugins.Length, i));
 					var pluginVisible = true;
 					plugin.Update();
 					if (plugin.ToggleableWithTitleLabel) {
 						var prefKey = "Mediabox.GameManager.Editor.GameDefinitionManagerBase.Plugin::" + plugin;
-						EditorPrefs.SetBool(prefKey, EditorGUILayout.Foldout(EditorPrefs.GetBool(prefKey, true), plugin.Title, Styles.FoldoutStyle));
+						EditorPrefs.SetBool(prefKey, EditorGUILayout.Foldout(EditorPrefs.GetBool(prefKey, true), plugin.Title, StyleUtility.FoldoutStyle));
 						pluginVisible = EditorPrefs.GetBool(prefKey);
 					}
 					if (!pluginVisible)

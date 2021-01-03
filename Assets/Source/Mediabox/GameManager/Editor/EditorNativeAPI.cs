@@ -1,11 +1,15 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using Mediabox.API;
+using Mediabox.GameKit.GameDefinition;
+using Mediabox.GameManager.Editor.Build;
 using UnityEditor;
 using UnityEngine;
 
 namespace Mediabox.GameManager.Editor {
 	public class EditorNativeAPI : INativeAPI {
-		string contentBundleFolder;
+		protected string BundleName { get; private set; }
+		protected readonly GameDefinitionSettings settings;
 		string apiGameObjectName;
 		string locale = "DE";
 		string saveDataFolder = "./save";
@@ -24,8 +28,9 @@ namespace Mediabox.GameManager.Editor {
 
 		State state;
 
-		public EditorNativeAPI(string contentBundleFolder) {
-			this.contentBundleFolder = contentBundleFolder;
+		public EditorNativeAPI(string bundleName, GameDefinitionSettings settings) {
+			this.BundleName = bundleName;
+			this.settings = settings;
 		}
 	
 		void SendEvent(string name, string arg) {
@@ -39,14 +44,25 @@ namespace Mediabox.GameManager.Editor {
 			this.state = State.Startable;
 		}
 
-		void Start(string contentBundleFolder) {
-			this.contentBundleFolder = contentBundleFolder;
+		void Start(string bundleName) {
+			this.BundleName = bundleName;
+			try {
+				PrepareContentBundle();
+			} catch (Exception e) {
+				Debug.LogException(e);
+				OnLoadingFailed();
+				return;
+			}
 			this.state = State.Starting;
 			this.waitingForLoadingCallback = true;
 			SendEvent(nameof(IMediaboxCallbacks.SetContentLanguage), this.locale);
 			SendEvent(nameof(IMediaboxCallbacks.SetSaveDataFolder), this.saveDataFolder);
-			SendEvent(nameof(IMediaboxCallbacks.SetContentBundleFolder), this.contentBundleFolder);
+			SendEvent(nameof(IMediaboxCallbacks.SetContentBundleFolder), this.ContentBundleFolder);
 		}
+
+		protected virtual string ContentBundleFolder => Path.Combine(this.settings.gameDefinitionDirectoryPath, this.BundleName);
+
+		protected virtual void PrepareContentBundle() { }
 
 		void Stop() {
 			this.state = State.Stopping;
@@ -127,20 +143,20 @@ namespace Mediabox.GameManager.Editor {
 			Stop();
 		}
 		
-		public void AutoSimulate(string contentBundleFolder) {
+		public void AutoSimulate(string bundleName) {
 			if (this.state == State.Startable) {
-				Start(contentBundleFolder);
-			} else if (this.state == State.Stoppable && this.contentBundleFolder != contentBundleFolder) {
+				Start(bundleName);
+			} else if (this.state == State.Stoppable && this.BundleName != bundleName) {
 				Stop();
 			}
 		}
 		
-		public void OnGUI(string contentBundleFolder) {
+		public void OnGUI(string bundleName) {
 			GUILayout.Label("Simulating...");
 			this.locale = EditorGUILayout.TextField("Locale", this.locale);
 			this.saveDataFolder = EditorGUILayout.TextField("SaveDataFolder", this.saveDataFolder);
 			GUILayout.Label($"State: {this.state}");
-			DrawContextButtons(contentBundleFolder);
+			DrawContextButtons(bundleName);
 		}
 
 		void DrawContextButtons(string contentBundleFolder) {

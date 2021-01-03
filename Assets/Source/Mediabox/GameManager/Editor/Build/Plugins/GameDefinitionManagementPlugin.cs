@@ -55,7 +55,7 @@ namespace Mediabox.GameManager.Editor.Build.Plugins {
 		}
 
 		void LoadSelectedIndex() {
-			var index = Array.IndexOf(this.directories, SimulationMode.ContentBundleFolder);
+			var index = Array.IndexOf(this.directories, Path.Combine(this.settingsPlugin.settings.gameDefinitionDirectoryPath, SimulationMode.BundleName));
 			this.selectedIndex = index > 0 ? index : 0;
 		}
 		

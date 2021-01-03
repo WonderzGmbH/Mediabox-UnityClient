@@ -2,7 +2,7 @@ using UnityEditor;
 using UnityEngine;
 
 namespace Mediabox.GameManager.Editor.Utility {
-	public class Styles {
+	public class StyleUtility {
 		
 		static GUIStyle _foldoutStyle;
 		static GUIStyle[] guiStyleArray;

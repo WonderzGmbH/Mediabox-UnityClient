@@ -7,9 +7,9 @@ namespace Mediabox.Samples.Editor {
 	/// The MenuItem-Attribute ensures that you can open this window using Unity's MenuBar in the top of the window.
 	/// Details to this class can be found in the base class.
 	/// </summary>
-	public class GameDefinitionManager : GameDefinitionHub<GameDefinitionManager, GameDefinition> {
-		[MenuItem("MediaBox/Game Definition Manager")]
-		static GameDefinitionManager OpenWindow() {
+	public class GameDefinitionHub : GameDefinitionHub<GameDefinitionHub, GameDefinition> {
+		[MenuItem("MediaBox/"+shortTitle)]
+		static GameDefinitionHub OpenWindow() {
 			return ShowWindow();
 		}
 	}

@@ -12,6 +12,7 @@ namespace Mediabox.GameManager.Editor.Build {
 		public string gameDefinitionBuildPath = "GameDefinitionBuild";
 		public string TempGameDefinitionBuildPath => Path.Combine(this.gameDefinitionBuildPath, "_TMP_");
 		public string assetBundleBuildPath = "AssetBundles";
+		public string tempSimulationBuildPath = "SimulationBuildCache";
 		
 		const string resourcePath = "/Resources/";
 		static string SettingsResourcePath => Path.ChangeExtension(SettingsPath, null).Substring(SettingsPath.IndexOf(resourcePath, StringComparison.Ordinal) + resourcePath.Length);

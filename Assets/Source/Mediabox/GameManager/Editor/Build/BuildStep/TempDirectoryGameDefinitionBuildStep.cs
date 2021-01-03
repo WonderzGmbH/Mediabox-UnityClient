@@ -11,13 +11,13 @@ namespace Mediabox.GameManager.Editor.Build.BuildStep {
 		}
 
 		public void PreProcess() {
-			PathHelper.EnsureEmptyDirectory(this.buildSettings.TempGameDefinitionBuildPath);
+			PathUtility.EnsureEmptyDirectory(this.buildSettings.TempGameDefinitionBuildPath);
 		}
 
 		public void Execute(BuildTarget buildTarget, GameDefinitionBuildInfo[] gameDefinitions) { }
 
 		public void PostProcess() {
-			PathHelper.SafeDeleteDirectory(this.buildSettings.TempGameDefinitionBuildPath);
+			PathUtility.DeleteDirectoryIfExists(this.buildSettings.TempGameDefinitionBuildPath);
 		}
 	}
 }

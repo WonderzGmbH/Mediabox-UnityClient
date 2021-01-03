@@ -24,7 +24,11 @@ namespace Mediabox.GameKit.GameManager {
         string saveGamePath;
         IBundle loadedBundle;
         static GameManagerBase<TGameDefinition> instance;
-        
+
+        protected virtual string DefaultSceneName => "StartScene";
+
+        readonly PauseHandler pauseHandler = new PauseHandler();
+
         #region UnityEventFunctions
         void Awake() {
             EnsureSingletonInstance();
@@ -118,23 +122,18 @@ namespace Mediabox.GameKit.GameManager {
         // }
 
         public async void WriteSaveData(string path) {
-            await FindGame()?.Save(path);
+            var saveTask = FindGame()?.Save(path);
+            if (saveTask != null)
+                await saveTask;
             this.nativeApi.OnSaveDataWritten();
         }
-
-        float timeScaleBeforePause;
-        float volumeBeforePause;
         
         public void PauseApplication() {
-            this.timeScaleBeforePause = Time.timeScale;
-            Time.timeScale = 0f;
-            this.volumeBeforePause = AudioListener.volume;
-            AudioListener.volume = 0f;
+            this.pauseHandler.Pause();
         }
 
         public void UnpauseApplication() {
-            Time.timeScale = this.timeScaleBeforePause;
-            AudioListener.volume = this.volumeBeforePause;
+            this.pauseHandler.Unpause();
         }
         
         public void CreateScreenshot() {
@@ -164,9 +163,13 @@ namespace Mediabox.GameKit.GameManager {
         }
 
         async Task ResetGame() {
-            if (SceneManager.GetActiveScene().name != "StartScene")
-                await SceneManager.LoadSceneAsync("StartScene");
-            if (this.loadedBundle != null) {
+            if (SceneManager.GetActiveScene().name != this.DefaultSceneName)
+                await SceneManager.LoadSceneAsync(this.DefaultSceneName);
+            UnloadBundle();
+        }
+
+        void UnloadBundle() {
+            if (this.HasContentBundle) {
                 this.loadedBundle.Unload();
                 this.loadedBundle = null;
             }

@@ -1,4 +1,8 @@
-﻿using Mediabox.GameKit.GameManager;
+﻿using System;
+using Mediabox.GameKit.Bundles;
+using Mediabox.GameKit.GameDefinition;
+using Mediabox.GameKit.GameManager;
+using Mediabox.GameManager.Editor.Build;
 using UnityEditor;
 
 namespace Mediabox.GameManager.Editor {
@@ -8,13 +12,13 @@ namespace Mediabox.GameManager.Editor {
 		const string autoSimulateEditorPrefKey = "Mediabox.GameManager.Editor.AutoSimulate";
 		const string contentBundleFolderEditorPrefKey = "Mediabox.GameManager.Editor.ContentBundleFolder";
 		public static EditorNativeAPI SimulationModeNativeApi { get; private set; }
-		static string _contentBundleFolder;
-		public static string ContentBundleFolder { 
-			get => _contentBundleFolder;
+		static string bundleName;
+		public static string BundleName { 
+			get => bundleName;
 			set {
-				if (value == _contentBundleFolder) 
+				if (value == bundleName) 
 					return;
-				_contentBundleFolder = value;
+				bundleName = value;
 				EditorPrefs.SetString(contentBundleFolderEditorPrefKey, value);
 			} 
 		}
@@ -35,7 +39,7 @@ namespace Mediabox.GameManager.Editor {
 		public static bool IsInSimulationMode => SimulationModeNativeApi != null;
 		static SimulationMode() {
 			_autoSimulate = EditorPrefs.GetBool(autoSimulateEditorPrefKey, true);
-			_contentBundleFolder = EditorPrefs.GetString(contentBundleFolderEditorPrefKey, null);
+			bundleName = EditorPrefs.GetString(contentBundleFolderEditorPrefKey, null);
 			EditorApplication.update += Update;
 			EditorApplication.playModeStateChanged += OnplayModeStateChanged;
 		}
@@ -65,19 +69,27 @@ namespace Mediabox.GameManager.Editor {
 			if (!IsInSimulationMode) {
 				StartSimulationMode();
 			} else {
-				SimulationModeNativeApi.AutoSimulate(ContentBundleFolder);
+				SimulationModeNativeApi.AutoSimulate(BundleName);
 			}
 		}
 		
 		public static void StartSimulationMode() {
-			SimulationModeNativeApi = new EditorNativeAPI(ContentBundleFolder);
+			SimulationModeNativeApi = CreateNativeAPI();
 			UnityEngine.Object.FindObjectOfType<GameManagerBase>().SetNativeApi(SimulationModeNativeApi);
+		}
+
+		static EditorNativeAPI CreateNativeAPI() {
+			var gameDefinitionSettings = AssetDatabase.LoadAssetAtPath<GameDefinitionSettings>(GameDefinitionSettings.SettingsPath);
+			var gameDefinitionBuildSettings = AssetDatabase.LoadAssetAtPath<GameDefinitionBuildSettings>(GameDefinitionBuildSettings.SettingsPath);
+			return BundleManager.UseEditorBundles ? new EditorNativeAPI(BundleName, gameDefinitionSettings) : new EditorBuildNativeAPI(BundleName, gameDefinitionSettings, gameDefinitionBuildSettings);
 		}
 
 		public static void StopSimulationMode() {
 			if (SimulationModeNativeApi == null)
 				return;
 			SimulationModeNativeApi.StopSimulation();
+			if(SimulationModeNativeApi is IDisposable disposable)
+				disposable.Dispose();
 			SimulationModeNativeApi = null;
 		}
 	}
