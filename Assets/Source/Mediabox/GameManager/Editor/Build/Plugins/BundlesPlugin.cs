@@ -5,6 +5,7 @@ using UnityEngine;
 namespace Mediabox.GameManager.Editor.Build.Plugins {
 	public class BundlesPlugin : IGameDefinitionManagerPlugin {
 		public string Title => "Bundles";
+		public bool ToggleableWithTitleLabel => true;
 		public void Update() {
 		}
 

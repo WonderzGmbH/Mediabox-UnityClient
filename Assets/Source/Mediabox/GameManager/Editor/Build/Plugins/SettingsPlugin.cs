@@ -25,6 +25,7 @@ namespace Mediabox.GameManager.Editor.Build.Plugins {
 		}
 		
 		public string Title => "Settings";
+		public bool ToggleableWithTitleLabel => true;
 
 		void LoadOrCreateSettings() {
 			this.settings = AssetDatabase.LoadAssetAtPath<GameDefinitionSettings>(GameDefinitionSettings.SettingsPath) ?? TryCreateSettings();

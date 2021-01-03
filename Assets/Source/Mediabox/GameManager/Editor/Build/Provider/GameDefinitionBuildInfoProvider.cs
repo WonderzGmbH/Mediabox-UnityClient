@@ -5,10 +5,9 @@ using Mediabox.GameManager.Editor.Build.Validator;
 using UnityEngine;
 
 namespace Mediabox.GameManager.Editor.Build.Provider {
-	public class GameDefinitionBuildInfoProvider<TGameDefinition> : IGameDefinitionBuildInfoProvider
-	where TGameDefinition : IGameDefinition {
-		public GameDefinitionBuildInfoResult Provide(string[] directories, string gameDefinitionFileName, IGameDefinitionBuildValidator[] validators) {
-			var buildInfos = directories.Select(directory => TryLoadGameDefinitionBuildInfo(directory, gameDefinitionFileName)).ToArray();
+	public class GameDefinitionBuildInfoProvider : IGameDefinitionBuildInfoProvider {
+		public GameDefinitionBuildInfoResult Provide(string[] directories, string gameDefinitionFileName, System.Type gameDefinitionType, IGameDefinitionBuildValidator[] validators) {
+			var buildInfos = directories.Select(directory => TryLoadGameDefinitionBuildInfo(directory, gameDefinitionFileName, gameDefinitionType)).ToArray();
 			var validBuildInfos = buildInfos.Where(buildInfo => ValidateGameDefinitionBuildInfo(buildInfo, validators)).ToArray();
 			
 			return new GameDefinitionBuildInfoResult {
@@ -28,14 +27,14 @@ namespace Mediabox.GameManager.Editor.Build.Provider {
 			};
 		}
 
-		GameDefinitionBuildInfo TryLoadGameDefinitionBuildInfo(string path, string gameDefinitionFileName) {
+		GameDefinitionBuildInfo TryLoadGameDefinitionBuildInfo(string path, string gameDefinitionFileName, System.Type gameDefinitionType) {
 			var filePath = Path.Combine(path, gameDefinitionFileName);
 			if (!File.Exists(filePath)) {
 				Debug.LogError($"Invalid GameDefinition at path '{path}', you can repair it using the Game Definition Manager.");
 				return null;
 			}
 
-			return new GameDefinitionBuildInfo(JsonUtility.FromJson<TGameDefinition>(File.ReadAllText(filePath)), path);
+			return new GameDefinitionBuildInfo(JsonUtility.FromJson(File.ReadAllText(filePath), gameDefinitionType) as IGameDefinition, path);
 		}
 
 		static bool ValidateGameDefinitionBuildInfo(GameDefinitionBuildInfo gameDefinitionBuildInfo, IGameDefinitionBuildValidator[] validators) {

@@ -20,15 +20,16 @@ namespace Mediabox.GameManager.Editor.Build.Plugins {
 		}
 		public string[] AllDirectories => this.directories;
 		readonly SettingsPlugin settingsPlugin;
-		readonly GameDefinitionManagerBase manager;
+		readonly GameDefinitionHub manager;
 		string newDefinitionName;
 
-		public GameDefinitionManagementPlugin(SettingsPlugin settingsPlugin, GameDefinitionManagerBase manager) {
+		public GameDefinitionManagementPlugin(SettingsPlugin settingsPlugin, GameDefinitionHub manager) {
 			this.settingsPlugin = settingsPlugin;
 			this.manager = manager;
 		}
 		
 		public string Title => $"Definition Management ({this.directories?.Length ?? 0} Games)";
+		public bool ToggleableWithTitleLabel => true;
 
 		public void Update() {
 			this.directories = LoadGameDefinitions();

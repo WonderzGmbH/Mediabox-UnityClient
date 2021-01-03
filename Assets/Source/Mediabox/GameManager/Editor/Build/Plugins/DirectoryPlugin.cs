@@ -12,6 +12,7 @@ namespace Mediabox.GameManager.Editor.Build.Plugins {
 			this.settingsPlugin = settingsPlugin;
 		}
 		public string Title => $"Directory {this.settingsPlugin.settings.gameDefinitionDirectoryPath}";
+		public bool ToggleableWithTitleLabel => true;
 
 		public void Update() {
 			EnsureDirectory();

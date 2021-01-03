@@ -1,0 +1,108 @@
+﻿using System;
+using Mediabox.GameKit.GameDefinition;
+using Mediabox.GameManager.Editor.Build.Plugins;
+using Mediabox.GameManager.Editor.Utility;
+using Mediabox.Samples;
+using UnityEditor;
+using UnityEngine;
+
+namespace Mediabox.GameManager.Editor {
+	/// <summary>
+	/// Implement this class to add a typed Game Definition Manager Editor Window. for your project.
+	/// Implement it like this:
+	/// ATTENTION! Place this script within an Editor-Folder in your Unity-Project. Your project won't build if you don't.
+	/// <code>
+	/// public class GameDefinitionManager : GameDefinitionManagerBase<GameDefinitionManager, GameDefinition> {
+	/// 	[MenuItem("MediaBox/Game Definition Manager")]
+	/// 	static GameDefinitionManager OpenWindow() {
+	/// 		return ShowWindow();
+	/// 	}
+	/// }
+	/// </code>
+	/// </summary>
+	/// <typeparam name="TWindow">Your inherited class type.</typeparam>
+	/// <typeparam name="TGameDefinition">The type of GameDefinition that you're using.</typeparam>
+	public class GameDefinitionHub<TWindow, TGameDefinition> : GameDefinitionHub<TGameDefinition>
+		where TWindow : GameDefinitionHub<TWindow, TGameDefinition>
+		where TGameDefinition : class, IGameDefinition, new() {
+		IGameDefinitionManagerPlugin[] plugins;
+		static TWindow window;
+		Vector2 scrollPosition;
+		const string shortTitle = "Game Definition Hub";
+		const string title = "Mediabox "+shortTitle;
+		
+		protected static TWindow ShowWindow() {
+			window = GetWindow<TWindow>();
+			window.titleContent = new GUIContent(shortTitle);
+			window.Show();
+			return window;
+		}
+
+		protected virtual IGameDefinitionManagerPlugin[] CreatePlugins() {
+			var settings = new SettingsPlugin();
+			var directory = new DirectoryPlugin(settings);
+			var management = new GameDefinitionManagementPlugin(settings, this);
+
+			return new IGameDefinitionManagerPlugin[] {
+				new TitlePlugin(title),
+				settings,
+				directory,
+				management,
+				new GameDefinitionEditorPlugin<TGameDefinition>(settings, management, this),
+				new CustomPlatformSettingsPlugin(management, this),
+				new BundlesPlugin(),
+				new SimulationPlugin(management),
+				new BuildPlugin(settings, management, this)
+			};
+		}
+
+		void OnGUI() {
+			
+			
+			if (this.plugins == null) {
+				this.plugins = CreatePlugins();
+			}
+
+			this.scrollPosition = GUILayout.BeginScrollView(this.scrollPosition, false, false);
+			for (var i = 0; i < this.plugins.Length; i++) {
+				var plugin = this.plugins[i];
+				try {
+					EditorGUILayout.BeginVertical(Styles.GetColoredBoxStyle(this.plugins.Length, i));
+					var pluginVisible = true;
+					plugin.Update();
+					if (plugin.ToggleableWithTitleLabel) {
+						var prefKey = "Mediabox.GameManager.Editor.GameDefinitionManagerBase.Plugin::" + plugin;
+						EditorPrefs.SetBool(prefKey, EditorGUILayout.Foldout(EditorPrefs.GetBool(prefKey, true), plugin.Title, Styles.FoldoutStyle));
+						pluginVisible = EditorPrefs.GetBool(prefKey);
+					}
+					if (!pluginVisible)
+						continue;
+					if (!plugin.Render())
+						break;
+				} finally {
+					EditorGUILayout.EndVertical();
+				}
+			}
+			GUILayout.EndScrollView();
+		}
+	}
+
+	public class GameDefinitionHub<TGameDefinition> : GameDefinitionHub
+		where TGameDefinition : class, IGameDefinition, new() {
+		public TGameDefinition gameDefinition;
+
+		public override IGameDefinition CreateGameDefinition() {
+			return new TGameDefinition();
+		}
+
+		public override Type GetGameDefinitionType() {
+			return typeof(TGameDefinition);
+		}
+	}
+
+	public abstract class GameDefinitionHub : EditorWindow {
+		public CustomPlatformSettings customPlatformSettings;
+		public abstract IGameDefinition CreateGameDefinition();
+		public abstract System.Type GetGameDefinitionType();
+	}
+}

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Mediabox.GameKit.GameDefinition;
@@ -10,17 +11,19 @@ using UnityEditor;
 using UnityEngine;
 
 namespace Mediabox.GameManager.Editor.Build {
-	public class GameDefinitionBuild<TGameDefinition> where TGameDefinition : IGameDefinition {
+	public class GameDefinitionBuild {
 		readonly string[] directories;
 		readonly bool clearDirectory;
 		readonly BuildTarget[] buildTargets;
+		readonly Type gameDefinitionType;
 		readonly GameDefinitionSettings settings;
 		readonly GameDefinitionBuildSettings buildSettings;
 
-		public GameDefinitionBuild(string[] directories, bool clearDirectory, BuildTarget[] buildTargets, GameDefinitionSettings gameDefinitionSettings, GameDefinitionBuildSettings buildSettings) {
+		public GameDefinitionBuild(string[] directories, bool clearDirectory, BuildTarget[] buildTargets, System.Type gameDefinitionType, GameDefinitionSettings gameDefinitionSettings, GameDefinitionBuildSettings buildSettings) {
 			this.directories = directories;
 			this.clearDirectory = clearDirectory;
 			this.buildTargets = buildTargets;
+			this.gameDefinitionType = gameDefinitionType;
 			this.settings = gameDefinitionSettings;
 			this.buildSettings = buildSettings;
 		}
@@ -59,7 +62,7 @@ namespace Mediabox.GameManager.Editor.Build {
 		/// <returns></returns>
 		protected virtual IGameDefinitionBuildInfoProvider[] CreateBuildInfoProvider() {
 			return new IGameDefinitionBuildInfoProvider[] {
-				new GameDefinitionBuildInfoProvider<TGameDefinition>(),
+				new GameDefinitionBuildInfoProvider(),
 			};
 		}
 
@@ -86,7 +89,7 @@ namespace Mediabox.GameManager.Editor.Build {
 		}
 		
 		GameDefinitionBuildInfoResult ProvideBuildInfo(string[] directories) {
-			var results = CreateBuildInfoProvider().Select(provider => provider.Provide(directories, this.settings.gameDefinitionFileName, CreateGameDefinitionBuildValidators())).ToArray();
+			var results = CreateBuildInfoProvider().Select(provider => provider.Provide(directories, this.settings.gameDefinitionFileName, this.gameDefinitionType, CreateGameDefinitionBuildValidators())).ToArray();
 			return new GameDefinitionBuildInfoResult {
 				hadErrors = results.Any(result => result.hadErrors),
 				buildInfos = results.SelectMany(result => result.buildInfos).ToArray()

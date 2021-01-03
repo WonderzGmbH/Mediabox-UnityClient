@@ -6,13 +6,15 @@ using UnityEngine;
 namespace Mediabox.GameManager.Editor.Build.Plugins {
 	public class CustomPlatformSettingsPlugin : IGameDefinitionManagerPlugin {
 		readonly GameDefinitionManagementPlugin management;
-		readonly GameDefinitionManagerBase manager;
+		readonly GameDefinitionHub manager;
 
-		public CustomPlatformSettingsPlugin(GameDefinitionManagementPlugin management, GameDefinitionManagerBase manager) {
+		public CustomPlatformSettingsPlugin(GameDefinitionManagementPlugin management, GameDefinitionHub manager) {
 			this.management = management;
 			this.manager = manager;
 		}
-		public string Title => $"Custom Platform Settings ({(this.manager.customPlatformSettings != null ? "ON" : "OFF")})";
+		public string Title => $"Custom Platform Settings ({this.OnOffString} for {this.management.SelectedDirectory})";
+		public bool ToggleableWithTitleLabel => true;
+		string OnOffString => (this.manager.customPlatformSettings != null ? "ON" : "OFF");
 
 		public void Update() {
 			var platformSettingsPath = Path.Combine(this.management.SelectedDirectory, GameDefinitionBuildSettings.customPlatformSettings);

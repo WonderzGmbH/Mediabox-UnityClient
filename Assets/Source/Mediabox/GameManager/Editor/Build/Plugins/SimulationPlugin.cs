@@ -34,6 +34,7 @@ namespace Mediabox.GameManager.Editor.Build.Plugins {
 		}
 		
 		public string Title => "Simulation";
+		public bool ToggleableWithTitleLabel => true;
 
 		void DrawSimulationMode() {
 			SimulationMode.SimulationModeNativeApi.OnGUI(SimulationMode.ContentBundleFolder);

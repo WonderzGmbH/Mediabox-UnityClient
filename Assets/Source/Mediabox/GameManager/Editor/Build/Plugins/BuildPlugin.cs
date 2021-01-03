@@ -1,23 +1,22 @@
 using System;
 using System.IO;
-using Mediabox.GameKit.GameDefinition;
 using UnityEditor;
 using UnityEngine;
 
 namespace Mediabox.GameManager.Editor.Build.Plugins {
-	public class BuildPlugin<TGameDefinition> : IGameDefinitionManagerPlugin
-		where TGameDefinition : class, IGameDefinition, new() {
+	public class BuildPlugin : IGameDefinitionManagerPlugin {
 		readonly SettingsPlugin settingsPlugin;
 		readonly GameDefinitionManagementPlugin managementPlugin;
-		readonly GameDefinitionManagerBase manager;
+		readonly GameDefinitionHub manager;
 
-		public BuildPlugin(SettingsPlugin settingsPlugin, GameDefinitionManagementPlugin managementPlugin, GameDefinitionManagerBase<TGameDefinition> manager) {
+		public BuildPlugin(SettingsPlugin settingsPlugin, GameDefinitionManagementPlugin managementPlugin, GameDefinitionHub manager) {
 			this.settingsPlugin = settingsPlugin;
 			this.managementPlugin = managementPlugin;
 			this.manager = manager;
 		}
 
 		public string Title => "Build";
+		public bool ToggleableWithTitleLabel => true;
 
 		public void Update() { }
 
@@ -36,6 +35,7 @@ namespace Mediabox.GameManager.Editor.Build.Plugins {
 
 			return true;
 		}
+
 
 		enum BuildPlatformOption {
 			AllSupportedPlatforms,
@@ -76,8 +76,8 @@ namespace Mediabox.GameManager.Editor.Build.Plugins {
 		/// <summary>
 		/// Overload this method in order to inject your own Build Script.
 		/// </summary>
-		protected virtual GameDefinitionBuild<TGameDefinition> CreateGameDefinitionBuild(string[] directories, bool clearDirectory, BuildTarget[] buildTargets) {
-			return new GameDefinitionBuild<TGameDefinition>(directories, clearDirectory, buildTargets, this.settingsPlugin.settings, this.settingsPlugin.buildSettings);
+		protected virtual GameDefinitionBuild CreateGameDefinitionBuild(string[] directories, bool clearDirectory, BuildTarget[] buildTargets) {
+			return new GameDefinitionBuild(directories, clearDirectory, buildTargets, this.manager.GetGameDefinitionType(), this.settingsPlugin.settings, this.settingsPlugin.buildSettings);
 		}
 	}
 }

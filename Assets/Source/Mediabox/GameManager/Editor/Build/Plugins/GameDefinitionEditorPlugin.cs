@@ -9,16 +9,16 @@ namespace Mediabox.GameManager.Editor.Build.Plugins {
 		where TGameDefinition : class, IGameDefinition, new() {
 		readonly SettingsPlugin settingsPlugin;
 		readonly GameDefinitionManagementPlugin management;
-		readonly GameDefinitionManagerBase<TGameDefinition> manager;
+		readonly GameDefinitionHub<TGameDefinition> manager;
 		string declinedRepairPath;
 
-		public GameDefinitionEditorPlugin(SettingsPlugin settingsPlugin, GameDefinitionManagementPlugin management, GameDefinitionManagerBase<TGameDefinition> manager) {
+		public GameDefinitionEditorPlugin(SettingsPlugin settingsPlugin, GameDefinitionManagementPlugin management, GameDefinitionHub<TGameDefinition> manager) {
 			this.settingsPlugin = settingsPlugin;
 			this.management = management;
 			this.manager = manager;
 		}
 		public string Title => $"Definition Editor ({this.management.SelectedDirectory})";
-		public Color Color => Color.white * 0.5f;
+		public bool ToggleableWithTitleLabel => true;
 
 		public void Update() {
 			var gameDefinitionPath = Path.Combine(this.management.SelectedDirectory, this.settingsPlugin.settings.gameDefinitionFileName);

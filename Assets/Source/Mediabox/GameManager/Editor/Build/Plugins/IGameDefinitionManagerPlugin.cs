@@ -6,5 +6,6 @@ namespace Mediabox.GameManager.Editor.Build.Plugins {
 		string Title { get; }
 		void Update();
 		bool Render();
+		bool ToggleableWithTitleLabel { get; }
 	}
 }
