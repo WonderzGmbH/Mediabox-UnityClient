@@ -1,5 +1,4 @@
 using Mediabox.GameKit.GameDefinition;
-using Mediabox.GameManager.Editor;
 
 namespace Mediabox.Samples {
 	/// <summary>

@@ -1,10 +1,10 @@
-﻿
-using System.IO;
+﻿using System.IO;
 using System.Linq;
+using Mediabox.GameKit.GameDefinition;
 using Mediabox.GameManager.Editor.Build.Validator;
 using UnityEngine;
 
-namespace Mediabox.GameManager.Editor.Build {
+namespace Mediabox.GameManager.Editor.Build.Provider {
 	public class GameDefinitionBuildInfoProvider<TGameDefinition> : IGameDefinitionBuildInfoProvider
 	where TGameDefinition : IGameDefinition {
 		public GameDefinitionBuildInfoResult Provide(string[] directories, string gameDefinitionFileName, IGameDefinitionBuildValidator[] validators) {

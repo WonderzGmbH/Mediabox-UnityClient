@@ -1,4 +1,5 @@
 using Mediabox.GameKit.GameDefinition;
+using Mediabox.GameManager.Editor.Build.Provider;
 using UnityEngine;
 
 namespace Mediabox.GameManager.Editor.Build.Validator {

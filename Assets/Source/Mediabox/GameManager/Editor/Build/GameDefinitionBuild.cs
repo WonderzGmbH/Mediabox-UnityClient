@@ -2,6 +2,8 @@
 using System.IO;
 using System.Linq;
 using Mediabox.GameKit.GameDefinition;
+using Mediabox.GameManager.Editor.Build.BuildStep;
+using Mediabox.GameManager.Editor.Build.Provider;
 using Mediabox.GameManager.Editor.Build.Validator;
 using Mediabox.GameManager.Editor.Utility;
 using UnityEditor;

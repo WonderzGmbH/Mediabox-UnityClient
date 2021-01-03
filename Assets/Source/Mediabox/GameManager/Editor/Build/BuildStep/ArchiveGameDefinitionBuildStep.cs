@@ -1,9 +1,10 @@
 ﻿using System.IO;
 using Mediabox.GameKit.GameDefinition;
+using Mediabox.GameManager.Editor.Build.Provider;
 using Mediabox.GameManager.Editor.Utility;
 using UnityEditor;
 
-namespace Mediabox.GameManager.Editor.Build.Validator {
+namespace Mediabox.GameManager.Editor.Build.BuildStep {
 	public class ArchiveGameDefinitionBuildStep : IGameDefinitionBuildStep {
 		readonly GameDefinitionSettings settings;
 		readonly GameDefinitionBuildSettings buildSettings;

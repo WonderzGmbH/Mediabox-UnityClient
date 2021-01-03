@@ -1,4 +1,4 @@
-namespace Mediabox.GameManager.Editor {
+namespace Mediabox.GameKit.GameDefinition {
 	public interface IGameDefinition {
 	}
 }

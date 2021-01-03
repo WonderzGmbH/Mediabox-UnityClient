@@ -2,10 +2,11 @@
 using System.IO;
 using System.Linq;
 using Mediabox.GameKit.GameDefinition;
+using Mediabox.GameManager.Editor.Build.Provider;
 using Mediabox.GameManager.Editor.Utility;
 using UnityEditor;
 
-namespace Mediabox.GameManager.Editor.Build.Validator {
+namespace Mediabox.GameManager.Editor.Build.BuildStep {
 	public class AssetBundlesGameDefinitionBuildStep : IGameDefinitionBuildStep {
 		readonly GameDefinitionBuildSettings buildSettings;
 		HashSet<string> builtBundlePaths;

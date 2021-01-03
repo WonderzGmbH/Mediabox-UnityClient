@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Mediabox.GameKit.GameDefinition;
 using UnityEditor;
 using UnityEngine;
 

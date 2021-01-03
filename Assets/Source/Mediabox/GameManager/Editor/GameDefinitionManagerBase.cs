@@ -1,4 +1,5 @@
-﻿using Mediabox.GameManager.Editor.Build.Plugins;
+﻿using Mediabox.GameKit.GameDefinition;
+using Mediabox.GameManager.Editor.Build.Plugins;
 using UnityEditor;
 using UnityEngine;
 
