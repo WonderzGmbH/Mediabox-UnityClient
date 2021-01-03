@@ -191,9 +191,9 @@ namespace Mediabox.GameKit.GameManager {
         protected virtual INativeAPI CreateNativeAPI() {
             switch (Application.platform) {
                 case RuntimePlatform.Android:
-                    return new MediaboxIOSNativeAPI();
-                case RuntimePlatform.IPhonePlayer:
                     return new MediaboxAndroidNativeAPI();
+                case RuntimePlatform.IPhonePlayer:
+                    return new MediaboxIOSNativeAPI();
                 default:
                     throw new ArgumentOutOfRangeException(nameof(Application.platform), Application.platform, string.Empty);
             }
@@ -211,10 +211,6 @@ namespace Mediabox.GameKit.GameManager {
             if (instance == this)
                 instance = null;
         }
-        
-        static async Task LoadGameDefinitionScene(IGameSceneDefinition gameSceneDefinition) {
-            await SceneManager.LoadSceneAsync(gameSceneDefinition.SceneName);
-        }
 
         async Task LoadGameDefinitionBundle(string path, IGameBundleDefinition gameBundleDefinition) {
             var bundlePath = Path.Combine(path, gameBundleDefinition.BundleName);
@@ -226,6 +222,10 @@ namespace Mediabox.GameKit.GameManager {
 
             await bundle;
             this.loadedBundle = bundle.Result;
+        }
+        
+        static async Task LoadGameDefinitionScene(IGameSceneDefinition gameSceneDefinition) {
+            await SceneManager.LoadSceneAsync(gameSceneDefinition.SceneName);
         }
 
         static TGameDefinition LoadGameDefinition(string path, GameDefinitionSettings settings) {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Mediabox.GameManager.Editor {
+namespace Mediabox.GameManager.Editor.Utility {
 	public static class OpenInFileBrowser {
 		public static void Open(string path) {
 			if (IsWindows)

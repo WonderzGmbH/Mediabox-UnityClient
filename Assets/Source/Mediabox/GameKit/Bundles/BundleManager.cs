@@ -4,29 +4,29 @@ using UnityEngine;
 namespace Mediabox.GameKit.Bundles {
 	public static class BundleManager {
 	
-		const string editorBundlesEditorPrefKey = "Mediabox.GameKit.Bundles.EditorBundles";
-		static bool _editorBundles;
-		public static bool EditorBundles {
-        	get => _editorBundles;
+		const string releaseBundlesEditorPrefKey = "Mediabox.GameKit.Bundles.ReleaseBundles";
+		static bool _releaseBundles;
+		public static bool ReleaseBundles {
+        	get => _releaseBundles;
         	set {
         	#if UNITY_EDITOR
-        		if (value == _editorBundles)
+        		if (value == _releaseBundles)
         			return;
-        		_editorBundles = value;
-        		UnityEditor.EditorPrefs.SetBool(editorBundlesEditorPrefKey, value);
+        		_releaseBundles = value;
+        		UnityEditor.EditorPrefs.SetBool(releaseBundlesEditorPrefKey, value);
         		#endif
    			}
         }
 		
 		static BundleManager() {
 			#if UNITY_EDITOR
-			_editorBundles = UnityEditor.EditorPrefs.GetBool(editorBundlesEditorPrefKey, true);
+			_releaseBundles = UnityEditor.EditorPrefs.GetBool(releaseBundlesEditorPrefKey, true);
 			#else
-			_editorBundles = false;
+			_releaseBundles = false;
 			#endif
 		}
 		public static Task<IBundle> Load(string bundleName) {
-			return EditorBundles ? LoadEditorBundle(bundleName) : LoadUnityBundle(bundleName);
+			return ReleaseBundles ? LoadEditorBundle(bundleName) : LoadUnityBundle(bundleName);
 		}
 
 		static async Task<IBundle> LoadUnityBundle(string bundleName) {

@@ -14,7 +14,7 @@ namespace Mediabox.API {
 		}
 		
 		public void InitializeApi(string apiGameObjectName) {
-			this.nativeApi.CallStatic(nameof(InitializeApi), apiGameObjectName);
+			this.nativeApi.CallStatic(nameof(InitializeApi).LowerCaseFirst(), apiGameObjectName);
 		}
 
 		public void OnLoadingSucceeded() {
@@ -38,7 +38,7 @@ namespace Mediabox.API {
 		}
 
 		public void OnCreateScreenshotSucceeded(string path) {
-			this.nativeApi.CallStatic(nameof(OnCreateScreenshotSucceeded).LowerCaseFirst());
+			this.nativeApi.CallStatic(nameof(OnCreateScreenshotSucceeded).LowerCaseFirst(), path);
 		}
 
 		public void OnCreateScreenshotFailed() {

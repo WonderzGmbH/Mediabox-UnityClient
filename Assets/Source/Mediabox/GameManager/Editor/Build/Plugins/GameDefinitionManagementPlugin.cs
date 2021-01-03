@@ -1,0 +1,97 @@
+using System;
+using System.IO;
+using System.Linq;
+using UnityEditor;
+using UnityEngine;
+
+namespace Mediabox.GameManager.Editor.Build.Plugins {
+
+	[Serializable]
+	public class GameDefinitionManagementPlugin : IGameDefinitionManagerPlugin {
+		string[] directories;
+		int selectedIndex;
+
+		public string SelectedDirectory {
+			get {
+				if (this.directories == null || this.directories.Length <= this.selectedIndex || this.selectedIndex < 0)
+					return null;
+				return this.directories[this.selectedIndex];
+			}
+		}
+		public string[] AllDirectories => this.directories;
+		readonly SettingsPlugin settingsPlugin;
+		readonly GameDefinitionManagerBase manager;
+		string newDefinitionName;
+
+		public GameDefinitionManagementPlugin(SettingsPlugin settingsPlugin, GameDefinitionManagerBase manager) {
+			this.settingsPlugin = settingsPlugin;
+			this.manager = manager;
+		}
+		
+		public string Title => $"Definition Management ({this.directories?.Length ?? 0} Games)";
+
+		public void Update() {
+			this.directories = LoadGameDefinitions();
+			LoadSelectedIndex();
+		}
+
+		public bool Render() {
+			this.directories = DrawCreateNew();
+			if (this.directories.Length == 0) {
+				EditorGUILayout.HelpBox("Create a new GameDefinition to begin work.", MessageType.Info);
+				return false;
+			}
+			ValidateSelectedGameDefinition(this.directories);
+			this.directories = DrawSelector(this.directories);
+			if (this.directories.Length == 0)
+				return false;
+			return true;
+		}
+
+		string[] LoadGameDefinitions() {
+			var directories = Directory.GetDirectories(this.settingsPlugin.settings.gameDefinitionDirectoryPath);
+			return directories;
+		}
+
+		void LoadSelectedIndex() {
+			var index = Array.IndexOf(this.directories, SimulationMode.ContentBundleFolder);
+			this.selectedIndex = index > 0 ? index : 0;
+		}
+		
+		string[] DrawCreateNew() {
+			GUILayout.BeginHorizontal();
+			GUILayout.Label("Create new: ");
+			this.newDefinitionName = GUILayout.TextArea(this.newDefinitionName);
+			if (GUILayout.Button("Create")) {
+				var newDirectory = Path.Combine(this.settingsPlugin.settings.gameDefinitionDirectoryPath, this.newDefinitionName);
+				Directory.CreateDirectory(newDirectory);
+				this.directories = Directory.GetDirectories(this.settingsPlugin.settings.gameDefinitionDirectoryPath);
+				this.selectedIndex = Array.IndexOf(this.directories, newDirectory);
+				Debug.Log("selected index: " + this.selectedIndex);
+				File.WriteAllText(Path.Combine(newDirectory, this.settingsPlugin.settings.gameDefinitionFileName), JsonUtility.ToJson(this.manager.CreateGameDefinition()));
+			}
+
+			GUILayout.EndHorizontal();
+			return this.directories;
+		}
+
+		void ValidateSelectedGameDefinition(string[] directories) {
+			this.selectedIndex = Mathf.Clamp(this.selectedIndex, 0, directories.Length);
+		}
+		
+		string[] DrawSelector(string[] directories) {
+			GUILayout.BeginHorizontal();
+			this.selectedIndex = EditorGUILayout.Popup("GameDefinition", this.selectedIndex, directories.Select(Path.GetFileName).ToArray());
+			if (GUILayout.Button("Delete")) {
+				Directory.Delete(directories[this.selectedIndex], true);
+				directories = directories.Where(dir => dir != directories[this.selectedIndex]).ToArray();
+				if (directories.Length > 0 && this.selectedIndex >= directories.Length - 1) {
+					this.selectedIndex = directories.Length - 1;
+				}
+			}
+
+			GUILayout.EndHorizontal();
+			return directories;
+		}
+	}
+}

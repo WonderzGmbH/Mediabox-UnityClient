@@ -1,4 +1,5 @@
 using Mediabox.GameKit.GameDefinition;
+using Mediabox.GameManager.Editor;
 
 namespace Mediabox.Samples {
 	/// <summary>
@@ -11,7 +12,7 @@ namespace Mediabox.Samples {
 	/// Details to this class can be found in the base class.
 	/// </summary>
 	[System.Serializable]
-	public class GameDefinition : IGameBundleSceneDefinition {
+	public class GameDefinition : IGameBundleSceneDefinition, IGameDefinition {
 		public string game;
 		public string skin;
 		public string bundlePath;
