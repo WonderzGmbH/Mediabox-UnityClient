@@ -1,13 +1,12 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEditor;
+﻿using UnityEditor;
 
-public class CreateAssetBundles
-{
-    [MenuItem("Assets/Build AssetBundles")]
-    static void BuildAllAssetBundles()
+namespace Mediabox.Editor {
+    public class CreateAssetBundles
     {
-        BuildPipeline.BuildAssetBundles("Assets/AssetBundles", BuildAssetBundleOptions.None, BuildTarget.StandaloneOSX);
+        [MenuItem("Assets/Build AssetBundles")]
+        static void BuildAllAssetBundles()
+        {
+            BuildPipeline.BuildAssetBundles("Assets/AssetBundles", BuildAssetBundleOptions.None, BuildTarget.StandaloneOSX);
+        }
     }
 }
