@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Mediabox.GameManager.Editor.Build {
 	public class GameDefinitionBuildSettings : ScriptableObject {
-		public const string SettingsPath = "Assets/Editor/Resources/GameDefinitionSettings.asset";
+		public const string SettingsPath = "Assets/Plugins/Mediabox/Editor/Resources/GameDefinitionSettings.asset";
 		public const string customPlatformSettings = "customPlatforms.json";
 		
 		public BuildTarget[] supportedBuildTargets = {BuildTarget.Android, BuildTarget.iOS};

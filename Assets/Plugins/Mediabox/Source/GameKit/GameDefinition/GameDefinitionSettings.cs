@@ -2,7 +2,7 @@
 
 namespace Mediabox.GameKit.GameDefinition {
 	public class GameDefinitionSettings : ScriptableObject {
-		public const string SettingsPath = "Assets/Resources/GameDefinitionSettings.asset";
+		public const string SettingsPath = "Assets/Plugins/Mediabox/Resources/GameDefinitionSettings.asset";
 		static string SettingsResourcePath => SettingsPath.Replace("Resources/", "").Replace(".asset", "").Replace("Assets/", "");
 		public string gameDefinitionDirectoryPath = "./GameDefinitions/";
 		public bool useGameDefinitionJsonFile = true;
