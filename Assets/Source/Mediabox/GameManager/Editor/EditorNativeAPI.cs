@@ -2,7 +2,6 @@
 using System.IO;
 using Mediabox.API;
 using Mediabox.GameKit.GameDefinition;
-using Mediabox.GameManager.Editor.Build;
 using UnityEditor;
 using UnityEngine;
 

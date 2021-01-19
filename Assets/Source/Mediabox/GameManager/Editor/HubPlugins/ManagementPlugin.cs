@@ -7,7 +7,7 @@ using UnityEngine;
 namespace Mediabox.GameManager.Editor.HubPlugins {
 
 	[Serializable]
-	public class GameDefinitionManagementPlugin : IGameDefinitionManagerPlugin {
+	public class ManagementPlugin : IHubPlugin {
 		string[] directories;
 		int selectedIndex;
 
@@ -23,7 +23,7 @@ namespace Mediabox.GameManager.Editor.HubPlugins {
 		readonly GameDefinitionHub manager;
 		string newDefinitionName;
 
-		public GameDefinitionManagementPlugin(SettingsPlugin settingsPlugin, GameDefinitionHub manager) {
+		public ManagementPlugin(SettingsPlugin settingsPlugin, GameDefinitionHub manager) {
 			this.settingsPlugin = settingsPlugin;
 			this.manager = manager;
 		}

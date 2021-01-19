@@ -1,14 +1,15 @@
 using System.IO;
 using Mediabox.GameManager.Editor.Build;
+using Mediabox.GameManager.Editor.Utility;
 using UnityEditor;
 using UnityEngine;
 
 namespace Mediabox.GameManager.Editor.HubPlugins {
-	public class CustomPlatformSettingsPlugin : IGameDefinitionManagerPlugin {
-		readonly GameDefinitionManagementPlugin management;
+	public class CustomPlatformSettingsPlugin : IHubPlugin {
+		readonly ManagementPlugin management;
 		readonly GameDefinitionHub manager;
 
-		public CustomPlatformSettingsPlugin(GameDefinitionManagementPlugin management, GameDefinitionHub manager) {
+		public CustomPlatformSettingsPlugin(ManagementPlugin management, GameDefinitionHub manager) {
 			this.management = management;
 			this.manager = manager;
 		}
@@ -60,6 +61,7 @@ namespace Mediabox.GameManager.Editor.HubPlugins {
 			var property = so.FindProperty(nameof(this.manager.customPlatformSettings));
 			EditorGUILayout.PropertyField(property, true);
 			so.ApplyModifiedProperties();
+			PathUtility.EnsureDirectory(Path.GetDirectoryName(platformSettingsPath));
 			File.WriteAllText(platformSettingsPath, JsonUtility.ToJson(this.manager.customPlatformSettings));
 		}
 	}

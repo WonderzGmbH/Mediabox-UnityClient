@@ -1,12 +1,10 @@
 ﻿using System;
 using System.IO;
 using System.IO.Compression;
-using Mediabox.API;
 using Mediabox.GameKit.GameDefinition;
 using Mediabox.GameManager.Editor.Build;
 using Mediabox.GameManager.Editor.Utility;
 using UnityEditor;
-using UnityEngine;
 
 namespace Mediabox.GameManager.Editor {
 	public class EditorBuildNativeAPI : EditorNativeAPI, IDisposable {

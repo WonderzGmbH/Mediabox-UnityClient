@@ -22,7 +22,6 @@ namespace Mediabox.GameKit.Game {
 		protected abstract Task LoadSaveGame(TSaveGame saveGame);
     
 		public sealed override Task Save(string path) {
-			var saveGamePath = Path.Combine(path, this.SaveGameName);
 			SaveData(this.SaveGameName, CreateSaveGame());
 			return Task.CompletedTask;
 		}

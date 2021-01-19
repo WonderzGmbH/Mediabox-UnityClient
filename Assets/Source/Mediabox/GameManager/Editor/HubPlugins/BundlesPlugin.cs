@@ -2,7 +2,7 @@ using Mediabox.GameKit.Bundles;
 using UnityEditor;
 
 namespace Mediabox.GameManager.Editor.HubPlugins {
-	public class BundlesPlugin : IGameDefinitionManagerPlugin {
+	public class BundlesPlugin : IHubPlugin {
 		public string Title => "Bundles";
 		public bool ToggleableWithTitleLabel => true;
 		public void Update() { }

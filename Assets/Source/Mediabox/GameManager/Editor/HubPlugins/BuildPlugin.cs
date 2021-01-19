@@ -5,12 +5,12 @@ using UnityEditor;
 using UnityEngine;
 
 namespace Mediabox.GameManager.Editor.HubPlugins {
-	public class BuildPlugin : IGameDefinitionManagerPlugin {
+	public class BuildPlugin : IHubPlugin {
 		readonly SettingsPlugin settingsPlugin;
-		readonly GameDefinitionManagementPlugin managementPlugin;
+		readonly ManagementPlugin managementPlugin;
 		readonly GameDefinitionHub manager;
 
-		public BuildPlugin(SettingsPlugin settingsPlugin, GameDefinitionManagementPlugin managementPlugin, GameDefinitionHub manager) {
+		public BuildPlugin(SettingsPlugin settingsPlugin, ManagementPlugin managementPlugin, GameDefinitionHub manager) {
 			this.settingsPlugin = settingsPlugin;
 			this.managementPlugin = managementPlugin;
 			this.manager = manager;

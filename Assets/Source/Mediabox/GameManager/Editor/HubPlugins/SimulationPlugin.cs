@@ -4,11 +4,11 @@ using UnityEditor;
 using UnityEngine;
 
 namespace Mediabox.GameManager.Editor.HubPlugins {
-	public class SimulationPlugin : IGameDefinitionManagerPlugin {
-		readonly GameDefinitionManagementPlugin managementPlugin;
+	public class SimulationPlugin : IHubPlugin {
+		readonly ManagementPlugin managementPlugin;
 		readonly SettingsPlugin settingsPlugin;
 
-		public SimulationPlugin(GameDefinitionManagementPlugin managementPlugin, SettingsPlugin settingsPlugin) {
+		public SimulationPlugin(ManagementPlugin managementPlugin, SettingsPlugin settingsPlugin) {
 			this.managementPlugin = managementPlugin;
 			this.settingsPlugin = settingsPlugin;
 		}

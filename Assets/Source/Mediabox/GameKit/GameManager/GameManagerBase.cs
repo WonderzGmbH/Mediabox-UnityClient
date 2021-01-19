@@ -25,6 +25,8 @@ namespace Mediabox.GameKit.GameManager {
         IBundle loadedBundle;
         static GameManagerBase<TGameDefinition> instance;
 
+        public static GameManagerBase<TGameDefinition> Instance => instance;
+
         protected virtual string DefaultSceneName => "StartScene";
 
         readonly PauseHandler pauseHandler = new PauseHandler();

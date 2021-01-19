@@ -2,7 +2,7 @@ using UnityEditor;
 using UnityEngine;
 
 namespace Mediabox.GameManager.Editor.HubPlugins {
-	public class TitlePlugin : IGameDefinitionManagerPlugin {
+	public class TitlePlugin : IHubPlugin {
 		readonly string title;
 		readonly GUIStyle style;
 		const int fontSize = 20;

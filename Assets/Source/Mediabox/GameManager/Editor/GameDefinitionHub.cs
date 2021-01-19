@@ -25,7 +25,7 @@ namespace Mediabox.GameManager.Editor {
 	public class GameDefinitionHub<TWindow, TGameDefinition> : GameDefinitionHub<TGameDefinition>
 		where TWindow : GameDefinitionHub<TWindow, TGameDefinition>
 		where TGameDefinition : class, IGameDefinition, new() {
-		IGameDefinitionManagerPlugin[] plugins;
+		IHubPlugin[] plugins;
 		static TWindow window;
 		Vector2 scrollPosition;
 		protected const string shortTitle = "Game Definition Hub";
@@ -38,17 +38,17 @@ namespace Mediabox.GameManager.Editor {
 			return window;
 		}
 
-		protected virtual IGameDefinitionManagerPlugin[] CreatePlugins() {
+		protected virtual IHubPlugin[] CreatePlugins() {
 			var settings = new SettingsPlugin();
 			var directory = new DirectoryPlugin(settings);
-			var management = new GameDefinitionManagementPlugin(settings, this);
+			var management = new ManagementPlugin(settings, this);
 
-			return new IGameDefinitionManagerPlugin[] {
+			return new IHubPlugin[] {
 				new TitlePlugin(fullTitle),
 				settings,
 				directory,
 				management,
-				new GameDefinitionEditorPlugin<TGameDefinition>(settings, management, this),
+				new EditorPlugin<TGameDefinition>(settings, management, this),
 				new CustomPlatformSettingsPlugin(management, this),
 				new BundlesPlugin(),
 				new SimulationPlugin(management, settings),
@@ -57,8 +57,6 @@ namespace Mediabox.GameManager.Editor {
 		}
 
 		void OnGUI() {
-			
-			
 			if (this.plugins == null) {
 				this.plugins = CreatePlugins();
 			}
@@ -68,13 +66,8 @@ namespace Mediabox.GameManager.Editor {
 				var plugin = this.plugins[i];
 				try {
 					EditorGUILayout.BeginVertical(StyleUtility.GetColoredBoxStyle(this.plugins.Length, i));
-					var pluginVisible = true;
 					plugin.Update();
-					if (plugin.ToggleableWithTitleLabel) {
-						var prefKey = "Mediabox.GameManager.Editor.GameDefinitionManagerBase.Plugin::" + plugin;
-						EditorPrefs.SetBool(prefKey, EditorGUILayout.Foldout(EditorPrefs.GetBool(prefKey, true), plugin.Title, StyleUtility.FoldoutStyle));
-						pluginVisible = EditorPrefs.GetBool(prefKey);
-					}
+					var pluginVisible = UpdatePluginVisibility(plugin);
 					if (!pluginVisible)
 						continue;
 					if (!plugin.Render())
@@ -84,6 +77,14 @@ namespace Mediabox.GameManager.Editor {
 				}
 			}
 			GUILayout.EndScrollView();
+		}
+
+		static bool UpdatePluginVisibility(IHubPlugin plugin) {
+			if (!plugin.ToggleableWithTitleLabel) 
+				return true;
+			var prefKey = "Mediabox.GameManager.Editor.GameDefinitionManagerBase.Plugin::" + plugin;
+			EditorPrefs.SetBool(prefKey, EditorGUILayout.Foldout(EditorPrefs.GetBool(prefKey, true), plugin.Title, StyleUtility.FoldoutStyle));
+			return EditorPrefs.GetBool(prefKey);
 		}
 	}
 

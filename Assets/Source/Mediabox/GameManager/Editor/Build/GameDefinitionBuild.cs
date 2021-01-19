@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Mediabox.GameKit.GameDefinition;
 using Mediabox.GameManager.Editor.Build.BuildStep;
 using Mediabox.GameManager.Editor.Build.Provider;
@@ -29,6 +30,7 @@ namespace Mediabox.GameManager.Editor.Build {
 		}
 
 		public void Execute() {
+			
 			var buildInfoResult = ProvideBuildInfo(this.directories);
 			if (buildInfoResult.hadErrors &&
 			    !EditorUtility.DisplayDialog("There have been errors", "Some GameDefinitions had errors. Do you still want to continue?", "OK", "Cancel"))
@@ -77,9 +79,14 @@ namespace Mediabox.GameManager.Editor.Build {
 				new ArchiveGameDefinitionBuildStep(this.settings, this.buildSettings, this.clearDirectory),
 			};
 		}
-
-		static IEnumerable<IGrouping<BuildTarget, GameDefinitionBuildInfo>> GetGameDefinitionsPerPlatform(BuildTarget[] buildTargets, GameDefinitionBuildInfo[] gameDefinitionsX) {
-			return gameDefinitionsX.SelectMany(gameDefinition => GetBuildTargetsForGameDefinition(gameDefinition, buildTargets).Select(buildTarget => (buildTarget, gameDefinition))).GroupBy(touple => touple.buildTarget, touple => touple.gameDefinition);
+		
+		static IEnumerable<IGrouping<BuildTarget, GameDefinitionBuildInfo>> GetGameDefinitionsPerPlatform(BuildTarget[] buildTargets, GameDefinitionBuildInfo[] gameDefinitions) {
+			return gameDefinitions
+				.SelectMany(gameDefinition => 
+					GetBuildTargetsForGameDefinition(gameDefinition, buildTargets)
+						.Select(buildTarget => (buildTarget, gameDefinition))
+				)
+				.GroupBy(touple => touple.buildTarget, touple => touple.gameDefinition);
 		}
 
 		static BuildTarget[] GetBuildTargetsForGameDefinition(GameDefinitionBuildInfo gameDefinition, BuildTarget[] buildTargets) {

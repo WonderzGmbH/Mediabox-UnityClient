@@ -4,7 +4,7 @@ using UnityEditor;
 using UnityEngine;
 
 namespace Mediabox.GameManager.Editor.HubPlugins {
-	public class DirectoryPlugin : IGameDefinitionManagerPlugin {
+	public class DirectoryPlugin : IHubPlugin {
 		readonly SettingsPlugin settingsPlugin;
 
 		public DirectoryPlugin(SettingsPlugin settingsPlugin) {

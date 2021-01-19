@@ -1,18 +1,19 @@
 using System;
 using System.IO;
 using Mediabox.GameKit.GameDefinition;
+using Mediabox.GameManager.Editor.Utility;
 using UnityEditor;
 using UnityEngine;
 
 namespace Mediabox.GameManager.Editor.HubPlugins {
-	public class GameDefinitionEditorPlugin<TGameDefinition> : IGameDefinitionManagerPlugin
+	public class EditorPlugin<TGameDefinition> : IHubPlugin
 		where TGameDefinition : class, IGameDefinition, new() {
 		readonly SettingsPlugin settingsPlugin;
-		readonly GameDefinitionManagementPlugin management;
+		readonly ManagementPlugin management;
 		readonly GameDefinitionHub<TGameDefinition> manager;
 		string declinedRepairPath;
 
-		public GameDefinitionEditorPlugin(SettingsPlugin settingsPlugin, GameDefinitionManagementPlugin management, GameDefinitionHub<TGameDefinition> manager) {
+		public EditorPlugin(SettingsPlugin settingsPlugin, ManagementPlugin management, GameDefinitionHub<TGameDefinition> manager) {
 			this.settingsPlugin = settingsPlugin;
 			this.management = management;
 			this.manager = manager;
@@ -33,6 +34,7 @@ namespace Mediabox.GameManager.Editor.HubPlugins {
 		
 		void LoadGameDefinition(string gameDefinitionPath) {
 			if (!File.Exists(gameDefinitionPath)) {
+				PathUtility.EnsureDirectory(Path.GetDirectoryName(gameDefinitionPath));
 				if (this.declinedRepairPath != gameDefinitionPath && EditorUtility.DisplayDialog("GameDefinitionManager Error", $"Expected to find a file named '{this.settingsPlugin.settings.gameDefinitionFileName}' at path '{gameDefinitionPath}'. This can be repaired automatically, but you will have to setup the {this.settingsPlugin.settings.gameDefinitionFileName} manually.", "OK", "Cancel")) {
 					this.manager.gameDefinition = new TGameDefinition();
 					File.WriteAllText(gameDefinitionPath, JsonUtility.ToJson(this.manager.gameDefinition));
@@ -53,6 +55,7 @@ namespace Mediabox.GameManager.Editor.HubPlugins {
 			var property = so.FindProperty(nameof(this.manager.gameDefinition));
 			EditorGUILayout.PropertyField(property, true);
 			so.ApplyModifiedProperties();
+			PathUtility.EnsureDirectory(Path.GetDirectoryName(gameDefinitionPath));
 			File.WriteAllText(gameDefinitionPath, JsonUtility.ToJson(this.manager.gameDefinition));
 		}
 	}

@@ -36,8 +36,8 @@ namespace Mediabox.GameManager.Editor.Utility {
 		}
 
 		public static void CopyFileToDirectory(string fileName, string fromDirectory, string toDirectory) {
-			if (!Directory.Exists(toDirectory))
-				Directory.CreateDirectory(toDirectory);
+			var toFilePath = Path.Combine(toDirectory, fileName);
+			EnsureDirectory(Path.GetDirectoryName(toFilePath));
 			File.Copy(Path.Combine(fromDirectory, fileName), Path.Combine(toDirectory, fileName), true);
 		}
 		

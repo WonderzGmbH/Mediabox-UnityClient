@@ -1,6 +1,6 @@
 
 namespace Mediabox.GameManager.Editor.HubPlugins {
-	public interface IGameDefinitionManagerPlugin {
+	public interface IHubPlugin {
 		string Title { get; }
 		void Update();
 		bool Render();

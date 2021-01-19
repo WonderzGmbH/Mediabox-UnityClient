@@ -5,7 +5,7 @@ using UnityEditor;
 using UnityEngine;
 
 namespace Mediabox.GameManager.Editor.HubPlugins {
-	public class SettingsPlugin : IGameDefinitionManagerPlugin {
+	public class SettingsPlugin : IHubPlugin {
 		public GameDefinitionSettings settings { get; private set; }
 		public GameDefinitionBuildSettings buildSettings { get; private set; }
 
