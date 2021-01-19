@@ -27,7 +27,6 @@
       <Path>Library</Path>
       <Path>Logs</Path>
       <Path>Temp</Path>
-      <Path>gamea</Path>
       <Path>obj</Path>
       <Path>save</Path>
     </explicitExcludes>
