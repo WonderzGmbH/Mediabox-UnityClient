@@ -30,7 +30,6 @@ namespace Mediabox.GameManager.Editor.Build {
 		}
 
 		public void Execute() {
-			
 			var buildInfoResult = ProvideBuildInfo(this.directories);
 			if (buildInfoResult.hadErrors &&
 			    !EditorUtility.DisplayDialog("There have been errors", "Some GameDefinitions had errors. Do you still want to continue?", "OK", "Cancel"))

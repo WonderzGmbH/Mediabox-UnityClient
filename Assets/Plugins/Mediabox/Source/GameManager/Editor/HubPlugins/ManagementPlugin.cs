@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using Mediabox.GameManager.Editor.Utility;
 using UnityEditor;
 using UnityEngine;
 
@@ -60,19 +61,18 @@ namespace Mediabox.GameManager.Editor.HubPlugins {
 		}
 		
 		string[] DrawCreateNew() {
-			GUILayout.BeginHorizontal();
-			GUILayout.Label("Create new: ");
-			this.newDefinitionName = GUILayout.TextArea(this.newDefinitionName);
-			if (GUILayout.Button("Create")) {
-				var newDirectory = Path.Combine(this.settingsPlugin.settings.gameDefinitionDirectoryPath, this.newDefinitionName);
-				Directory.CreateDirectory(newDirectory);
-				this.directories = Directory.GetDirectories(this.settingsPlugin.settings.gameDefinitionDirectoryPath);
-				this.selectedIndex = Array.IndexOf(this.directories, newDirectory);
-				Debug.Log("selected index: " + this.selectedIndex);
-				File.WriteAllText(Path.Combine(newDirectory, this.settingsPlugin.settings.gameDefinitionFileName), JsonUtility.ToJson(this.manager.CreateGameDefinition()));
+			using (LayoutUtility.HorizontalStack()) {
+				GUILayout.Label("Create new: ");
+				this.newDefinitionName = GUILayout.TextArea(this.newDefinitionName);
+				if (GUILayout.Button("Create")) {
+					var newDirectory = Path.Combine(this.settingsPlugin.settings.gameDefinitionDirectoryPath, this.newDefinitionName);
+					Directory.CreateDirectory(newDirectory);
+					this.directories = Directory.GetDirectories(this.settingsPlugin.settings.gameDefinitionDirectoryPath);
+					this.selectedIndex = Array.IndexOf(this.directories, newDirectory);
+					Debug.Log("selected index: " + this.selectedIndex);
+					File.WriteAllText(Path.Combine(newDirectory, this.settingsPlugin.settings.gameDefinitionFileName), JsonUtility.ToJson(this.manager.CreateGameDefinition()));
+				}
 			}
-
-			GUILayout.EndHorizontal();
 			return this.directories;
 		}
 
@@ -81,17 +81,16 @@ namespace Mediabox.GameManager.Editor.HubPlugins {
 		}
 		
 		string[] DrawSelector(string[] directories) {
-			GUILayout.BeginHorizontal();
-			this.selectedIndex = EditorGUILayout.Popup("GameDefinition", this.selectedIndex, directories.Select(Path.GetFileName).ToArray());
-			if (GUILayout.Button("Delete")) {
-				Directory.Delete(directories[this.selectedIndex], true);
-				directories = directories.Where(dir => dir != directories[this.selectedIndex]).ToArray();
-				if (directories.Length > 0 && this.selectedIndex >= directories.Length - 1) {
-					this.selectedIndex = directories.Length - 1;
+			using (LayoutUtility.HorizontalStack()) {
+				this.selectedIndex = EditorGUILayout.Popup("GameDefinition", this.selectedIndex, directories.Select(Path.GetFileName).ToArray());
+				if (GUILayout.Button("Delete")) {
+					Directory.Delete(directories[this.selectedIndex], true);
+					directories = directories.Where(dir => dir != directories[this.selectedIndex]).ToArray();
+					if (directories.Length > 0 && this.selectedIndex >= directories.Length - 1) {
+						this.selectedIndex = directories.Length - 1;
+					}
 				}
 			}
-
-			GUILayout.EndHorizontal();
 			return directories;
 		}
 	}

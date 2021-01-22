@@ -25,13 +25,14 @@ namespace Mediabox.GameManager.Editor.HubPlugins {
 			var directories = this.managementPlugin.AllDirectories;
 			DrawBuildPlatformsArea();
 			GUILayout.Label($"Building: {string.Join(", ", GetSelectedBuildTargets())}");
-			EditorGUI.EndDisabledGroup();
 			if (GUILayout.Button($"Build All")) {
 				BuildGameDefinitions(directories, true, GetSelectedBuildTargets());
+				return false;
 			}
 
 			if (this.manager != null & GUILayout.Button($"Build {Path.GetFileName(this.managementPlugin.SelectedDirectory)}")) {
 				BuildGameDefinitions(new[] {this.managementPlugin.SelectedDirectory}, false, GetSelectedBuildTargets());
+				return false;
 			}
 
 			return true;

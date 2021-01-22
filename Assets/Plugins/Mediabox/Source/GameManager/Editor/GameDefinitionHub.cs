@@ -61,22 +61,19 @@ namespace Mediabox.GameManager.Editor {
 				this.plugins = CreatePlugins();
 			}
 
-			this.scrollPosition = GUILayout.BeginScrollView(this.scrollPosition, false, false);
+			var scrollStack = LayoutUtility.ScrollStack(ref this.scrollPosition);
 			for (var i = 0; i < this.plugins.Length; i++) {
 				var plugin = this.plugins[i];
-				try {
-					EditorGUILayout.BeginVertical(StyleUtility.GetColoredBoxStyle(this.plugins.Length, i));
+				using (LayoutUtility.VerticalStack(StyleUtility.GetColoredBoxStyle(this.plugins.Length, i))) {
 					plugin.Update();
 					var pluginVisible = UpdatePluginVisibility(plugin);
 					if (!pluginVisible)
 						continue;
 					if (!plugin.Render())
-						break;
-				} finally {
-					EditorGUILayout.EndVertical();
+						GUIUtility.ExitGUI();
 				}
 			}
-			GUILayout.EndScrollView();
+			scrollStack.Dispose();
 		}
 
 		static bool UpdatePluginVisibility(IHubPlugin plugin) {
