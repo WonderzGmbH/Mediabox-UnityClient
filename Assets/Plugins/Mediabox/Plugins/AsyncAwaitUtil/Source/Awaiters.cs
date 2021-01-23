@@ -11,7 +11,7 @@ public static class Awaiters {
 
 	public static WaitForFixedUpdate FixedUpdate { get { return _waitForFixedUpdate; } }
 
-	public static WaitForEndOsfFrame EndOfFrame { get { return _waitForEndOfFrame; } }
+	public static WaitForEndOfFrame EndOfFrame { get { return _waitForEndOfFrame; } }
 
 	public static WaitForSeconds Seconds(float seconds) {
 		return new WaitForSeconds(seconds);
