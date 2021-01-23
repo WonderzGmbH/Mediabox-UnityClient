@@ -5,6 +5,8 @@
     <e p="$USER_HOME$/Library/Caches/JetBrains/Rider2020.2/extResources" t="IncludeRecursive" />
     <e p="$USER_HOME$/Library/Caches/JetBrains/Rider2020.2/resharper-host/local/Transient/Rider/v202/SolutionCaches/_Mediabox-UnityClient.1417583351.00" t="ExcludeRecursive" />
     <e p="$PROJECT_DIR$" t="IncludeRecursive">
+      <e p="Assembly-CSharp-Editor-firstpass.csproj" t="IncludeRecursive" />
+      <e p="Assembly-CSharp-firstpass.csproj" t="IncludeRecursive" />
       <e p="Assets" t="Include">
         <e p="Plugins" t="Include">
           <e p="Mediabox" t="Include">
@@ -28,7 +30,6 @@
             <e p="Samples" t="Include">
               <e p="Editor" t="Include">
                 <e p="GameDefinitionHub.cs" t="Include" />
-                <e p="Mediabox.Samples.Editor.asmdef" t="Include" />
               </e>
               <e p="Game.cs" t="Include" />
               <e p="gamea" t="Include">
@@ -36,7 +37,6 @@
               </e>
               <e p="GameDefinition.cs" t="Include" />
               <e p="GameManager.cs" t="Include" />
-              <e p="Mediabox.Samples.asmdef" t="Include" />
               <e p="SaveGame.cs" t="Include" />
             </e>
             <e p="Source" t="Include">
@@ -98,6 +98,7 @@
                       <e p="SceneGameDefinitionBuildValidator.cs" t="Include" />
                     </e>
                   </e>
+                  <e p="csc.rsp" t="Include" />
                   <e p="CustomPlatformSettings.cs" t="Include" />
                   <e p="EditorBuildNativeAPI.cs" t="Include" />
                   <e p="EditorNativeAPI.cs" t="Include" />
@@ -135,8 +136,6 @@
       <e p="Mediabox-UnityClient.sln" t="IncludeFlat" />
       <e p="Mediabox.csproj" t="IncludeRecursive" />
       <e p="Mediabox.GameManager.Editor.csproj" t="IncludeRecursive" />
-      <e p="Mediabox.Samples.csproj" t="IncludeRecursive" />
-      <e p="Mediabox.Samples.Editor.csproj" t="IncludeRecursive" />
       <e p="obj" t="ExcludeRecursive" />
       <e p="Packages" t="ExcludeRecursive" />
       <e p="Temp/bin" t="ExcludeRecursive" />
