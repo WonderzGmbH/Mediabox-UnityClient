@@ -38,5 +38,20 @@ extern "C" {
         assert(api != nil);
         [api onSaveDataWritten];
     }
+
+    void OnGameExitRequested() {
+        assert(api != nil);
+        [api onGameExitRequested];
+    }
+
+    void OnCreateScreenshotFailed() {
+        assert(api != nil);
+        [api onCreateScreenshotFailed];
+    }
+
+    void OnCreateScreenshotSucceeded(const char* apiGameObject) {
+        assert(api != nil);
+        [api onCreateScreenshotSucceeded:[NSString stringWithUTF8String:apiGameObject]];
+    }
 }
 

@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using AsyncAwaitUtil;
 using JetBrains.Annotations;
 using Mediabox.API;
 using Mediabox.GameKit.Bundles;

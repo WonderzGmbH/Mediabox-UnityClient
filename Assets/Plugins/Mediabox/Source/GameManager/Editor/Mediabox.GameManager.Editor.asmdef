@@ -1,0 +1,17 @@
+{
+    "name": "Mediabox.GameManager.Editor",
+    "references": [
+        "GUID:d31cde07089014e468bd0e8f26166eec"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

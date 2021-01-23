@@ -1,10 +1,6 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
-namespace UnityAsyncAwaitUtil
+namespace AsyncAwaitUtil.Internal
 {
     public class AsyncCoroutineRunner : MonoBehaviour
     {
@@ -27,9 +23,9 @@ namespace UnityAsyncAwaitUtil
         void Awake()
         {
             // Don't show in scene hierarchy
-            gameObject.hideFlags = HideFlags.HideAndDontSave;
+            this.gameObject.hideFlags = HideFlags.HideAndDontSave;
 
-            DontDestroyOnLoad(gameObject);
+            DontDestroyOnLoad(this.gameObject);
         }
     }
 }

@@ -11,6 +11,9 @@
 - (void) onLoadingFailed;
 - (void) onUnloadingSucceeded;
 - (void) onSaveDataWritten;
+- (void) onGameExitRequested;
+- (void) onCreateScreenshotFailed;
+- (void) onCreateScreenshotSucceeded: (NSString*) screenshotPath;
 // other methods
 @end
 
