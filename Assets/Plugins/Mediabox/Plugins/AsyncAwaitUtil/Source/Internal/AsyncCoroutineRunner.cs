@@ -1,31 +1,28 @@
 using UnityEngine;
 
-namespace AsyncAwaitUtil.Internal
+public class AsyncCoroutineRunner : MonoBehaviour
 {
-    public class AsyncCoroutineRunner : MonoBehaviour
+    static AsyncCoroutineRunner _instance;
+
+    public static AsyncCoroutineRunner Instance
     {
-        static AsyncCoroutineRunner _instance;
-
-        public static AsyncCoroutineRunner Instance
+        get
         {
-            get
+            if (_instance == null)
             {
-                if (_instance == null)
-                {
-                    _instance = new GameObject("AsyncCoroutineRunner")
-                        .AddComponent<AsyncCoroutineRunner>();
-                }
-
-                return _instance;
+                _instance = new GameObject("AsyncCoroutineRunner")
+                    .AddComponent<AsyncCoroutineRunner>();
             }
-        }
 
-        void Awake()
-        {
-            // Don't show in scene hierarchy
-            this.gameObject.hideFlags = HideFlags.HideAndDontSave;
-
-            DontDestroyOnLoad(this.gameObject);
+            return _instance;
         }
+    }
+
+    void Awake()
+    {
+        // Don't show in scene hierarchy
+        this.gameObject.hideFlags = HideFlags.HideAndDontSave;
+
+        DontDestroyOnLoad(this.gameObject);
     }
 }

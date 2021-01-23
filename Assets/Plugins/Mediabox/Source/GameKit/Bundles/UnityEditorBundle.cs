@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using AsyncAwaitUtil;
 using UnityEngine.SceneManagement;
 
 namespace Mediabox.GameKit.Bundles {
