@@ -9,7 +9,7 @@ namespace Mediabox.Samples.Editor {
 	/// </summary>
 	public class GameDefinitionHub : GameDefinitionHub<GameDefinitionHub, GameDefinition> {
 		[MenuItem("MediaBox/"+shortTitle)]
-		static GameDefinitionHub OpenWindow() {
+		public static GameDefinitionHub OpenWindow() {
 			return ShowWindow();
 		}
 	}

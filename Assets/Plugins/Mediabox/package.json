@@ -1,6 +1,6 @@
 {
   "name": "com.wonderz.wunderbox",
-  "version": "2021.123.3",
+  "version": "2021.123.14",
   "displayName": "Wunderbox Unity SDK",
   "description": "This is the Unity SDK used ",
   "unity": "2019.4",
@@ -22,7 +22,7 @@
     {
       "displayName": "Samples",
       "description": "Description for sample 1",
-      "path": "Samples"
+      "path": "Samples~"
     }
   ]
 }
