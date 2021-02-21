@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 - TBD
 
-## [2021.221.1] - 2021-2-21
+## [2021.221.2] - 2021-2-21
 ### Added
 - `Build Asset Bundle Options` to `GameDefinitionBuildSettings`. This allows you to specify your Asset Bundle Build Options to be used by the Game Definition Hub to build your Game Definition Bundles
 - `CHANGELOG.md` to the package root to keep track of upcoming changes
