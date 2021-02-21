@@ -27,7 +27,7 @@ namespace Mediabox.GameManager.Editor.Build.BuildStep {
 			var bundleBuildDirectory = Path.Combine(this.buildSettings.assetBundleBuildPath, buildTarget.ToString());
 			if (!PathUtility.EnsureDirectory(bundleBuildDirectory))
 				RepairBundleConflicts(gameDefinitions, this.buildSettings.assetBundleBuildPath);
-			BuildPipeline.BuildAssetBundles(bundleBuildDirectory, CreateAssetBundleBuilds(gameDefinitions), BuildAssetBundleOptions.None, buildTarget);
+			BuildPipeline.BuildAssetBundles(bundleBuildDirectory, CreateAssetBundleBuilds(gameDefinitions), this.buildSettings.buildAssetBundleOptions, buildTarget);
 			foreach (var gameDefinition in gameDefinitions) {
 				var bundleName = (gameDefinition.gameDefinition as IGameBundleDefinition).BundleName;
 				PathUtility.CopyFileToDirectory(bundleName, bundleBuildDirectory, gameDefinition.directory);
