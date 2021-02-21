@@ -1,6 +1,6 @@
 {
   "name": "com.wonderz.wunderbox",
-  "version": "2021.123.15",
+  "version": "2021.221.1",
   "displayName": "Wunderbox Unity SDK",
   "description": "This is the Unity SDK used for Wonderz' Wunderbox Content Distribution Solution",
   "unity": "2019.4",
@@ -20,8 +20,8 @@
   },
   "samples": [
     {
-      "displayName": "Samples",
-      "description": "Description for sample 1",
+      "displayName": "Demo (Standard Template)",
+      "description": "Use these Files to get started quickly. It includes all necessary files to get a project up and running with two switchable games.",
       "path": "Samples~"
     }
   ]
