@@ -57,5 +57,12 @@ namespace Mediabox.GameManager.Editor.Utility {
 			if (File.Exists(bundlePath))
 				File.Delete(bundlePath);
 		}
+
+		public static void DeleteAssetFileIfExists(string bundlePath) {
+			if (File.Exists(bundlePath))
+				File.Delete(bundlePath);
+			if (File.Exists($"{bundlePath}.meta"))
+				File.Delete($"{bundlePath}.meta");
+		}
 	}
 }
