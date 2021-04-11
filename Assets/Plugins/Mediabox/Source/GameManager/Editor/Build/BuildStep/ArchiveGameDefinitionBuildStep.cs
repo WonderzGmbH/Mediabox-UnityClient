@@ -16,10 +16,7 @@ namespace Mediabox.GameManager.Editor.Build.BuildStep {
 			this.clearDirectory = clearDirectory;
 		}
 
-		public void PreProcess() {
-			if (this.clearDirectory)
-				PathUtility.DeleteDirectoryIfExists(this.buildSettings.gameDefinitionBuildPath);
-		}
+		public void PreProcess() { }
 
 		public void Execute(BuildTarget buildTarget, GameDefinitionBuildInfo[] gameDefinitions) {
 			var buildDirectory = Path.Combine(this.buildSettings.gameDefinitionBuildPath, buildTarget.ToString());
