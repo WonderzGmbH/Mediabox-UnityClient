@@ -20,7 +20,6 @@ namespace Editor {
 
 		[MenuItem(sampleTestModeMenuItem, true)]
 		static bool PerformActionValidation() {
-			EditorBuildSettings.scenes = new[] {new EditorBuildSettingsScene("abc", true)}.Concat(EditorBuildSettings.scenes).ToArray();
 			Menu.SetChecked(sampleTestModeMenuItem, Directory.Exists(samplesPath));
 			return true;
 		}
