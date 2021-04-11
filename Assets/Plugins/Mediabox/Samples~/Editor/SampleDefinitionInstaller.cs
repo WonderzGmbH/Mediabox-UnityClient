@@ -22,7 +22,7 @@ namespace Mediabox.Samples.Editor {
 		static bool HasGameDefinitions {
 			get {
 				var path = GameDefinitionSettings.Load().gameDefinitionDirectoryPath;
-				return Directory.Exists(path) && new DirectoryInfo(path).GetDirectories().Length > 0;
+				return PathUtility.IsNonEmptyDirectory(path);
 			}
 		}
 
@@ -96,14 +96,15 @@ namespace Mediabox.Samples.Editor {
 			if (!HasGameDefinitions || MakeBackupOfGameDefinitions()) {
 				var sampleDefinitionPath = AssetDatabase.GUIDToAssetPath(sampleGameDefinitionsDirectoryGuid);
 				var path = GameDefinitionSettings.Load().gameDefinitionDirectoryPath;
+				PathUtility.DeleteDirectoryIfExists(path);
 				Directory.Move(sampleDefinitionPath, path);
 				CleanUpMetaFiles(path);
 				File.Delete(Path.ChangeExtension(sampleDefinitionPath, "meta"));
 				GameDefinitionHub.OpenWindow();
 			}
 
-			if (EditorUtility.DisplayDialog("Change Build Scenes", $"In order for the Simulation Mode to work for these samples, we need to add a new Start-Scene to your Build Settings. Can we proceed?", "OK", "Cancel")) {
-				GUID.TryParse(startSceneGuid, out var parsedStartSceneGUID);
+			GUID.TryParse(startSceneGuid, out var parsedStartSceneGUID);
+			if (EditorBuildSettings.scenes.All(scene => scene.guid != parsedStartSceneGUID) && EditorUtility.DisplayDialog("Change Build Scenes", $"In order for the Simulation Mode to work for these samples, we need to add a new Start-Scene to your Build Settings. Can we proceed?", "OK", "Cancel")) {
 				EditorBuildSettings.scenes = new[] {new EditorBuildSettingsScene(parsedStartSceneGUID, true)}.Concat(EditorBuildSettings.scenes).ToArray();
 			}
 

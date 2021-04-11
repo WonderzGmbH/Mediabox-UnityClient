@@ -16,6 +16,10 @@ namespace Mediabox.GameManager.Editor.Utility {
 			return true;
 		}
 
+		public static bool IsNonEmptyDirectory(string path) {
+			return Directory.Exists(path) && new DirectoryInfo(path).GetDirectories().Length > 0;
+		}
+
 		public static void DeleteDirectoryIfExists(string path) {
 			if (Directory.Exists(path))
 				Directory.Delete(path, true);
