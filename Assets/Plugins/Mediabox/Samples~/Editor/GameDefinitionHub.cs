@@ -1,4 +1,4 @@
-﻿using Mediabox.GameManager.Editor;
+﻿using Mediabox.GameManager.Simulation.Editor;
 using UnityEditor;
 
 namespace Mediabox.Samples.Editor {

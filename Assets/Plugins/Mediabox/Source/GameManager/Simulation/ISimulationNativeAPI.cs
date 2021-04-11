@@ -5,5 +5,6 @@ namespace Mediabox.GameManager.Simulation {
 		void AutoSimulate(string bundleName);
 		void StopSimulation();
 		void OnGUI(string bundleName);
+		string[] AllAvailableGameDefinitions { get; }
 	}
 }

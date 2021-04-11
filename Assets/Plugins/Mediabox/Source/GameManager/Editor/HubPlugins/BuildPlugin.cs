@@ -61,7 +61,7 @@ namespace Mediabox.GameManager.Editor.HubPlugins {
 			}
 		}
 
-		void BuildGameDefinitions(string[] directories, bool clearDirectory, BuildTarget[] buildTargets) {
+		public void BuildGameDefinitions(string[] directories, bool clearDirectory, BuildTarget[] buildTargets) {
 			var build = CreateGameDefinitionBuild(directories, clearDirectory, buildTargets);
 			build.Execute();
 		}

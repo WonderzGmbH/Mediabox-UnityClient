@@ -31,10 +31,18 @@ namespace Mediabox.GameKit.GameManager {
 
         readonly PauseHandler pauseHandler = new PauseHandler();
 
+        [HideInInspector]
+        public bool streamingAssetsGameDefinitionMode =
+#if STREAMING_ASSETS_GAME_DEFINITIONS
+            true;
+#else
+            false;
+#endif
+        
         #region UnityEventFunctions
         void Awake() {
             EnsureSingletonInstance();
-            if (!Application.isEditor) {
+            if (!Application.isEditor && !streamingAssetsGameDefinitionMode) {
                 SetNativeApi(CreateNativeAPI());
             }
         }
@@ -124,9 +132,13 @@ namespace Mediabox.GameKit.GameManager {
         // }
 
         public async void WriteSaveData(string path) {
-            var saveTask = FindGame()?.Save(path);
-            if (saveTask != null)
-                await saveTask;
+            try {
+                var saveTask = FindGame()?.Save(path);
+                if (saveTask != null)
+                    await saveTask;
+            } catch (Exception e) {
+                Debug.LogException(e);
+            }
             this.nativeApi.OnSaveDataWritten();
         }
         

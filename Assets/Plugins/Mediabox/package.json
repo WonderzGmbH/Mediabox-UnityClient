@@ -1,10 +1,10 @@
 {
   "name": "com.wonderz.wunderbox",
-  "version": "2021.221.2",
+  "version": "2021.412.1",
   "displayName": "Wunderbox Unity SDK",
-  "description": "This is the Unity SDK used for Wonderz' Wunderbox Content Distribution Solution",
+  "description": "This is the Unity SDK used for WonderZ GmbH's Wunderbox Content Distribution Solution",
   "unity": "2019.4",
-  "unityRelease": "1f1",
+  "unityRelease": "24f1",
   "dependencies": {
   },
   "keywords": [

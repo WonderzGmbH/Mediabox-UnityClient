@@ -2,7 +2,7 @@ using System.Runtime.InteropServices;
 
 namespace Mediabox.API {
     public class MediaboxIOSNativeAPI : INativeAPI {
-        #if UNITY_IOS
+#if UNITY_IOS
         [DllImport("__Internal")] static extern void InitializeApi(string apiGameObjectName);
         [DllImport("__Internal")] static extern void OnLoadingSucceeded();
         [DllImport("__Internal")] static extern void OnLoadingFailed();
