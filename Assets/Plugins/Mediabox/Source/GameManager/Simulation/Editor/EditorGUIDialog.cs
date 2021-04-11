@@ -33,8 +33,6 @@ namespace Mediabox.GameManager.Simulation.Editor {
 			}
 		}
 
-		public void Update() {
-			throw new NotImplementedException();
-		}
+		public void Update() {}
 	}
 }
