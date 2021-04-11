@@ -1,10 +1,10 @@
 ﻿using System;
 using Mediabox.GameKit.GameManager;
-using UnityEditor;
 
 namespace Mediabox.GameManager.Simulation {
 	public class SimulationModeRunner {
 		readonly IPrefs prefs;
+		readonly Func<bool> isActive;
 		readonly Func<ISimulationNativeAPI> createEditorNativeAPI;
 
 		const string autoSimulatePrefKey = "Mediabox.GameManager.Editor.AutoSimulate";
@@ -17,7 +17,7 @@ namespace Mediabox.GameManager.Simulation {
 				if (value == this.bundleName) 
 					return;
 				this.bundleName = value;
-				EditorPrefs.SetString(contentBundleFolderPrefKey, value);
+				this.prefs.SetString(contentBundleFolderPrefKey, value);
 			} 
 		}
 
@@ -30,13 +30,14 @@ namespace Mediabox.GameManager.Simulation {
 				if (value == this._autoSimulate)
 					return;
 				this._autoSimulate = value;
-				EditorPrefs.SetBool(autoSimulatePrefKey, value);
+				this.prefs.SetBool(autoSimulatePrefKey, value);
 			}
 		}
 
 		public bool IsInSimulationMode => this.SimulationModeNativeApi != null;
-		public SimulationModeRunner(IPrefs prefs, Func<ISimulationNativeAPI> createEditorNativeAPI) {
+		public SimulationModeRunner(IPrefs prefs, Func<bool> isActive, Func<ISimulationNativeAPI> createEditorNativeAPI) {
 			this.prefs = prefs;
+			this.isActive = isActive;
 			this.createEditorNativeAPI = createEditorNativeAPI;
 			this._autoSimulate = prefs.GetBool(autoSimulatePrefKey, true);
 			this.bundleName = prefs.GetString(contentBundleFolderPrefKey, null);
@@ -54,7 +55,7 @@ namespace Mediabox.GameManager.Simulation {
 		public void Update() {
 			if (!this.AutoSimulate)
 				return;
-			if (!EditorApplication.isPlaying || this.isQuitting)
+			if (!this.isActive() || this.isQuitting)
 				return;
 			if (!this.IsInSimulationMode) {
 				StartSimulationMode();

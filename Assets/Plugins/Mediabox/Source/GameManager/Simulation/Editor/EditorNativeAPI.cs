@@ -2,8 +2,8 @@
 using System.IO;
 using Mediabox.API;
 using Mediabox.GameKit.GameDefinition;
-using UnityEditor;
 using UnityEngine;
+using UnityEditor;
 
 namespace Mediabox.GameManager.Simulation.Editor {
 	public class EditorNativeAPI : ISimulationNativeAPI {

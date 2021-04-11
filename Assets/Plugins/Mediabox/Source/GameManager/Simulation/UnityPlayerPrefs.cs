@@ -6,8 +6,16 @@ namespace Mediabox.GameManager.Simulation {
 			return PlayerPrefs.GetInt(key, defaultValue ? 1 : 0) != 0;
 		}
 
+		public void SetBool(string key, bool value) {
+			PlayerPrefs.SetInt(key, value ? 1 : 0);
+		}
+
 		public string GetString(string key, string defaultValue) {
 			return PlayerPrefs.GetString(key, defaultValue);
+		}
+
+		public void SetString(string key, string value) {
+			PlayerPrefs.SetString(key, value);
 		}
 	}
 }

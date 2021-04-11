@@ -22,11 +22,11 @@ namespace Mediabox.GameManager.Simulation.Editor {
 
 		public static bool IsInSimulationMode => simulationRunner.IsInSimulationMode;
 		static SimulationMode() {
-			simulationRunner = new SimulationModeRunner(new UnityEditorPrefs(), CreateNativeAPI);
+			simulationRunner = new SimulationModeRunner(new UnityEditorPrefs(), () => EditorApplication.isPlaying, CreateNativeAPI);
 			EditorApplication.update += Update;
 			EditorApplication.playModeStateChanged += OnplayModeStateChanged;
 		}
-
+		
 		static void OnplayModeStateChanged(PlayModeStateChange change) {
 			switch (change) {
 				case PlayModeStateChange.ExitingPlayMode:
