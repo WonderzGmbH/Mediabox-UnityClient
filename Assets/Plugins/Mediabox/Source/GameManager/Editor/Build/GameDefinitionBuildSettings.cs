@@ -14,6 +14,12 @@ namespace Mediabox.GameManager.Editor.Build {
 		public string assetBundleBuildPath = "AssetBundles";
 		public string tempSimulationBuildPath = "SimulationBuildCache";
 		public BuildAssetBundleOptions buildAssetBundleOptions;
+
+		public string GetAssetBundleBuildPath(BuildTarget buildTarget)
+			=> Path.Combine(this.assetBundleBuildPath, buildTarget.ToString());
+
+		public string GetAssetBundleManifestPath(BuildTarget buildTarget)
+			=> Path.ChangeExtension(Path.Combine(GetAssetBundleBuildPath(buildTarget), buildTarget.ToString()), "manifest");
 		
 		const string resourcePath = "/Resources/";
 		static string SettingsResourcePath => Path.ChangeExtension(SettingsPath, null).Substring(SettingsPath.IndexOf(resourcePath, StringComparison.Ordinal) + resourcePath.Length);

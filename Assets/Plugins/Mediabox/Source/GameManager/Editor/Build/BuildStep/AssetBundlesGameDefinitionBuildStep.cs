@@ -23,10 +23,10 @@ namespace Mediabox.GameManager.Editor.Build.BuildStep {
 			gameDefinitions = FilterSupportedGameDefinitions(gameDefinitions);
 			if (gameDefinitions.Length == 0)
 				return;
-			
-			var bundleBuildDirectory = Path.Combine(this.buildSettings.assetBundleBuildPath, buildTarget.ToString());
+
+			var bundleBuildDirectory = this.buildSettings.GetAssetBundleBuildPath(buildTarget);
 			if (!PathUtility.EnsureDirectory(bundleBuildDirectory))
-				RepairBundleConflicts(gameDefinitions, this.buildSettings.assetBundleBuildPath);
+				RepairBundleConflicts(gameDefinitions, this.buildSettings.GetAssetBundleBuildPath(buildTarget));
 			BuildPipeline.BuildAssetBundles(bundleBuildDirectory, CreateAssetBundleBuilds(gameDefinitions), this.buildSettings.buildAssetBundleOptions, buildTarget);
 			foreach (var gameDefinition in gameDefinitions) {
 				var bundleName = (gameDefinition.gameDefinition as IGameBundleDefinition).BundleName;
