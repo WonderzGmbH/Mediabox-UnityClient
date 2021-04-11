@@ -1,12 +1,9 @@
 {
-    "name": "Mediabox.GameManager.Editor",
+    "name": "Mediabox.GameManager.Simulation",
     "references": [
-        "GUID:d31cde07089014e468bd0e8f26166eec",
-        "GUID:c27c12394e43442fae629d1bde764e6b"
+        "GUID:d31cde07089014e468bd0e8f26166eec"
     ],
-    "includePlatforms": [
-        "Editor"
-    ],
+    "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,

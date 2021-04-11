@@ -6,7 +6,7 @@ using Mediabox.GameManager.Editor.Build;
 using Mediabox.GameManager.Editor.Utility;
 using UnityEditor;
 
-namespace Mediabox.GameManager.Editor {
+namespace Mediabox.GameManager.Simulation.Editor {
 	public class EditorBuildNativeAPI : EditorNativeAPI, IDisposable {
 		readonly GameDefinitionBuildSettings buildSettings;
 		protected override string ContentBundleFolder => Path.Combine(this.buildSettings.tempSimulationBuildPath, this.BundleName);

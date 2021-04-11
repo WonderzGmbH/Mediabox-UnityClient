@@ -50,7 +50,6 @@ namespace Mediabox.GameManager.Editor {
 				new EditorPlugin<TGameDefinition>(settings, management, this),
 				new CustomPlatformSettingsPlugin(management, this),
 				new BundlesPlugin(),
-				new SimulationPlugin(management, settings),
 				new BuildPlugin(settings, management, this)
 			};
 		}

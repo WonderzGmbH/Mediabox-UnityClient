@@ -1,9 +1,10 @@
 using Mediabox.GameKit.Bundles;
+using Mediabox.GameManager.Editor.HubPlugins;
 using Mediabox.GameManager.Editor.Utility;
 using UnityEditor;
 using UnityEngine;
 
-namespace Mediabox.GameManager.Editor.HubPlugins {
+namespace Mediabox.GameManager.Simulation.Editor.HubPlugins {
 	public class SimulationPlugin : IHubPlugin {
 		readonly ManagementPlugin managementPlugin;
 		readonly SettingsPlugin settingsPlugin;

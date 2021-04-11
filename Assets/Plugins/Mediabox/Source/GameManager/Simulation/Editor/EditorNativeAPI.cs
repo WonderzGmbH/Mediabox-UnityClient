@@ -5,8 +5,8 @@ using Mediabox.GameKit.GameDefinition;
 using UnityEditor;
 using UnityEngine;
 
-namespace Mediabox.GameManager.Editor {
-	public class EditorNativeAPI : INativeAPI {
+namespace Mediabox.GameManager.Simulation.Editor {
+	public class EditorNativeAPI : ISimulationNativeAPI {
 		protected string BundleName { get; private set; }
 		protected readonly GameDefinitionSettings settings;
 		string apiGameObjectName;

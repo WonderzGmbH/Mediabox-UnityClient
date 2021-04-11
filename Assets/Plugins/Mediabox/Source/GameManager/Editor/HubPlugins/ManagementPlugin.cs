@@ -31,6 +31,7 @@ namespace Mediabox.GameManager.Editor.HubPlugins {
 		
 		public string Title => $"Definition Management ({this.directories?.Length ?? 0} Games)";
 		public bool ToggleableWithTitleLabel => true;
+		public const string contentBundleFolderPrefKey = "Mediabox.GameManager.Editor.ContentBundleFolder";
 
 		public void Update() {
 			this.directories = LoadGameDefinitions();
@@ -56,7 +57,7 @@ namespace Mediabox.GameManager.Editor.HubPlugins {
 		}
 
 		void LoadSelectedIndex() {
-			var index = Array.IndexOf(this.directories, Path.Combine(this.settingsPlugin.settings.gameDefinitionDirectoryPath, SimulationMode.BundleName));
+			var index = Array.IndexOf(this.directories, Path.Combine(this.settingsPlugin.settings.gameDefinitionDirectoryPath, EditorPrefs.GetString(contentBundleFolderPrefKey, string.Empty)));
 			this.selectedIndex = index > 0 ? index : 0;
 		}
 		
