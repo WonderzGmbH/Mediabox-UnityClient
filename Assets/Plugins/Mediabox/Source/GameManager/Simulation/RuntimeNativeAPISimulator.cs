@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 namespace Mediabox.GameManager.Simulation {
-	public class PlayModeNativeAPI : MonoBehaviour {
+	public class RuntimeNativeAPISimulator : MonoBehaviour {
 		
 		[HideInInspector]
 		public bool streamingAssetsGameDefinitionMode =
@@ -115,7 +115,7 @@ namespace Mediabox.GameManager.Simulation {
 		}
 
 		ISimulationNativeAPI CreateSimulationNativeAPI() {
-			this.nativeApi = new GameNativeAPI(bundleName, new GUIDialog());
+			this.nativeApi = new StreamingAssetsNativeAPI(bundleName, new GUIDialog());
 			return this.nativeApi;
 		}
 	}

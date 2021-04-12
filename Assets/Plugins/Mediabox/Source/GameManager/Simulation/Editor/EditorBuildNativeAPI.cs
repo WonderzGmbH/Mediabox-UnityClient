@@ -9,7 +9,8 @@ using UnityEditor;
 namespace Mediabox.GameManager.Simulation.Editor {
 	public class EditorBuildNativeAPI : EditorNativeAPI, IDisposable {
 		readonly GameDefinitionBuildSettings buildSettings;
-		protected override string ContentBundleFolder => Path.Combine(this.buildSettings.tempSimulationBuildPath, this.BundleName);
+
+		protected string GameDefinitionDirectoryPath => this.buildSettings.tempSimulationBuildPath;
 
 		public EditorBuildNativeAPI(string bundleName, GameDefinitionSettings settings, GameDefinitionBuildSettings buildSettings) : base (bundleName, settings) {
 			this.buildSettings = buildSettings;

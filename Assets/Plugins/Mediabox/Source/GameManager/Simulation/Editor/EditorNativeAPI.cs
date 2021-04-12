@@ -1,12 +1,16 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using Mediabox.GameKit.GameDefinition;
 using UnityEditor;
 
 namespace Mediabox.GameManager.Simulation.Editor {
-	public class EditorNativeAPI : GameNativeAPI {
+	public class EditorNativeAPI : SimulationNativeAPI {
 		readonly GameDefinitionSettings settings;
 		protected override string GameDefinitionDirectoryPath => this.settings.gameDefinitionDirectoryPath;
+		protected override string[] GetAllAvailableGameDefinitions() {
+			return new DirectoryInfo(GameDefinitionDirectoryPath).GetDirectories().Select(dir => dir.Name).ToArray();
+		}
 
 		public EditorNativeAPI(string bundleName, GameDefinitionSettings settings) : base(bundleName, new EditorGUIDialog()) {
 			this.settings = settings;
