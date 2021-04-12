@@ -6,7 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 - TBD
-## [2021.412.1] - 2021-4-12
+
+
+
+## [2021.412.2] - 2021-4-12
 ### Added
 - `Standalone-Build` for faster iterations: Use `Game Definition Hub`'s new `Run`-Plugin to Execute your `Game Definitions` directly on your desired Target Platform. Uses Unity's `Streaming Assets` Technology.
 - `PlayModeNativeAPI` for `Standalone-Builds`: It's an interactive GUI built into your application when doing a Standalone Build to allow you to switch between `Game Definitions` the way you're used from the `Simulation Mode`.
