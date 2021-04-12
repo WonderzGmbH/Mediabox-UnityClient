@@ -7,10 +7,12 @@ using Mediabox.GameManager.Editor.Utility;
 using UnityEditor;
 
 namespace Mediabox.GameManager.Simulation.Editor {
+	/// <summary>
+	/// Use this Native API, if you want to simulate the game using built (and archived) GameDefinitions
+	/// </summary>
 	public class EditorBuildNativeAPI : EditorNativeAPI, IDisposable {
 		readonly GameDefinitionBuildSettings buildSettings;
-
-		protected string GameDefinitionDirectoryPath => this.buildSettings.tempSimulationBuildPath;
+		protected override string GameDefinitionDirectoryPath => this.buildSettings.tempSimulationBuildPath;
 
 		public EditorBuildNativeAPI(string bundleName, GameDefinitionSettings settings, GameDefinitionBuildSettings buildSettings) : base (bundleName, settings) {
 			this.buildSettings = buildSettings;
@@ -30,6 +32,7 @@ namespace Mediabox.GameManager.Simulation.Editor {
 			ZipFile.ExtractToDirectory(bundlePath, this.ContentBundleFolder);
 		}
 
+#region IDisposable
 		void ReleaseUnmanagedResources() {
 			PathUtility.DeleteDirectoryIfExists(this.buildSettings.tempSimulationBuildPath);
 		}
@@ -42,6 +45,7 @@ namespace Mediabox.GameManager.Simulation.Editor {
 		~EditorBuildNativeAPI() {
 			ReleaseUnmanagedResources();
 		}
+#endregion IDisposable
 	}
 }
 

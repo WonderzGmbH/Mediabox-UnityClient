@@ -5,15 +5,19 @@ using Mediabox.GameKit.GameDefinition;
 using UnityEditor;
 
 namespace Mediabox.GameManager.Simulation.Editor {
+	/// <summary>
+	/// Use this Native API, if you want to simulate the game using raw GameDefinition-Configurations
+	/// </summary>
 	public class EditorNativeAPI : SimulationNativeAPI {
 		readonly GameDefinitionSettings settings;
 		protected override string GameDefinitionDirectoryPath => this.settings.gameDefinitionDirectoryPath;
-		protected override string[] GetAllAvailableGameDefinitions() {
-			return new DirectoryInfo(GameDefinitionDirectoryPath).GetDirectories().Select(dir => dir.Name).ToArray();
-		}
 
 		public EditorNativeAPI(string bundleName, GameDefinitionSettings settings) : base(bundleName, new EditorGUIDialog()) {
 			this.settings = settings;
+		}
+		
+		protected override string[] GetAllAvailableGameDefinitions() {
+			return new DirectoryInfo(GameDefinitionDirectoryPath).GetDirectories().Select(dir => dir.Name).ToArray();
 		}
 
 		protected override void HandleScreenshotUserChoice(string path, ScreenshotUserChoice choice) {

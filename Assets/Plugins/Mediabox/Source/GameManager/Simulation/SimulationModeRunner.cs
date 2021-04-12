@@ -69,8 +69,6 @@ namespace Mediabox.GameManager.Simulation {
 			UnityEngine.Object.FindObjectOfType<GameManagerBase>().SetNativeApi(this.SimulationModeNativeApi);
 		}
 
-		
-
 		public void StopSimulationMode() {
 			if (this.SimulationModeNativeApi == null)
 				return;
