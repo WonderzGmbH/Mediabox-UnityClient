@@ -12,7 +12,6 @@ namespace Mediabox.GameManager.Simulation {
 	/// even without a fully integrated build.
 	/// </summary>
 	public abstract class SimulationNativeAPI : ISimulationNativeAPI {
-		
 		enum State {
 			WaitingForInitialize,
 			Startable,
@@ -21,18 +20,21 @@ namespace Mediabox.GameManager.Simulation {
 			Stopping,
 			Stopped
 		}
-		
+
 		protected string BundleName { get; private set; }
 		protected readonly IDialog dialog;
 		protected string ContentBundleFolder => Path.Combine(this.GameDefinitionDirectoryPath, this.BundleName);
 		protected abstract string GameDefinitionDirectoryPath { get; }
 		protected abstract string[] GetAllAvailableGameDefinitions();
-		protected virtual void PrepareContentBundle() { }
+
+		protected virtual void PrepareContentBundle() {
+		}
+
 		protected abstract void StopApplication();
 		protected abstract void HandleLoadingFailed();
 		protected abstract void HandleScreenshotUserChoice(string path, ScreenshotUserChoice choice);
 		protected abstract void ValueTextField(string label, ref string value);
-		
+
 		string apiGameObjectName;
 		string locale = "DE";
 		string saveDataFolder = "./save";
@@ -49,8 +51,10 @@ namespace Mediabox.GameManager.Simulation {
 			this.dialog = dialog;
 		}
 
-#region ISimulationNativeAPI
+		#region ISimulationNativeAPI
+
 		string[] ISimulationNativeAPI.AllAvailableGameDefinitions => this._cachedAllAvailableGameDefinitions ?? (this._cachedAllAvailableGameDefinitions = GetAllAvailableGameDefinitions());
+
 		void ISimulationNativeAPI.StopSimulation() {
 			if (this.state != State.Stoppable)
 				return;
@@ -74,15 +78,16 @@ namespace Mediabox.GameManager.Simulation {
 			GUILayout.Label($"State: {this.state}");
 			DrawContextButtons(bundleName);
 		}
-#endregion ISimulationNativeAPI
 
-#region INativeAPI
+		#endregion ISimulationNativeAPI
+
+		#region INativeAPI
 
 		void INativeAPI.InitializeApi(string apiGameObjectName) {
 			this.apiGameObjectName = apiGameObjectName;
 			this.state = State.Startable;
 		}
-		
+
 		void INativeAPI.OnCreateScreenshotSucceeded(string path) {
 			this.dialog.Show("Screenshot creation succeeded", $"Screenshot can be found at '{path}'.", HandleUserChoice, Enum.GetNames(typeof(ScreenshotUserChoice)));
 
@@ -103,7 +108,7 @@ namespace Mediabox.GameManager.Simulation {
 		void INativeAPI.OnGameExitRequested() {
 			StopApplication();
 		}
-		
+
 		void INativeAPI.OnLoadingFailed() {
 			this.state = State.Stopped;
 			this.waitingForLoadingCallback = false;
@@ -119,7 +124,8 @@ namespace Mediabox.GameManager.Simulation {
 			this.waitingForSaveDataCallback = false;
 			SwitchStateIfDone();
 		}
-#endregion INativeAPI
+
+		#endregion INativeAPI
 
 		void SendEvent(string name, string arg) {
 			Debug.Log($"[EditorNativeAPI] Sending Event '{name} with argument '{arg}'");
@@ -138,9 +144,16 @@ namespace Mediabox.GameManager.Simulation {
 
 			this.state = State.Starting;
 			this.waitingForLoadingCallback = true;
+			EnsureSaveDataDirectoryExists();
 			SendEvent(nameof(IMediaboxCallbacks.SetContentLanguage), this.locale);
 			SendEvent(nameof(IMediaboxCallbacks.SetSaveDataFolder), this.SaveDataDirectoryPath);
 			SendEvent(nameof(IMediaboxCallbacks.SetContentBundleFolder), this.ContentBundleFolder);
+		}
+
+		void EnsureSaveDataDirectoryExists() {
+			if (!Directory.Exists(this.SaveDataDirectoryPath)) {
+				Directory.CreateDirectory(this.SaveDataDirectoryPath);
+			}
 		}
 
 
@@ -148,7 +161,7 @@ namespace Mediabox.GameManager.Simulation {
 			this.state = State.Stopping;
 			this.waitingForSaveDataCallback = true;
 			this.waitingForUnloadCallback = true;
-			SendEvent(nameof(IMediaboxCallbacks.WriteSaveData), this.saveDataFolder);
+			SendEvent(nameof(IMediaboxCallbacks.WriteSaveData), this.SaveDataDirectoryPath);
 			SendEvent(nameof(IMediaboxCallbacks.UnloadGameContent), null);
 		}
 
