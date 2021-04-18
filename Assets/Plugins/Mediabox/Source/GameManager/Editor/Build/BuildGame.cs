@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
+using Mediabox.GameKit.GameDefinition;
 using Mediabox.GameManager.Editor.HubPlugins;
 using UnityEditor;
 using UnityEngine;
@@ -29,15 +29,14 @@ namespace Mediabox.GameManager.Editor.Build {
 			buildPlayerOptions.assetBundleManifestPath = manifestPath;
 			if (autoRun)
 				buildPlayerOptions.options |= BuildOptions.AutoRunPlayer;
-			var oldDefines = PlayerSettings.GetScriptingDefineSymbolsForGroup(buildPlayerOptions.targetGroup);
-			var defines = new HashSet<string>(oldDefines.Split(','));
-			if (streamingAssetsGameDefinitionMode)
-				defines.Add("STREAMING_ASSETS_GAME_DEFINITIONS");
-			else
-				defines.Remove("STREAMING_ASSETS_GAME_DEFINITIONS");
-			PlayerSettings.SetScriptingDefineSymbolsForGroup(buildPlayerOptions.targetGroup, string.Join(", ", defines));
+			var oldIntegrationMode = settingsPlugin.settings.ServerMode;
+			if(streamingAssetsGameDefinitionMode) {
+				Debug.Log($"Configuring {nameof(ServerMode)}.{nameof(ServerMode.Simulation)}");
+				settingsPlugin.settings.ServerMode = ServerMode.Simulation;
+				EditorUtility.SetDirty(settingsPlugin.settings);
+			}
 			BuildPipeline.BuildPlayer(buildPlayerOptions);
-			PlayerSettings.SetScriptingDefineSymbolsForGroup(buildPlayerOptions.targetGroup, oldDefines);
+			settingsPlugin.settings.ServerMode = oldIntegrationMode;
 		}
 		
 		static bool ValidateAssetBundleManifestFileExists(string manifestPath) {

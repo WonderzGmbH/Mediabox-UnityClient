@@ -11,7 +11,7 @@ namespace Mediabox.GameManager.Simulation {
 	/// Handles all communication with the Unity SDK to ensure that your Games run,
 	/// even without a fully integrated build.
 	/// </summary>
-	public abstract class SimulationNativeAPI : ISimulationNativeAPI {
+	public abstract class SimulationMediaboxServer : ISimulationMediaboxServer {
 		enum State {
 			WaitingForInitialize,
 			Startable,
@@ -46,22 +46,22 @@ namespace Mediabox.GameManager.Simulation {
 
 		string SaveDataDirectoryPath => Path.Combine(Application.persistentDataPath, this.saveDataFolder);
 
-		protected SimulationNativeAPI(string bundleName, IDialog dialog) {
+		protected SimulationMediaboxServer(string bundleName, IDialog dialog) {
 			this.BundleName = bundleName;
 			this.dialog = dialog;
 		}
 
-		#region ISimulationNativeAPI
+		#region ISimulationMediaboxServer
 
-		string[] ISimulationNativeAPI.AllAvailableGameDefinitions => this._cachedAllAvailableGameDefinitions ?? (this._cachedAllAvailableGameDefinitions = GetAllAvailableGameDefinitions());
+		string[] ISimulationMediaboxServer.AllAvailableGameDefinitions => this._cachedAllAvailableGameDefinitions ?? (this._cachedAllAvailableGameDefinitions = GetAllAvailableGameDefinitions());
 
-		void ISimulationNativeAPI.StopSimulation() {
+		void ISimulationMediaboxServer.StopSimulation() {
 			if (this.state != State.Stoppable)
 				return;
 			Stop();
 		}
 
-		void ISimulationNativeAPI.AutoSimulate(string bundleName) {
+		void ISimulationMediaboxServer.AutoSimulate(string bundleName) {
 			if (this.state == State.Startable) {
 				Start(bundleName);
 			} else if (this.state == State.Stoppable && this.BundleName != bundleName) {
@@ -69,7 +69,7 @@ namespace Mediabox.GameManager.Simulation {
 			}
 		}
 
-		void ISimulationNativeAPI.OnGUI(string bundleName) {
+		void ISimulationMediaboxServer.OnGUI(string bundleName) {
 			this.dialog.Update();
 			GUILayout.Label("----------");
 			GUILayout.Label("Simulating...");
@@ -79,16 +79,16 @@ namespace Mediabox.GameManager.Simulation {
 			DrawContextButtons(bundleName);
 		}
 
-		#endregion ISimulationNativeAPI
+		#endregion ISimulationMediaboxServer
 
 		#region INativeAPI
 
-		void INativeAPI.InitializeApi(string apiGameObjectName) {
+		void IMediaboxServer.InitializeApi(string apiGameObjectName) {
 			this.apiGameObjectName = apiGameObjectName;
 			this.state = State.Startable;
 		}
 
-		void INativeAPI.OnCreateScreenshotSucceeded(string path) {
+		void IMediaboxServer.OnCreateScreenshotSucceeded(string path) {
 			this.dialog.Show("Screenshot creation succeeded", $"Screenshot can be found at '{path}'.", HandleUserChoice, Enum.GetNames(typeof(ScreenshotUserChoice)));
 
 			void HandleUserChoice(string choice) {
@@ -96,31 +96,31 @@ namespace Mediabox.GameManager.Simulation {
 			}
 		}
 
-		void INativeAPI.OnLoadingSucceeded() {
+		void IMediaboxServer.OnLoadingSucceeded() {
 			this.state = State.Stoppable;
 			this.waitingForLoadingCallback = false;
 		}
 
-		void INativeAPI.OnCreateScreenshotFailed() {
+		void IMediaboxServer.OnCreateScreenshotFailed() {
 			this.dialog.Show("Screenshot creation failed", "An unknown error occured", null, "OK");
 		}
 
-		void INativeAPI.OnGameExitRequested() {
+		void IMediaboxServer.OnGameExitRequested() {
 			StopApplication();
 		}
 
-		void INativeAPI.OnLoadingFailed() {
+		void IMediaboxServer.OnLoadingFailed() {
 			this.state = State.Stopped;
 			this.waitingForLoadingCallback = false;
 			HandleLoadingFailed();
 		}
 
-		void INativeAPI.OnUnloadingSucceeded() {
+		void IMediaboxServer.OnUnloadingSucceeded() {
 			this.waitingForUnloadCallback = false;
 			SwitchStateIfDone();
 		}
 
-		void INativeAPI.OnSaveDataWritten() {
+		void IMediaboxServer.OnSaveDataWritten() {
 			this.waitingForSaveDataCallback = false;
 			SwitchStateIfDone();
 		}
@@ -145,9 +145,9 @@ namespace Mediabox.GameManager.Simulation {
 			this.state = State.Starting;
 			this.waitingForLoadingCallback = true;
 			EnsureSaveDataDirectoryExists();
-			SendEvent(nameof(IMediaboxCallbacks.SetContentLanguage), this.locale);
-			SendEvent(nameof(IMediaboxCallbacks.SetSaveDataFolder), this.SaveDataDirectoryPath);
-			SendEvent(nameof(IMediaboxCallbacks.SetContentBundleFolder), this.ContentBundleFolder);
+			SendEvent(nameof(IMediaboxClient.SetContentLanguage), this.locale);
+			SendEvent(nameof(IMediaboxClient.SetSaveDataFolder), this.SaveDataDirectoryPath);
+			SendEvent(nameof(IMediaboxClient.SetContentBundleFolder), this.ContentBundleFolder);
 		}
 
 		void EnsureSaveDataDirectoryExists() {
@@ -161,20 +161,20 @@ namespace Mediabox.GameManager.Simulation {
 			this.state = State.Stopping;
 			this.waitingForSaveDataCallback = true;
 			this.waitingForUnloadCallback = true;
-			SendEvent(nameof(IMediaboxCallbacks.WriteSaveData), this.SaveDataDirectoryPath);
-			SendEvent(nameof(IMediaboxCallbacks.UnloadGameContent), null);
+			SendEvent(nameof(IMediaboxClient.WriteSaveData), this.SaveDataDirectoryPath);
+			SendEvent(nameof(IMediaboxClient.UnloadGameContent), null);
 		}
 
 		void CreateScreenshot() {
-			SendEvent(nameof(IMediaboxCallbacks.CreateScreenshot), null);
+			SendEvent(nameof(IMediaboxClient.CreateScreenshot), null);
 		}
 
 		void PauseApplication() {
-			SendEvent(nameof(IMediaboxCallbacks.PauseApplication), null);
+			SendEvent(nameof(IMediaboxClient.PauseApplication), null);
 		}
 
 		void UnpauseApplication() {
-			SendEvent(nameof(IMediaboxCallbacks.UnpauseApplication), null);
+			SendEvent(nameof(IMediaboxClient.UnpauseApplication), null);
 		}
 
 		void SwitchStateIfDone() {
@@ -196,13 +196,13 @@ namespace Mediabox.GameManager.Simulation {
 					break;
 				case State.Starting:
 					if (this.waitingForLoadingCallback)
-						GUILayout.Label($"Waiting for {nameof(INativeAPI.OnLoadingSucceeded)}-Callback or {nameof(INativeAPI.OnLoadingFailed)}-Callback.");
+						GUILayout.Label($"Waiting for {nameof(IMediaboxServer.OnLoadingSucceeded)}-Callback or {nameof(IMediaboxServer.OnLoadingFailed)}-Callback.");
 					break;
 				case State.Stopping:
 					if (this.waitingForUnloadCallback)
-						GUILayout.Label($"Waiting for {nameof(INativeAPI.OnUnloadingSucceeded)}-Callback.");
+						GUILayout.Label($"Waiting for {nameof(IMediaboxServer.OnUnloadingSucceeded)}-Callback.");
 					if (this.waitingForSaveDataCallback)
-						GUILayout.Label($"Waiting for {nameof(INativeAPI.OnSaveDataWritten)}-Callback.");
+						GUILayout.Label($"Waiting for {nameof(IMediaboxServer.OnSaveDataWritten)}-Callback.");
 					break;
 			}
 		}

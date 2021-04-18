@@ -47,7 +47,7 @@ namespace Mediabox.GameManager.Simulation.Editor.HubPlugins {
 		public bool ToggleableWithTitleLabel => true;
 
 		void DrawSimulationMode() {
-			SimulationMode.SimulationModeNativeApi.OnGUI(SimulationMode.BundleName);
+			SimulationMode.SimulationModeMediaboxServer.OnGUI(SimulationMode.BundleName);
 		}
 
 		void DrawStartSimulationMode() {

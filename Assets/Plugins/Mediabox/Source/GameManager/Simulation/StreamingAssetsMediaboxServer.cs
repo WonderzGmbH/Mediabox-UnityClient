@@ -3,8 +3,8 @@ using System.Linq;
 using UnityEngine;
 
 namespace Mediabox.GameManager.Simulation {
-	public class StreamingAssetsNativeAPI : SimulationNativeAPI {
-		public StreamingAssetsNativeAPI(string bundleName, IDialog dialog) : base(bundleName, dialog) {
+	public class StreamingAssetsMediaboxServer : SimulationMediaboxServer {
+		public StreamingAssetsMediaboxServer(string bundleName, IDialog dialog) : base(bundleName, dialog) {
 		}
 
 		protected override string GameDefinitionDirectoryPath => Path.Combine(Application.streamingAssetsPath, "GameDefinitions");

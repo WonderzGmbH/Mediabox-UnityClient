@@ -8,11 +8,11 @@ namespace Mediabox.GameManager.Simulation.Editor {
 	/// <summary>
 	/// Use this Native API, if you want to simulate the game using raw GameDefinition-Configurations
 	/// </summary>
-	public class EditorNativeAPI : SimulationNativeAPI {
+	public class EditorMediaboxServer : SimulationMediaboxServer {
 		readonly GameDefinitionSettings settings;
 		protected override string GameDefinitionDirectoryPath => this.settings.gameDefinitionDirectoryPath;
 
-		public EditorNativeAPI(string bundleName, GameDefinitionSettings settings) : base(bundleName, new EditorGUIDialog()) {
+		public EditorMediaboxServer(string bundleName, GameDefinitionSettings settings) : base(bundleName, new EditorGUIDialog()) {
 			this.settings = settings;
 		}
 		

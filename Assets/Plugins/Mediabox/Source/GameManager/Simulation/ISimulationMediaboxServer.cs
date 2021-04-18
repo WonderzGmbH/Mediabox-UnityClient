@@ -1,7 +1,7 @@
 using Mediabox.API;
 
 namespace Mediabox.GameManager.Simulation {
-	public interface ISimulationNativeAPI : INativeAPI {
+	public interface ISimulationMediaboxServer : IMediaboxServer {
 		/// <summary>
 		/// AutoSimulate will automatically handle all required events to get the Game for the passed bundleName running.
 		/// </summary>

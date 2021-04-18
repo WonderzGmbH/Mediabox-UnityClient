@@ -10,11 +10,11 @@ namespace Mediabox.GameManager.Simulation.Editor {
 	/// <summary>
 	/// Use this Native API, if you want to simulate the game using built (and archived) GameDefinitions
 	/// </summary>
-	public class EditorBuildNativeAPI : EditorNativeAPI, IDisposable {
+	public class EditorBuildMediaboxServer : EditorMediaboxServer, IDisposable {
 		readonly GameDefinitionBuildSettings buildSettings;
 		protected override string GameDefinitionDirectoryPath => this.buildSettings.tempSimulationBuildPath;
 
-		public EditorBuildNativeAPI(string bundleName, GameDefinitionSettings settings, GameDefinitionBuildSettings buildSettings) : base (bundleName, settings) {
+		public EditorBuildMediaboxServer(string bundleName, GameDefinitionSettings settings, GameDefinitionBuildSettings buildSettings) : base (bundleName, settings) {
 			this.buildSettings = buildSettings;
 			PathUtility.EnsureEmptyDirectory(this.buildSettings.tempSimulationBuildPath);
 		}
@@ -42,7 +42,7 @@ namespace Mediabox.GameManager.Simulation.Editor {
 			GC.SuppressFinalize(this);
 		}
 
-		~EditorBuildNativeAPI() {
+		~EditorBuildMediaboxServer() {
 			ReleaseUnmanagedResources();
 		}
 #endregion IDisposable

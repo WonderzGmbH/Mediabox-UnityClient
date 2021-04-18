@@ -9,17 +9,17 @@ using Mediabox.GameKit.Game;
 using Mediabox.GameKit.GameDefinition;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using Object = UnityEngine.Object;
 
 namespace Mediabox.GameKit.GameManager {
     /// <summary>
-    /// This class handles all communication with the Mediabox-NativeAPI.
+    /// This class handles all communication with the <see cref="IMediaboxServer"/>
     /// You need to implement this class once in your project and place it in your starting scene.
+    /// You can import the Package Samples with Unity's Package Manager, if you want to get started quickly.
     /// </summary>
-    /// <typeparam name="TGameDefinition">The type of GameDefinition that you use in your project. GameDefinitions will be stored separately on the Mediabox-Backend and allow you to launch different types of game within one Unity Client. This feature can be configured and disabled using the "Game Definition Manager" folder under the "Mediabox"-Menu.</typeparam>
-    public abstract class GameManagerBase<TGameDefinition> : GameManagerBase, IMediaboxCallbacks, IGameManager {
+    /// <typeparam name="TGameDefinition">The type of GameDefinition that you use in your project. GameDefinitions will be stored separately on the Mediabox-Backend and allow you to launch different types of game within one Unity Client. This feature can be configured and disabled using the "Game Definition Hub" that can be found in the "Mediabox"-Menu.</typeparam>
+    public abstract class GameManagerBase<TGameDefinition> : GameManagerBase, IMediaboxClient, IGameManager {
 
-        INativeAPI nativeApi;
+        IMediaboxServer mediaboxServer;
         string language;
         string saveGamePath;
         IBundle loadedBundle;
@@ -30,19 +30,12 @@ namespace Mediabox.GameKit.GameManager {
         protected virtual string DefaultSceneName => "StartScene";
 
         readonly PauseHandler pauseHandler = new PauseHandler();
-
-        [HideInInspector]
-        public bool streamingAssetsGameDefinitionMode =
-#if STREAMING_ASSETS_GAME_DEFINITIONS
-            true;
-#else
-            false;
-#endif
         
         #region UnityEventFunctions
         void Awake() {
+            var settings = GameDefinitionSettings.Load();
             EnsureSingletonInstance();
-            if (!Application.isEditor && !streamingAssetsGameDefinitionMode) {
+            if (!Application.isEditor) {
                 SetNativeApi(CreateNativeAPI());
             }
         }
@@ -56,23 +49,23 @@ namespace Mediabox.GameKit.GameManager {
         /// <summary>
         /// This method needs to be called so the API can be initialized.
         /// </summary>
-        /// <param name="nativeApi">An implementation of NativeAPI.</param>
+        /// <param name="mediaboxServer">An implementation of NativeAPI.</param>
         /// <exception cref="NativeApiAlreadySetupException">Thrown, if SetNativeApi has already been called.</exception>
-        public override void SetNativeApi(INativeAPI nativeApi) {
-            if(this.nativeApi != null)
+        public override void SetNativeApi(IMediaboxServer mediaboxServer) {
+            if(this.mediaboxServer != null)
                 throw new NativeApiAlreadySetupException();
-            this.nativeApi = nativeApi;
-            this.nativeApi.InitializeApi(this.gameObject.name);
+            this.mediaboxServer = mediaboxServer;
+            this.mediaboxServer.InitializeApi(this.gameObject.name);
         }
         public void QuitApplication() {
-            this.nativeApi.OnGameExitRequested();
+            this.mediaboxServer.OnGameExitRequested();
         }
         public bool HasContentBundle => this.loadedBundle != null;
         public async Task<T> LoadAssetFromContentBundle<T>(string assetPath) where T:UnityEngine.Object {
             return await this.loadedBundle.LoadAssetAsync<T>(assetPath);
         }
 
-        public async Task LoadSceneFromContentBundle<T>(string assetPath, LoadSceneMode loadSceneMode = LoadSceneMode.Single) where T : Object {
+        public async Task LoadSceneFromContentBundle<T>(string assetPath, LoadSceneMode loadSceneMode = LoadSceneMode.Single) where T : UnityEngine.Object {
             await this.loadedBundle.LoadScene(assetPath, loadSceneMode);
         }
 
@@ -114,10 +107,10 @@ namespace Mediabox.GameKit.GameManager {
                 await FindGame().Load(this.saveGamePath);
                 await FindGame().SetLanguage(this.language);
                 await FindGame().StartGame(path, definition);
-                this.nativeApi.OnLoadingSucceeded();
+                this.mediaboxServer.OnLoadingSucceeded();
             } catch (Exception e) {
                 Debug.LogException(e);
-                this.nativeApi.OnLoadingFailed();
+                this.mediaboxServer.OnLoadingFailed();
             }
         }
 
@@ -139,7 +132,7 @@ namespace Mediabox.GameKit.GameManager {
             } catch (Exception e) {
                 Debug.LogException(e);
             }
-            this.nativeApi.OnSaveDataWritten();
+            this.mediaboxServer.OnSaveDataWritten();
         }
         
         public void PauseApplication() {
@@ -162,18 +155,18 @@ namespace Mediabox.GameKit.GameManager {
             const float timeout = 5f;
             while (!File.Exists(fullFilePath)) {
                 if (Time.realtimeSinceStartup > startTime + timeout) {
-                    this.nativeApi.OnCreateScreenshotFailed();
+                    this.mediaboxServer.OnCreateScreenshotFailed();
                     return;
                 }
                 await Task.Delay(100);
             }
-            this.nativeApi.OnCreateScreenshotSucceeded(fullFilePath);
+            this.mediaboxServer.OnCreateScreenshotSucceeded(fullFilePath);
         }
 
         public async void UnloadGameContent() {
             await ResetGame();
             await Resources.UnloadUnusedAssets();
-            this.nativeApi.OnUnloadingSucceeded();
+            this.mediaboxServer.OnUnloadingSucceeded();
         }
 
         async Task ResetGame() {
@@ -205,15 +198,25 @@ namespace Mediabox.GameKit.GameManager {
         /// </summary>
         /// <returns>INativeAPI instance to handle Mediabox communication.</returns>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
-        protected virtual INativeAPI CreateNativeAPI() {
+        protected virtual IMediaboxServer CreateNativeAPI() {
+            var server = GetMediaboxServerFromFactory();
+            if (server != null)
+                return server;
             switch (Application.platform) {
                 case RuntimePlatform.Android:
-                    return new MediaboxAndroidNativeAPI();
+                    return new AndroidMediaboxServer();
                 case RuntimePlatform.IPhonePlayer:
-                    return new MediaboxIOSNativeAPI();
+                    return new IosMediaboxServer();
                 default:
                     throw new ArgumentOutOfRangeException(nameof(Application.platform), Application.platform, string.Empty);
             }
+        }
+
+        IMediaboxServer GetMediaboxServerFromFactory() {
+            return GetComponents<IMediaboxServerFactory>()
+                .OrderBy(factory => factory.Priority)
+                .FirstOrDefault()?.Create();
+            ;
         }
         
         void EnsureSingletonInstance() {
@@ -233,7 +236,7 @@ namespace Mediabox.GameKit.GameManager {
             var bundlePath = Path.Combine(path, gameBundleDefinition.BundleName);
             var bundle = BundleManager.Load(bundlePath);
             if (bundle == null) {
-                this.nativeApi.OnLoadingFailed();
+                this.mediaboxServer.OnLoadingFailed();
                 throw new Exception($"No AssetBundle found at contentBundleFolderPath {bundlePath}. Either, the contentBundleFolderPath has not been set up correctly in the GameDefinition, or the bundle has not been placed in the correct place.");
             }
 
@@ -295,6 +298,6 @@ namespace Mediabox.GameKit.GameManager {
     }
 
     public abstract class GameManagerBase : MonoBehaviour {
-        public abstract void SetNativeApi(INativeAPI nativeAPI);
+        public abstract void SetNativeApi(IMediaboxServer mediaboxServer);
     }
 }

@@ -1,11 +1,11 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using UnityEditor;
 using UnityEngine;
 
 namespace Mediabox.GameManager.Editor.Build {
 	public class GameDefinitionBuildSettings : ScriptableObject {
-		public const string SettingsPath = "Assets/Plugins/Mediabox/Editor/Resources/GameDefinitionSettings.asset";
+		const string PathWithinResources = "GameDefinitionBuildSettings.asset";
+		public const string SettingsPath = "Assets/Plugins/Mediabox/Editor/Resources/"+PathWithinResources;
 		public const string customPlatformSettings = "customPlatforms.json";
 		
 		public BuildTarget[] supportedBuildTargets = {BuildTarget.Android, BuildTarget.iOS};
@@ -21,7 +21,6 @@ namespace Mediabox.GameManager.Editor.Build {
 		public string GetAssetBundleManifestPath(BuildTarget buildTarget)
 			=> Path.ChangeExtension(Path.Combine(GetAssetBundleBuildPath(buildTarget), buildTarget.ToString()), "manifest");
 		
-		const string resourcePath = "/Resources/";
-		static string SettingsResourcePath => Path.ChangeExtension(SettingsPath, null).Substring(SettingsPath.IndexOf(resourcePath, StringComparison.Ordinal) + resourcePath.Length);
+		static string SettingsResourcePath => Path.ChangeExtension(PathWithinResources, null);
 	}
 }

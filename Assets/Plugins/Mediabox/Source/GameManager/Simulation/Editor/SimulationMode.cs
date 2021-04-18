@@ -7,7 +7,7 @@ using UnityEditor;
 namespace Mediabox.GameManager.Simulation.Editor {
 	[InitializeOnLoad]
 	public static class SimulationMode {
-		public static ISimulationNativeAPI SimulationModeNativeApi => simulationRunner.SimulationModeNativeApi;
+		public static ISimulationMediaboxServer SimulationModeMediaboxServer => simulationRunner.SimulationModeMediaboxServer;
 		public static string BundleName {
 			get => simulationRunner.BundleName;
 			set => simulationRunner.BundleName = value;
@@ -22,7 +22,7 @@ namespace Mediabox.GameManager.Simulation.Editor {
 
 		public static bool IsInSimulationMode => simulationRunner.IsInSimulationMode;
 		static SimulationMode() {
-			simulationRunner = new SimulationModeRunner(new UnityEditorPrefs(), () => EditorApplication.isPlaying, CreateNativeAPI);
+			simulationRunner = new SimulationModeRunner(new UnityEditorPrefs(), () => EditorApplication.isPlaying, CreateSimulationMediaboxServer);
 			EditorApplication.update += Update;
 			EditorApplication.playModeStateChanged += OnplayModeStateChanged;
 		}
@@ -47,10 +47,10 @@ namespace Mediabox.GameManager.Simulation.Editor {
 			simulationRunner.StartSimulationMode();
 		}
 
-		static ISimulationNativeAPI CreateNativeAPI() {
+		static ISimulationMediaboxServer CreateSimulationMediaboxServer() {
 			var gameDefinitionSettings = AssetDatabase.LoadAssetAtPath<GameDefinitionSettings>(GameDefinitionSettings.SettingsPath);
 			var gameDefinitionBuildSettings = AssetDatabase.LoadAssetAtPath<GameDefinitionBuildSettings>(GameDefinitionBuildSettings.SettingsPath);
-			return BundleManager.UseEditorBundles ? new EditorNativeAPI(BundleName, gameDefinitionSettings) : new EditorBuildNativeAPI(BundleName, gameDefinitionSettings, gameDefinitionBuildSettings);
+			return BundleManager.UseEditorBundles ? new EditorMediaboxServer(BundleName, gameDefinitionSettings) : new EditorBuildMediaboxServer(BundleName, gameDefinitionSettings, gameDefinitionBuildSettings);
 		}
 
 		public static void StopSimulationMode() {

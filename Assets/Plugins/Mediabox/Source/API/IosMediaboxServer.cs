@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 
 namespace Mediabox.API {
-    public class MediaboxIOSNativeAPI : INativeAPI {
+    public class IosMediaboxServer : IMediaboxServer {
 #if UNITY_IOS
         [DllImport("__Internal")] static extern void InitializeApi(string apiGameObjectName);
         [DllImport("__Internal")] static extern void OnLoadingSucceeded();
@@ -13,49 +13,49 @@ namespace Mediabox.API {
         [DllImport("__Internal")] static extern void OnGameExitRequested();
 #endif
         
-        void INativeAPI.InitializeApi(string apiGameObjectName) {
+        void IMediaboxServer.InitializeApi(string apiGameObjectName) {
 #if UNITY_IOS
             InitializeApi(apiGameObjectName);
 #endif
         }
 
-        void INativeAPI.OnLoadingSucceeded() {
+        void IMediaboxServer.OnLoadingSucceeded() {
 #if UNITY_IOS
             OnLoadingSucceeded();
 #endif
         }
 
-        void INativeAPI.OnLoadingFailed() {
+        void IMediaboxServer.OnLoadingFailed() {
 #if UNITY_IOS
             OnLoadingFailed();
 #endif
         }
 
-        void INativeAPI.OnUnloadingSucceeded() {
+        void IMediaboxServer.OnUnloadingSucceeded() {
 #if UNITY_IOS
             OnUnloadingSucceeded();
 #endif
         }
 
-        void INativeAPI.OnSaveDataWritten() {
+        void IMediaboxServer.OnSaveDataWritten() {
 #if UNITY_IOS
             OnSaveDataWritten();
 #endif
         }
 
-        void INativeAPI.OnCreateScreenshotSucceeded(string path) {
+        void IMediaboxServer.OnCreateScreenshotSucceeded(string path) {
 #if UNITY_IOS
             OnCreateScreenshotSucceeded(path);
 #endif
         }
 
-        void INativeAPI.OnCreateScreenshotFailed() {
+        void IMediaboxServer.OnCreateScreenshotFailed() {
 #if UNITY_IOS
             OnCreateScreenshotFailed();
 #endif
         }
         
-        void INativeAPI.OnGameExitRequested() {
+        void IMediaboxServer.OnGameExitRequested() {
 #if UNITY_IOS
             OnGameExitRequested();
 #endif

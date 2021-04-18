@@ -5,11 +5,11 @@ namespace Mediabox.GameManager.Simulation {
 	public class SimulationModeRunner {
 		readonly IPrefs prefs;
 		readonly Func<bool> isActive;
-		readonly Func<ISimulationNativeAPI> createEditorNativeAPI;
+		readonly Func<ISimulationMediaboxServer> createSimulationMediaboxServer;
 
 		const string autoSimulatePrefKey = "Mediabox.GameManager.Editor.AutoSimulate";
 		const string contentBundleFolderPrefKey = "Mediabox.GameManager.Editor.ContentBundleFolder";
-		public ISimulationNativeAPI SimulationModeNativeApi { get; private set; }
+		public ISimulationMediaboxServer SimulationModeMediaboxServer { get; private set; }
 		string bundleName;
 		public string BundleName { 
 			get => this.bundleName;
@@ -34,11 +34,11 @@ namespace Mediabox.GameManager.Simulation {
 			}
 		}
 
-		public bool IsInSimulationMode => this.SimulationModeNativeApi != null;
-		public SimulationModeRunner(IPrefs prefs, Func<bool> isActive, Func<ISimulationNativeAPI> createEditorNativeAPI) {
+		public bool IsInSimulationMode => this.SimulationModeMediaboxServer != null;
+		public SimulationModeRunner(IPrefs prefs, Func<bool> isActive, Func<ISimulationMediaboxServer> createSimulationMediaboxServer) {
 			this.prefs = prefs;
 			this.isActive = isActive;
-			this.createEditorNativeAPI = createEditorNativeAPI;
+			this.createSimulationMediaboxServer = createSimulationMediaboxServer;
 			this._autoSimulate = prefs.GetBool(autoSimulatePrefKey, true);
 			this.bundleName = prefs.GetString(contentBundleFolderPrefKey, null);
 		}
@@ -60,22 +60,22 @@ namespace Mediabox.GameManager.Simulation {
 			if (!this.IsInSimulationMode) {
 				StartSimulationMode();
 			} else {
-				this.SimulationModeNativeApi.AutoSimulate(this.BundleName);
+				this.SimulationModeMediaboxServer.AutoSimulate(this.BundleName);
 			}
 		}
 		
 		public void StartSimulationMode() {
-			this.SimulationModeNativeApi = this.createEditorNativeAPI();
-			UnityEngine.Object.FindObjectOfType<GameManagerBase>().SetNativeApi(this.SimulationModeNativeApi);
+			this.SimulationModeMediaboxServer = this.createSimulationMediaboxServer();
+			UnityEngine.Object.FindObjectOfType<GameManagerBase>().SetNativeApi(this.SimulationModeMediaboxServer);
 		}
 
 		public void StopSimulationMode() {
-			if (this.SimulationModeNativeApi == null)
+			if (this.SimulationModeMediaboxServer == null)
 				return;
-			this.SimulationModeNativeApi.StopSimulation();
-			if(this.SimulationModeNativeApi is IDisposable disposable)
+			this.SimulationModeMediaboxServer.StopSimulation();
+			if(this.SimulationModeMediaboxServer is IDisposable disposable)
 				disposable.Dispose();
-			this.SimulationModeNativeApi = null;
+			this.SimulationModeMediaboxServer = null;
 		}
 	}
 }
