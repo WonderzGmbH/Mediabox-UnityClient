@@ -4,9 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2021.420.1] - 2021-4-20
+### Removed
+- `GameDefinitionSettings.asset` and `GameDefinitionBuildSettings.asset` from the package. It only caused duplicate assets.
+
 ## [2021.418.1] - 2021-4-18
 ### Fixed
-- Fixes the `Standalone-Build` Build-Pipeline. Adds the `Server Mode`-Setting to `GameDefinitionSettings` that enables you to switch between `Native` and `Simulation` `IMediaboxServer`. When using the `GameDefinitionHub`'s `Run`-Plugin, the setting is switched automatically.
+- the `Standalone-Build` Build-Pipeline. Adds the `Server Mode`-Setting to `GameDefinitionSettings` that enables you to switch between `Native` and `Simulation` `IMediaboxServer`. When using the `GameDefinitionHub`'s `Run`-Plugin, the setting is switched automatically.
 
 ## [2021.412.2] - 2021-4-12
 ### Fixed
