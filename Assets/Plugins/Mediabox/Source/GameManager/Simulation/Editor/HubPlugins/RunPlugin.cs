@@ -25,6 +25,11 @@ namespace Mediabox.GameManager.Simulation.Editor.HubPlugins {
 		public string Title => "Run";
 		public bool ToggleableWithTitleLabel => true;
 
+		bool AutoRunPlayer {
+			get => EditorPrefs.GetBool("Mediabox.GameManager.Simulation.Editor.HubPlugins.RunPlugin.AutoRunPlayer", true);
+			set => EditorPrefs.SetBool("Mediabox.GameManager.Simulation.Editor.HubPlugins.RunPlugin.AutoRunPlayer", value);
+		}
+
 		public void Update() { }
 
 		public bool Render() {
@@ -35,24 +40,26 @@ namespace Mediabox.GameManager.Simulation.Editor.HubPlugins {
 
 			if (GUILayout.Button("Build and Run All")) {
 				this.build.BuildGameDefinitions(directories, true, new []{GetSelectedBuildTargets()});
-				RunGameDefinitions(directories, true, GetSelectedBuildTargets());
+				RunGameDefinitions(directories, true, GetSelectedBuildTargets(), this.AutoRunPlayer);
 				return false;
 			}
 
 			if (GUILayout.Button($"Build and Run {Path.GetFileName(this.managementPlugin.SelectedDirectory)}")) {
 				this.build.BuildGameDefinitions(new[] {this.managementPlugin.SelectedDirectory}, false, new []{GetSelectedBuildTargets()});
-				RunGameDefinitions(new[] {this.managementPlugin.SelectedDirectory}, false, GetSelectedBuildTargets());
+				RunGameDefinitions(new[] {this.managementPlugin.SelectedDirectory}, false, GetSelectedBuildTargets(), this.AutoRunPlayer);
 			}
 			
 			if (GUILayout.Button($"Run All")) {
-				RunGameDefinitions(directories, true, GetSelectedBuildTargets());
+				RunGameDefinitions(directories, true, GetSelectedBuildTargets(), this.AutoRunPlayer);
 				return false;
 			}
 
 			if (this.manager != null & GUILayout.Button($"Run {Path.GetFileName(this.managementPlugin.SelectedDirectory)}")) {
-				RunGameDefinitions(new[] {this.managementPlugin.SelectedDirectory}, false, GetSelectedBuildTargets());
+				RunGameDefinitions(new[] {this.managementPlugin.SelectedDirectory}, false, GetSelectedBuildTargets(), this.AutoRunPlayer);
 				return false;
 			}
+
+			this.AutoRunPlayer = EditorGUILayout.Toggle("Auto Run Player", this.AutoRunPlayer);
 
 			return true;
 		}
@@ -77,7 +84,7 @@ namespace Mediabox.GameManager.Simulation.Editor.HubPlugins {
 			}
 		}
 
-		void RunGameDefinitions(string[] directories, bool clearDirectory, BuildTarget buildTarget) {
+		void RunGameDefinitions(string[] directories, bool clearDirectory, BuildTarget buildTarget, bool autoRun) {
 			var targetPath = Path.Combine(Application.streamingAssetsPath, "GameDefinitions");
 			PathUtility.EnsureEmptyDirectory(targetPath);
 			foreach (var directory in directories) {
@@ -91,7 +98,7 @@ namespace Mediabox.GameManager.Simulation.Editor.HubPlugins {
 				var zipTargetPath = Path.Combine(targetPath, localDir);
 				ZipFile.ExtractToDirectory(zipPath, zipTargetPath);
 			}
-			BuildGame.Build(buildTarget, true, true);
+			BuildGame.Build(buildTarget, true, autoRun);
 			PathUtility.DeleteDirectoryIfExists(targetPath);
 			PathUtility.DeleteFileIfExists($"{targetPath}.meta");
 		}

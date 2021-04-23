@@ -2,6 +2,7 @@
 using Mediabox.GameKit.GameDefinition;
 using Mediabox.GameManager.Editor.HubPlugins;
 using UnityEditor;
+using UnityEditor.Build.Reporting;
 using UnityEngine;
 
 namespace Mediabox.GameManager.Editor.Build {
@@ -14,7 +15,7 @@ namespace Mediabox.GameManager.Editor.Build {
 		public static void Build(BuildTarget buildTarget, bool streamingAssetsGameDefinitionMode = false, bool autoRun = true) {
 			BuildPlayerOptions buildPlayerOptions;
 			try {
-				buildPlayerOptions = BuildPlayerWindow.DefaultBuildMethods.GetBuildPlayerOptions(new BuildPlayerOptions(){target = buildTarget});
+				buildPlayerOptions = BuildPlayerWindow.DefaultBuildMethods.GetBuildPlayerOptions(new BuildPlayerOptions(){target = buildTarget, targetGroup = BuildPipeline.GetBuildTargetGroup(buildTarget)});
 			} catch (BuildPlayerWindow.BuildMethodException e) {
 				Debug.Log("BuildMethodException caught: " + e);
 				return;
@@ -26,6 +27,7 @@ namespace Mediabox.GameManager.Editor.Build {
 			var manifestPath = settingsPlugin.buildSettings.GetAssetBundleManifestPath(buildTarget);
 			if (!ValidateAssetBundleManifestFileExists(manifestPath))
 				return;
+			
 			buildPlayerOptions.assetBundleManifestPath = manifestPath;
 			if (autoRun)
 				buildPlayerOptions.options |= BuildOptions.AutoRunPlayer;
@@ -35,8 +37,17 @@ namespace Mediabox.GameManager.Editor.Build {
 				settingsPlugin.settings.ServerMode = ServerMode.Simulation;
 				EditorUtility.SetDirty(settingsPlugin.settings);
 			}
-			BuildPipeline.BuildPlayer(buildPlayerOptions);
-			settingsPlugin.settings.ServerMode = oldIntegrationMode;
+
+			try {
+				var report = BuildPipeline.BuildPlayer(buildPlayerOptions);
+				if (report.summary.result == BuildResult.Cancelled && autoRun && EditorUtility.DisplayDialog("Build Cancelled", "Would you like to re-run the build without autoRun?", "Yes", "No")) {
+					buildPlayerOptions.options |= BuildOptions.AutoRunPlayer;
+					BuildPipeline.BuildPlayer(buildPlayerOptions);
+				}
+			} finally {
+				settingsPlugin.settings.ServerMode = oldIntegrationMode;
+				EditorUtility.SetDirty(settingsPlugin.settings);
+			}
 		}
 		
 		static bool ValidateAssetBundleManifestFileExists(string manifestPath) {

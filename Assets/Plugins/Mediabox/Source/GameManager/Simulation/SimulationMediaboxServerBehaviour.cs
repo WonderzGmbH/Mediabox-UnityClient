@@ -50,6 +50,9 @@ namespace Mediabox.GameManager.Simulation {
 		}
 
 		void OnGUI() {
+			if (this.simulationRunner == null) {
+				return;
+			}
 			var ratio = Mathf.Clamp(Mathf.Min(Screen.width / 600.0f, Screen.height / 500.0f), 0.2f, float.MaxValue);
 			var oldMatrix = GUI.matrix;
 			GUI.matrix = Matrix4x4.Scale(new Vector3(ratio, ratio, 1f));

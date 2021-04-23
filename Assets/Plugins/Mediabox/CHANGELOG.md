@@ -2,7 +2,15 @@
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+and this project adheres to [Calendar Versioning](https://calver.org).
+
+## [2021.420.1] - 2021-4-23
+### Added
+- The Option to use the `Run`-Plugin to run the Game without `autoRunEnabled`
+### Fixed
+- Correctly hides the Simulation GUI in Native Mode.
+- Build Errors when Building for a Platform that's not your active Platform in the Unity Editor.
+
 
 ## [2021.420.1] - 2021-4-20
 ### Removed
