@@ -2,6 +2,7 @@
 using Mediabox.GameKit.GameDefinition;
 using Mediabox.GameManager.Editor.HubPlugins;
 using Mediabox.GameManager.Editor.Utility;
+using Mediabox.GameManager.Simulation;
 using UnityEditor;
 using UnityEngine;
 
@@ -38,6 +39,7 @@ namespace Mediabox.GameManager.Editor {
 		}
 
 		protected virtual IHubPlugin[] CreatePlugins() {
+			var prefs = new UnityPlayerPrefs();
 			var settings = new SettingsPlugin();
 			var directory = new DirectoryPlugin(settings);
 			var management = new ManagementPlugin(settings, this);
@@ -50,7 +52,7 @@ namespace Mediabox.GameManager.Editor {
 				new EditorPlugin<TGameDefinition>(settings, management, this),
 				new CustomPlatformSettingsPlugin(management, this),
 				new BundlesPlugin(),
-				new BuildPlugin(settings, management, this)
+				new BuildPlugin(settings, management, this, prefs)
 			};
 		}
 

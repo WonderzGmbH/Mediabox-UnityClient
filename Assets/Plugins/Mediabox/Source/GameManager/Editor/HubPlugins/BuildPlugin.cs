@@ -1,23 +1,30 @@
 using System;
 using System.IO;
 using Mediabox.GameManager.Editor.Build;
+using Mediabox.GameManager.Simulation;
 using UnityEditor;
 using UnityEngine;
 
 namespace Mediabox.GameManager.Editor.HubPlugins {
 	public class BuildPlugin : IHubPlugin {
-		readonly SettingsPlugin settingsPlugin;
-		readonly ManagementPlugin managementPlugin;
-		readonly GameDefinitionHub manager;
-
-		public BuildPlugin(SettingsPlugin settingsPlugin, ManagementPlugin managementPlugin, GameDefinitionHub manager) {
-			this.settingsPlugin = settingsPlugin;
-			this.managementPlugin = managementPlugin;
-			this.manager = manager;
-		}
 
 		public string Title => "Build";
 		public bool ToggleableWithTitleLabel => true;
+		
+		readonly SettingsPlugin settingsPlugin;
+		readonly ManagementPlugin managementPlugin;
+		readonly GameDefinitionHub manager;
+		readonly EnumPref<BuildPlatformOption> buildPlatformOption;
+		readonly BoolPref doNotAskForConfirmation;
+		BuildTarget manualPlatform;
+
+		public BuildPlugin(SettingsPlugin settingsPlugin, ManagementPlugin managementPlugin, GameDefinitionHub manager, IPrefs prefs) {
+			this.settingsPlugin = settingsPlugin;
+			this.managementPlugin = managementPlugin;
+			this.manager = manager;
+			this.buildPlatformOption = new EnumPref<BuildPlatformOption>(prefs, "Mediabox.GameManager.Editor.HubPlugins.BuildPlugin.BuildPlatformOption");
+			this.doNotAskForConfirmation = new BoolPref(prefs, "Mediabox.GameManager.Editor.HubPlugins.BuildPlugin.DoNotAskForConfirmation");
+		}
 
 		public void Update() { }
 
@@ -45,11 +52,8 @@ namespace Mediabox.GameManager.Editor.HubPlugins {
 			ManualPlatforms
 		}
 
-		BuildPlatformOption buildPlatformOption;
-		BuildTarget manualPlatform;
-
 		BuildTarget[] GetSelectedBuildTargets() {
-			switch (this.buildPlatformOption) {
+			switch (this.buildPlatformOption.Value) {
 				case BuildPlatformOption.AllSupportedPlatforms:
 					return this.settingsPlugin.buildSettings.supportedBuildTargets;
 				case BuildPlatformOption.CurrentPlatform:
@@ -62,16 +66,32 @@ namespace Mediabox.GameManager.Editor.HubPlugins {
 		}
 
 		public void BuildGameDefinitions(string[] directories, bool clearDirectory, BuildTarget[] buildTargets) {
+			if (!this.doNotAskForConfirmation.Value) {
+				switch (EditorUtility.DisplayDialogComplex("Confirm Build", "This action might take a couple minutes to complete.", "OK", "Cancel", "Never ask again")) {
+					case 0:
+						break;
+					case 1:
+						return;
+					case 2:
+						this.doNotAskForConfirmation.Value = true;
+						break;
+					default:
+						throw new ArgumentOutOfRangeException();
+				}
+			}
 			var build = CreateGameDefinitionBuild(directories, clearDirectory, buildTargets);
 			build.Execute();
 		}
 
 		void DrawBuildPlatformsArea() {
-			this.buildPlatformOption = (BuildPlatformOption) EditorGUILayout.EnumPopup(this.buildPlatformOption);
-			if (this.buildPlatformOption == BuildPlatformOption.ManualPlatforms) {
-				this.manualPlatform = (BuildTarget) EditorGUILayout.EnumPopup(this.manualPlatform);
-			} else if (this.buildPlatformOption == BuildPlatformOption.CurrentPlatform) {
-				GUILayout.Label("Current Platform: " + EditorUserBuildSettings.activeBuildTarget);
+			this.buildPlatformOption.Value = (BuildPlatformOption) EditorGUILayout.EnumPopup(this.buildPlatformOption.Value);
+			switch (this.buildPlatformOption.Value) {
+				case BuildPlatformOption.ManualPlatforms:
+					this.manualPlatform = (BuildTarget) EditorGUILayout.EnumPopup(this.manualPlatform);
+					break;
+				case BuildPlatformOption.CurrentPlatform:
+					GUILayout.Label("Current Platform: " + EditorUserBuildSettings.activeBuildTarget);
+					break;
 			}
 		}
 

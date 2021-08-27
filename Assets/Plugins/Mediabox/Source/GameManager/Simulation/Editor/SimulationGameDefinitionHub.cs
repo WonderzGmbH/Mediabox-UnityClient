@@ -25,6 +25,7 @@ namespace Mediabox.GameManager.Simulation.Editor {
 		where TGameDefinition : class, IGameDefinition, new() {
 
 		protected override IHubPlugin[] CreatePlugins() {
+			var prefs = new UnityEditorPrefs();
 			var basePlugins = base.CreatePlugins();
 			var settings = basePlugins
 				.OfType<SettingsPlugin>()
@@ -34,7 +35,7 @@ namespace Mediabox.GameManager.Simulation.Editor {
 				.FirstOrDefault() ?? new ManagementPlugin(settings, this);
 			var build = basePlugins
 				.OfType<BuildPlugin>()
-				.FirstOrDefault() ?? new BuildPlugin(settings, management, this);
+				.FirstOrDefault() ?? new BuildPlugin(settings, management, this, prefs);
 			var simulation = new SimulationPlugin(management, settings);
 			var run = new RunPlugin(settings, management, build, this);
 			return basePlugins.Concat(new IHubPlugin[] {simulation, run}).ToArray();
