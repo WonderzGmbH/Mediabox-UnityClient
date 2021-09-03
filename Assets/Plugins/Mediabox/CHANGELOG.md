@@ -4,13 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Calendar Versioning](https://calver.org).
 
-## [2021.420.1] - 2021-4-23
+## [2021.903.1] - 2021-9-03
+### Fixed
+- A wrong reference in `UnityPlayerPrefs` that prevent the player from building successfully.
+
+## [2021.827.1] - 2021-8-27
 ### Improved
 - `BuildPlugin` of `GameDefinitionHub` now includes a confirmation popup.
 ### Fixed
 - `GameWithSaveGame` not correctly loading existing SaveGames.
 
-## [2021.420.1] - 2021-4-23
+## [2021.423.1] - 2021-4-23
 ### Added
 - The Option to use the `Run`-Plugin to run the Game without `autoRunEnabled`
 ### Fixed

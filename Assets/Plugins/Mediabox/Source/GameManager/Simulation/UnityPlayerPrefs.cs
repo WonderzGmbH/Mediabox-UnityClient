@@ -1,5 +1,4 @@
 using System;
-using UnityEditor;
 using UnityEngine;
 
 namespace Mediabox.GameManager.Simulation {
@@ -17,9 +16,9 @@ namespace Mediabox.GameManager.Simulation {
 			=> PlayerPrefs.SetString(key, value);
 
 		public T GetEnum<T>(string key, T defaultValue) where T : Enum
-			=> (T)Enum.Parse(typeof(T), EditorPrefs.GetString(key, defaultValue.ToString()));
+			=> (T)Enum.Parse(typeof(T), PlayerPrefs.GetString(key, defaultValue.ToString()));
 
 		public void SetEnum<T>(string key, T value)
-			=> EditorPrefs.SetString(key, value.ToString());
+			=> PlayerPrefs.SetString(key, value.ToString());
 	}
 }
