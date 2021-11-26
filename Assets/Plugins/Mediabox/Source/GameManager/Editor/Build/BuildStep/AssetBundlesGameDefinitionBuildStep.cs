@@ -5,6 +5,7 @@ using Mediabox.GameKit.GameDefinition;
 using Mediabox.GameManager.Editor.Build.Provider;
 using Mediabox.GameManager.Editor.Utility;
 using UnityEditor;
+using UnityEngine;
 
 namespace Mediabox.GameManager.Editor.Build.BuildStep {
 	public class AssetBundlesGameDefinitionBuildStep : IGameDefinitionBuildStep {
@@ -45,10 +46,21 @@ namespace Mediabox.GameManager.Editor.Build.BuildStep {
 			return gameDefinitions.Where(definition => definition.gameDefinition is IGameBundleDefinition).ToArray();
 		}
 
+		static string[] GetAssetNamesForGameDefinition(GameDefinitionBuildInfo gameDefinitionBuildInfo) {
+			var assetNames = AssetDatabase.GetAssetPathsFromAssetBundle((gameDefinitionBuildInfo.gameDefinition as IGameBundleDefinition).BundleName);
+			if (gameDefinitionBuildInfo.gameDefinition is IGameSceneDefinition gameSceneDefinition) {
+				if (!assetNames.Contains(gameSceneDefinition.SceneName)) {
+					return assetNames.Concat(new[] { gameSceneDefinition.SceneName }).ToArray();
+				}
+			}
+
+			return assetNames;
+		}
+
 		static AssetBundleBuild[] CreateAssetBundleBuilds(GameDefinitionBuildInfo[] gameDefinitions) {
 			return gameDefinitions.Select(definition => new AssetBundleBuild {
 				assetBundleName = (definition.gameDefinition as IGameBundleDefinition).BundleName,
-				assetNames = AssetDatabase.GetAssetPathsFromAssetBundle((definition.gameDefinition as IGameBundleDefinition).BundleName)
+				assetNames = GetAssetNamesForGameDefinition(definition)
 			}).ToArray();
 		}
 

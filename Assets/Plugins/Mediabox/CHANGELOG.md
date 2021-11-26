@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Calendar Versioning](https://calver.org).
 
+## [2021.1126.1] - 2021-11-26
+### Added
+- `Release` Plugin to `GameDefinitionHub` for Building the Unity Client. This method ensures, that all `GameDefinitions`' Asset Bundles have been built before building the client to avoid issues with Unity's Engine Code Stripping. Note: This does not ensure, that all `GameDefinitions` have been rebuilt in case of new Changes. It is recommended to use the `Rebuild Game Definitions` Option whenever you can afford the extra time for ensuring that no problems occur.
+### Removed
+- `Build Game` Menu Item. Please use the `GameDefinitionHub`'s `Release`-Plugin for Building the Unity Client.
+### Fixed
+- `Auto Run` is now correctly disabled if asked to Re-Run a Cancelled Build with `Auto Run` enabled before.
+
 ## [2021.903.1] - 2021-9-03
 ### Fixed
 - A wrong reference in `UnityPlayerPrefs` that prevent the player from building successfully.

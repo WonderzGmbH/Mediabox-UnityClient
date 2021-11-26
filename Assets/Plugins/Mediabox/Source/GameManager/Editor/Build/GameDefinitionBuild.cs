@@ -29,12 +29,16 @@ namespace Mediabox.GameManager.Editor.Build {
 			this.buildSettings = buildSettings;
 		}
 
-		public void Execute() {
+		public bool GetInfo(out IEnumerable<IGrouping<BuildTarget, GameDefinitionBuildInfo>> gameDefinitionsPerPlatform) {
 			var buildInfoResult = ProvideBuildInfo(this.directories);
-			if (buildInfoResult.hadErrors &&
+			gameDefinitionsPerPlatform = GetGameDefinitionsPerPlatform(this.buildTargets, buildInfoResult.buildInfos);
+			return !buildInfoResult.hadErrors;
+		}
+
+		public void Execute() {
+			if (!GetInfo(out var gameDefinitionsPerPlatform) &&
 			    !EditorUtility.DisplayDialog("There have been errors", "Some GameDefinitions had errors. Do you still want to continue?", "OK", "Cancel"))
 				return;
-			var gameDefinitionsPerPlatform = GetGameDefinitionsPerPlatform(this.buildTargets, buildInfoResult.buildInfos);
 			var buildSteps = CreateBuildSteps();
 
 			buildSteps.ForEach(buildStep => buildStep.PreProcess());
@@ -94,7 +98,7 @@ namespace Mediabox.GameManager.Editor.Build {
 			return buildTargets.Concat(customPlatformSettings?.supportedPlatforms ?? new BuildTarget[0]).Where(buildTarget => customPlatformSettings?.unsupportedPlatforms?.Contains(buildTarget) != true).ToArray();
 		}
 		
-		GameDefinitionBuildInfoResult ProvideBuildInfo(string[] directories) {
+		public GameDefinitionBuildInfoResult ProvideBuildInfo(string[] directories) {
 			var results = CreateBuildInfoProvider().Select(provider => provider.Provide(directories, this.settings.gameDefinitionFileName, this.gameDefinitionType, CreateGameDefinitionBuildValidators())).ToArray();
 			return new GameDefinitionBuildInfoResult {
 				hadErrors = results.Any(result => result.hadErrors),

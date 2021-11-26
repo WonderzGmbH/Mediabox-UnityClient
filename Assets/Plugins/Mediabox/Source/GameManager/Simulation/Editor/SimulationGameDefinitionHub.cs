@@ -37,8 +37,9 @@ namespace Mediabox.GameManager.Simulation.Editor {
 				.OfType<BuildPlugin>()
 				.FirstOrDefault() ?? new BuildPlugin(settings, management, this, prefs);
 			var simulation = new SimulationPlugin(management, settings);
-			var run = new RunPlugin(settings, management, build, this);
-			return basePlugins.Concat(new IHubPlugin[] {simulation, run}).ToArray();
+			var run = new DebugRunPlugin(settings, management, build, this);
+			var release = new ReleasePlugin(settings, management, build, this);
+			return basePlugins.Concat(new IHubPlugin[] {simulation, run, release}).ToArray();
 		}
 	}
 }

@@ -1,6 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Mediabox.GameManager.Editor.Build;
+using Mediabox.GameManager.Editor.Build.Provider;
 using Mediabox.GameManager.Simulation;
 using UnityEditor;
 using UnityEngine;
@@ -32,12 +35,12 @@ namespace Mediabox.GameManager.Editor.HubPlugins {
 			var directories = this.managementPlugin.AllDirectories;
 			DrawBuildPlatformsArea();
 			GUILayout.Label($"Building: {string.Join(", ", GetSelectedBuildTargets())}");
-			if (GUILayout.Button($"Build All")) {
+			if (GUILayout.Button($"Build All Games")) {
 				BuildGameDefinitions(directories, true, GetSelectedBuildTargets());
 				return false;
 			}
 
-			if (this.manager != null & GUILayout.Button($"Build {Path.GetFileName(this.managementPlugin.SelectedDirectory)}")) {
+			if (this.manager != null & GUILayout.Button($"Build Game '{Path.GetFileName(this.managementPlugin.SelectedDirectory)}'")) {
 				BuildGameDefinitions(new[] {this.managementPlugin.SelectedDirectory}, false, GetSelectedBuildTargets());
 				return false;
 			}
@@ -65,8 +68,13 @@ namespace Mediabox.GameManager.Editor.HubPlugins {
 			}
 		}
 
-		public void BuildGameDefinitions(string[] directories, bool clearDirectory, BuildTarget[] buildTargets) {
-			if (!this.doNotAskForConfirmation.Value) {
+		public bool GetGameDefinitions(string[] directories, bool clearDirectory, BuildTarget[] buildTargets, out IEnumerable<IGrouping<BuildTarget, GameDefinitionBuildInfo>> gameDefinitionsPerPlatform) {
+			var build = CreateGameDefinitionBuild(directories, clearDirectory, buildTargets);
+			return build.GetInfo(out gameDefinitionsPerPlatform);
+		}
+
+		public void BuildGameDefinitions(string[] directories, bool clearDirectory, BuildTarget[] buildTargets, bool doNotAskForConfirmation = false) {
+			if (!doNotAskForConfirmation && !this.doNotAskForConfirmation.Value) {
 				switch (EditorUtility.DisplayDialogComplex("Confirm Build", "This action might take a couple minutes to complete.", "OK", "Cancel", "Never ask again")) {
 					case 0:
 						break;

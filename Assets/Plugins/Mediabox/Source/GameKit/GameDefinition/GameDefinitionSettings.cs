@@ -16,7 +16,7 @@ namespace Mediabox.GameKit.GameDefinition {
 		}
 
 		static GameDefinitionSettings CreateNewSettings() {
-			Debug.LogWarning($"No {nameof(GameDefinitionSettings)} found in Resource Folder at Path {SettingsResourcePath}. Creating new instance.");
+			Debug.Log($"No {nameof(GameDefinitionSettings)} found in Resource Folder at Path {SettingsResourcePath}. Creating new instance.");
 			return CreateInstance<GameDefinitionSettings>();
 		}
 	}

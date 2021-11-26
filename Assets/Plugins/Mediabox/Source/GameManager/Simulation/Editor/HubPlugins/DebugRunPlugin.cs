@@ -9,25 +9,25 @@ using UnityEditor;
 using UnityEngine;
 
 namespace Mediabox.GameManager.Simulation.Editor.HubPlugins {
-	public class RunPlugin : IHubPlugin {
+	public class DebugRunPlugin : IHubPlugin {
 		readonly SettingsPlugin settingsPlugin;
 		readonly ManagementPlugin managementPlugin;
 		readonly BuildPlugin build;
 		readonly GameDefinitionHub manager;
 
-		public RunPlugin(SettingsPlugin settingsPlugin, ManagementPlugin managementPlugin, BuildPlugin build, GameDefinitionHub manager) {
+		public DebugRunPlugin(SettingsPlugin settingsPlugin, ManagementPlugin managementPlugin, BuildPlugin build, GameDefinitionHub manager) {
 			this.settingsPlugin = settingsPlugin;
 			this.managementPlugin = managementPlugin;
 			this.build = build;
 			this.manager = manager;
 		}
 
-		public string Title => "Run";
+		public string Title => "Debug Run";
 		public bool ToggleableWithTitleLabel => true;
 
 		bool AutoRunPlayer {
-			get => EditorPrefs.GetBool("Mediabox.GameManager.Simulation.Editor.HubPlugins.RunPlugin.AutoRunPlayer", true);
-			set => EditorPrefs.SetBool("Mediabox.GameManager.Simulation.Editor.HubPlugins.RunPlugin.AutoRunPlayer", value);
+			get => EditorPrefs.GetBool($"{typeof(DebugRunPlugin).FullName}.{nameof(AutoRunPlayer)}", true);
+			set => EditorPrefs.SetBool($"{typeof(DebugRunPlugin).FullName}.{nameof(AutoRunPlayer)}", value);
 		}
 
 		public void Update() { }
@@ -38,23 +38,23 @@ namespace Mediabox.GameManager.Simulation.Editor.HubPlugins {
 			DrawRunPlatformsArea();
 			GUILayout.Label($"Running: {string.Join(", ", GetSelectedBuildTargets())}");
 
-			if (GUILayout.Button("Build and Run All")) {
+			if (GUILayout.Button("Build and Run All Games")) {
 				this.build.BuildGameDefinitions(directories, true, new []{GetSelectedBuildTargets()});
 				RunGameDefinitions(directories, true, GetSelectedBuildTargets(), this.AutoRunPlayer);
 				return false;
 			}
 
-			if (GUILayout.Button($"Build and Run {Path.GetFileName(this.managementPlugin.SelectedDirectory)}")) {
+			if (GUILayout.Button($"Build and Run Game '{Path.GetFileName(this.managementPlugin.SelectedDirectory)}'")) {
 				this.build.BuildGameDefinitions(new[] {this.managementPlugin.SelectedDirectory}, false, new []{GetSelectedBuildTargets()});
 				RunGameDefinitions(new[] {this.managementPlugin.SelectedDirectory}, false, GetSelectedBuildTargets(), this.AutoRunPlayer);
 			}
 			
-			if (GUILayout.Button($"Run All")) {
+			if (GUILayout.Button($"Run All Games")) {
 				RunGameDefinitions(directories, true, GetSelectedBuildTargets(), this.AutoRunPlayer);
 				return false;
 			}
 
-			if (this.manager != null & GUILayout.Button($"Run {Path.GetFileName(this.managementPlugin.SelectedDirectory)}")) {
+			if (this.manager != null & GUILayout.Button($"Run Game '{Path.GetFileName(this.managementPlugin.SelectedDirectory)}'")) {
 				RunGameDefinitions(new[] {this.managementPlugin.SelectedDirectory}, false, GetSelectedBuildTargets(), this.AutoRunPlayer);
 				return false;
 			}
