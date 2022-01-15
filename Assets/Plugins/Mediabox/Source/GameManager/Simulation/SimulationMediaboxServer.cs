@@ -128,7 +128,7 @@ namespace Mediabox.GameManager.Simulation {
 		#endregion INativeAPI
 
 		void SendEvent(string name, string arg) {
-			Debug.Log($"[EditorNativeAPI] Sending Event '{name} with argument '{arg}'");
+			Debug.Log($"[EditorNativeAPI] Sending Event '{name}' with argument '{arg}'");
 			var gameObject = GameObject.Find(this.apiGameObjectName);
 			gameObject.SendMessage(name, arg);
 		}

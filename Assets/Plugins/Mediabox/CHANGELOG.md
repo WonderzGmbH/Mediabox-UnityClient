@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Calendar Versioning](https://calver.org).
 
+## [2022.115.1] - 2022-01-15
+### Fixed
+- Improved some namings and spellings.
+
 ## [2021.1126.1] - 2021-11-26
 ### Added
 - `Release` Plugin to `GameDefinitionHub` for Building the Unity Client. This method ensures, that all `GameDefinitions`' Asset Bundles have been built before building the client to avoid issues with Unity's Engine Code Stripping. Note: This does not ensure, that all `GameDefinitions` have been rebuilt in case of new Changes. It is recommended to use the `Rebuild Game Definitions` Option whenever you can afford the extra time for ensuring that no problems occur.

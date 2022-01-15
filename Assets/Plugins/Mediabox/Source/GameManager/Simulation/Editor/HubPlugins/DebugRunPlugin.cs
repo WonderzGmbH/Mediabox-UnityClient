@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.IO.Compression;
+using Mediabox.GameKit.GameManager;
 using Mediabox.GameManager.Editor;
 using Mediabox.GameManager.Editor.Build;
 using Mediabox.GameManager.Editor.HubPlugins;
@@ -33,7 +34,7 @@ namespace Mediabox.GameManager.Simulation.Editor.HubPlugins {
 		public void Update() { }
 
 		public bool Render() {
-			EditorGUILayout.HelpBox("Make sure to have a SimulationRunner-Script in your build attached to a GameObject that does not get Destroyed On Load.", MessageType.Info);
+			EditorGUILayout.HelpBox($"Make sure to have a {nameof(SimulationMediaboxServerBehaviour)}-Script attached to the GameObject that also has your {nameof(GameManagerBase)}.", MessageType.Info);
 			var directories = this.managementPlugin.AllDirectories;
 			DrawRunPlatformsArea();
 			GUILayout.Label($"Running: {string.Join(", ", GetSelectedBuildTargets())}");
