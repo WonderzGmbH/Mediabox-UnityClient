@@ -170,6 +170,7 @@ namespace Mediabox.GameKit.GameManager {
         }
 
         async Task ResetGame() {
+            pauseHandler.ResetPauseValues();
             if (SceneManager.GetActiveScene().name != this.DefaultSceneName)
                 await SceneManager.LoadSceneAsync(this.DefaultSceneName);
             UnloadBundle();
