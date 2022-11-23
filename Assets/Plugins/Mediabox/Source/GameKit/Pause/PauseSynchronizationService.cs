@@ -66,6 +66,8 @@ namespace Mediabox.GameKit.Pause {
             {
                 pauseAction.OnUnpause(this.pauseState);
             }
+
+            this.pauseState = null;
         }
 
         public void Reset()
