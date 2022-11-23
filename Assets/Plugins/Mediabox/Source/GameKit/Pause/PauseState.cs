@@ -25,5 +25,17 @@ namespace Mediabox.GameKit.Pause
             numberOfPausesPerType[type]--;
             return numberOfPausesPerType[type] == 0;
         }
+
+        public bool TryResetPauseState(Type type)
+        {
+            if (!numberOfPausesPerType.TryGetValue(type, out var count))
+            {
+                return false;
+            }
+
+            if (count == 0) return false;
+            numberOfPausesPerType[type] = 0;
+            return true;
+        }
     }
 }

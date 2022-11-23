@@ -28,7 +28,7 @@ namespace Mediabox.GameKit.Pause.Actions
             {
                 Reset(default, false);
             }
-            else if(pauseState.TryUnsetLastPauseState(GetType()))
+            else if(pauseState.TryResetPauseState(GetType()))
             {
                 var state = (TPauseState) pauseState.pauseStatesPerType[GetType()];
                 pauseState.pauseStatesPerType.Remove(GetType());
