@@ -17,7 +17,7 @@ namespace Mediabox.GameKit.Pause
             }
 
             numberOfPausesPerType[type]++;
-            return numberOfPausesPerType[type] ==1;
+            return numberOfPausesPerType[type] == 1;
         }
         
         public bool TryUnsetLastPauseState(Type type)

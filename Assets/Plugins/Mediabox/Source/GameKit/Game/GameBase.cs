@@ -21,9 +21,11 @@ namespace Mediabox.GameKit.Game {
 		public void Initialize(IPauseSynchronizationService pauseSynchronizationService)
 		{
 			this.pauseSynchronizationService = pauseSynchronizationService;
-			foreach (var pauseAction in CreatePauseActions())
+			var pauseActions = CreatePauseActions();
+			foreach (var pauseAction in pauseActions)
 			{
 				pauseSynchronizationService.AddPauseAction(pauseAction);
+				this.pauseActions.Add(pauseAction);
 			}
 		}
 
