@@ -7,6 +7,7 @@ using Mediabox.API;
 using Mediabox.GameKit.Bundles;
 using Mediabox.GameKit.Game;
 using Mediabox.GameKit.GameDefinition;
+using Mediabox.GameKit.Pause;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -24,13 +25,13 @@ namespace Mediabox.GameKit.GameManager {
         string saveGamePath;
         IBundle loadedBundle;
         static GameManagerBase<TGameDefinition> instance;
-
         public static GameManagerBase<TGameDefinition> Instance => instance;
 
         protected virtual string DefaultSceneName => "StartScene";
 
-        readonly PauseHandler pauseHandler = new PauseHandler();
-        
+        readonly IPauseSynchronizationService _pauseSynchronizationService = new PauseSynchronizationService();
+        private PauseHandle pauseHandle;
+
         #region UnityEventFunctions
         void Awake() {
             var settings = GameDefinitionSettings.Load();
@@ -136,11 +137,11 @@ namespace Mediabox.GameKit.GameManager {
         }
         
         public void PauseApplication() {
-            this.pauseHandler.Pause();
+            this.pauseHandle = this._pauseSynchronizationService.Pause();
         }
 
         public void UnpauseApplication() {
-            this.pauseHandler.Unpause();
+            this._pauseSynchronizationService.Unpause(this.pauseHandle);
         }
         
         public void CreateScreenshot() {
@@ -172,6 +173,7 @@ namespace Mediabox.GameKit.GameManager {
         async Task ResetGame() {
             if (SceneManager.GetActiveScene().name != this.DefaultSceneName)
                 await SceneManager.LoadSceneAsync(this.DefaultSceneName);
+            this._pauseSynchronizationService.Reset();
             UnloadBundle();
         }
 

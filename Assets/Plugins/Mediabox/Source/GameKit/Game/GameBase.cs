@@ -1,11 +1,41 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
+using Mediabox.GameKit.Pause;
+using Mediabox.GameKit.Pause.Actions;
 using UnityEngine;
 
 namespace Mediabox.GameKit.Game {
 	public abstract class GameBase<TGameDefinition> : MonoBehaviour, IGame<TGameDefinition> {
 		string _savePath;
 		protected string GetSavePath(string path) => Path.Combine(this._savePath, path);
+		public IPauseSynchronizationService pauseSynchronizationService;
+		private HashSet<IPauseAction> pauseActions = new HashSet<IPauseAction>();
+
+		protected virtual IEnumerable<IPauseAction> CreatePauseActions()
+		{
+			yield return new TimePauseActionWithState();
+			yield return new VolumePauseActionWithState();
+		}
+
+		public void Initialize(IPauseSynchronizationService pauseSynchronizationService)
+		{
+			this.pauseSynchronizationService = pauseSynchronizationService;
+			foreach (var pauseAction in CreatePauseActions())
+			{
+				pauseSynchronizationService.AddPauseAction(pauseAction);
+			}
+		}
+
+		protected virtual void OnDestroy()
+		{
+			foreach (var pauseAction in this.pauseActions)
+			{
+				pauseSynchronizationService.RemovePauseAction(pauseAction);
+			}
+
+			this.pauseActions.Clear();
+		}
 		
 		/// <summary>
 		/// This method is called when the game is supposed to start and it sends all necessary information.

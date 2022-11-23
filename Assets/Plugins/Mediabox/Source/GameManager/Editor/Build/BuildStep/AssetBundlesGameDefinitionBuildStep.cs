@@ -28,7 +28,16 @@ namespace Mediabox.GameManager.Editor.Build.BuildStep {
 			var bundleBuildDirectory = this.buildSettings.GetAssetBundleBuildPath(buildTarget);
 			if (!PathUtility.EnsureDirectory(bundleBuildDirectory))
 				RepairBundleConflicts(gameDefinitions, this.buildSettings.GetAssetBundleBuildPath(buildTarget));
-			BuildPipeline.BuildAssetBundles(bundleBuildDirectory, CreateAssetBundleBuilds(gameDefinitions), this.buildSettings.buildAssetBundleOptions, buildTarget);
+			var assetBundleBuilds = CreateAssetBundleBuilds(gameDefinitions);
+			foreach (var assetBundleBuild in assetBundleBuilds)
+			{
+				var invalidAssets = assetBundleBuild.assetNames.Select(assetName => Path.GetExtension(assetName) != "unity");
+				if (invalidAssets.Any())
+				{
+					Debug.LogError($"ERROR: Assets {string.Join(", ", invalidAssets)} are flagged to be part of Asset Bundle {assetBundleBuild.assetBundleName}. Please remove those. The build will fail in the next step.");
+				}
+			}
+			BuildPipeline.BuildAssetBundles(bundleBuildDirectory, assetBundleBuilds, this.buildSettings.buildAssetBundleOptions, buildTarget);
 			foreach (var gameDefinition in gameDefinitions) {
 				var bundleName = (gameDefinition.gameDefinition as IGameBundleDefinition).BundleName;
 				PathUtility.CopyFileToDirectory(bundleName, bundleBuildDirectory, gameDefinition.directory);

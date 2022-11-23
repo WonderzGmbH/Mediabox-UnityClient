@@ -1,7 +1,12 @@
 ﻿using System.Threading.Tasks;
+using Mediabox.GameKit.Pause;
 
 namespace Mediabox.GameKit.Game {
-	public interface IGame<TGameDefinition> {
+	public interface IGame<TGameDefinition>
+	{
+
+		void Initialize(IPauseSynchronizationService pauseSynchronizationService);
+		
 		/// <summary>
 		/// This method is called when the game is supposed to start and it sends all necessary information.
 		/// </summary>

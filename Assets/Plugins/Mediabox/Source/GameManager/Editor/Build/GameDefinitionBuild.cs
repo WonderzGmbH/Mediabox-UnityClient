@@ -83,7 +83,7 @@ namespace Mediabox.GameManager.Editor.Build {
 			};
 		}
 		
-		static IEnumerable<IGrouping<BuildTarget, GameDefinitionBuildInfo>> GetGameDefinitionsPerPlatform(BuildTarget[] buildTargets, GameDefinitionBuildInfo[] gameDefinitions) {
+		IEnumerable<IGrouping<BuildTarget, GameDefinitionBuildInfo>> GetGameDefinitionsPerPlatform(BuildTarget[] buildTargets, GameDefinitionBuildInfo[] gameDefinitions) {
 			return gameDefinitions
 				.SelectMany(gameDefinition => 
 					GetBuildTargetsForGameDefinition(gameDefinition, buildTargets)
@@ -92,10 +92,10 @@ namespace Mediabox.GameManager.Editor.Build {
 				.GroupBy(touple => touple.buildTarget, touple => touple.gameDefinition);
 		}
 
-		static BuildTarget[] GetBuildTargetsForGameDefinition(GameDefinitionBuildInfo gameDefinition, BuildTarget[] buildTargets) {
+		BuildTarget[] GetBuildTargetsForGameDefinition(GameDefinitionBuildInfo gameDefinition, BuildTarget[] buildTargets) {
 			var platformSettingsPath = Path.Combine(gameDefinition.directory, GameDefinitionBuildSettings.customPlatformSettings);
 			var customPlatformSettings = File.Exists(platformSettingsPath) ? JsonUtility.FromJson<CustomPlatformSettings>(File.ReadAllText(platformSettingsPath)) : null;
-			return buildTargets.Concat(customPlatformSettings?.supportedPlatforms ?? new BuildTarget[0]).Where(buildTarget => customPlatformSettings?.unsupportedPlatforms?.Contains(buildTarget) != true).ToArray();
+			return buildTargets.Where(buildTarget => this.buildSettings.supportedBuildTargets.Concat(customPlatformSettings?.supportedPlatforms ?? new BuildTarget[0]).Contains(buildTarget) && customPlatformSettings?.unsupportedPlatforms?.Contains(buildTarget) != true).ToArray();
 		}
 		
 		public GameDefinitionBuildInfoResult ProvideBuildInfo(string[] directories) {

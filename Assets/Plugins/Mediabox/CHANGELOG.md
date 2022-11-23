@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Calendar Versioning](https://calver.org).
 
+## [2022.1123.1] - 2022-11-23
+### Added
+- `PauseSynchronizationHandler` to `GameManager` to synchronize Pause States in case of multiple Pause() and Unpause Events.
+  - You can call `Pause` to pause the Game and retrieve a `PauseHandle`
+  - You can then `UnPause` the Game using that `PauseHandle`
+  - `Reset` resets all `PauseHandles`
+- `PauseActions` to `Game` that allow adding your custom OnPause and OnUnpause logic to Games.
+  - They will synchronize with the `PauseSynchronizationHandler`, even if the Pause was already active when the `PauseHandler` was added.
+
 ## [2022.115.1] - 2022-01-15
 ### Fixed
 - Improved some namings and spellings.
