@@ -5,7 +5,7 @@ namespace Mediabox.GameKit.Pause.Actions
         public void OnPause(PauseState pauseState)
         {
             var type = GetType();
-            if (!pauseState.TrySetNewPauseState(type))
+            if (pauseState.TrySetNewPauseState(type))
             {
                 pauseState.pauseStatesPerType[GetType()] = Pause();
             }
@@ -16,8 +16,8 @@ namespace Mediabox.GameKit.Pause.Actions
             var type = GetType();
             if (pauseState.TryUnsetLastPauseState(type))
             {
-                var state = (TPauseState) pauseState[GetType()];
-                pauseState.Remove(GetType());
+                var state = (TPauseState) pauseState.pauseStatesPerType[GetType()];
+                pauseState.pauseStatesPerType.Remove(GetType());
                 Unpause(state);
             }
         }
@@ -30,8 +30,8 @@ namespace Mediabox.GameKit.Pause.Actions
             }
             else
             {
-                var state = (TPauseState) pauseState[GetType()];
-                pauseState.Remove(GetType());
+                var state = (TPauseState) pauseState.pauseStatesPerType[GetType()];
+                pauseState.pauseStatesPerType.Remove(GetType());
                 Reset(state, true);
             }
         }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Mediabox.GameKit.Pause
 {
-    public class PauseState : Dictionary<Type, object>
+    public class PauseState
     {
         public Dictionary<Type, int> numberOfPausesPerType = new Dictionary<Type, int>();
         public Dictionary<Type, object> pauseStatesPerType = new Dictionary<Type, object>();
@@ -17,7 +17,7 @@ namespace Mediabox.GameKit.Pause
             }
 
             numberOfPausesPerType[type]++;
-            return numberOfPausesPerType[type] > 1;
+            return numberOfPausesPerType[type] ==1;
         }
         
         public bool TryUnsetLastPauseState(Type type)

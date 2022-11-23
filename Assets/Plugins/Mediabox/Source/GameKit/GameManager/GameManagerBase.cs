@@ -105,6 +105,7 @@ namespace Mediabox.GameKit.GameManager {
                     }
                 }
                 await OnStartGame(path, definition, this.saveGamePath);
+                FindGame().Initialize(this._pauseSynchronizationService);
                 await FindGame().Load(this.saveGamePath);
                 await FindGame().SetLanguage(this.language);
                 await FindGame().StartGame(path, definition);
