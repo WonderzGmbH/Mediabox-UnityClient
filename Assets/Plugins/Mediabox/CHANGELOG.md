@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Calendar Versioning](https://calver.org).
 
+## [2022.1124.1] - 2022-11-24
+### Fixed
+- `BuildAssetBundlesGameDefinitionBuildStep` sending false alarms on Bundle Builds.
+
 ## [2022.1123.1] - 2022-11-23
 ### Added
 - `PauseSynchronizationHandler` to `GameManager` to synchronize Pause States in case of multiple Pause() and Unpause Events.
