@@ -31,7 +31,7 @@ namespace Mediabox.GameManager.Editor.Build.BuildStep {
 			var assetBundleBuilds = CreateAssetBundleBuilds(gameDefinitions);
 			foreach (var assetBundleBuild in assetBundleBuilds)
 			{
-				var invalidAssets = assetBundleBuild.assetNames.Where(assetName => Path.GetExtension(assetName) != "unity");
+				var invalidAssets = assetBundleBuild.assetNames.Where(assetName => Path.GetExtension(assetName) != ".unity");
 				if (invalidAssets.Any())
 				{
 					Debug.LogError($"ERROR: Assets {string.Join(", ", invalidAssets)} are flagged to be part of Asset Bundle {assetBundleBuild.assetBundleName}. Please remove those. The build will fail in the next step.");
