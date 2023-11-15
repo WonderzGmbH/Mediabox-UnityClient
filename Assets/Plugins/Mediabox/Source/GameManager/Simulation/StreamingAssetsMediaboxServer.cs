@@ -10,7 +10,7 @@ namespace Mediabox.GameManager.Simulation {
 		protected override string GameDefinitionDirectoryPath => Path.Combine(Application.streamingAssetsPath, "GameDefinitions");
 
 		protected override string[] GetAllAvailableGameDefinitions() {
-			return new DirectoryInfo(this.GameDefinitionDirectoryPath).GetDirectories().Select(dir => dir.Name).ToArray();
+			return DirectoryHelper.GetDirectories(this.GameDefinitionDirectoryPath).ToArray();
 		}
 
 		protected override void StopApplication() {

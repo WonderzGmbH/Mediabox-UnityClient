@@ -9,6 +9,7 @@ using Mediabox.GameKit.Game;
 using Mediabox.GameKit.GameDefinition;
 using Mediabox.GameKit.Pause;
 using UnityEngine;
+using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 
 namespace Mediabox.GameKit.GameManager {
@@ -34,7 +35,6 @@ namespace Mediabox.GameKit.GameManager {
 
         #region UnityEventFunctions
         void Awake() {
-            var settings = GameDefinitionSettings.Load();
             EnsureSingletonInstance();
             if (!Application.isEditor) {
                 SetNativeApi(CreateNativeAPI());
@@ -155,7 +155,7 @@ namespace Mediabox.GameKit.GameManager {
             ScreenCapture.CaptureScreenshot(fileName);
             var startTime = Time.realtimeSinceStartup;
             const float timeout = 5f;
-            while (!File.Exists(fullFilePath)) {
+            while (!FileHelper.Exists(fullFilePath)) {
                 if (Time.realtimeSinceStartup > startTime + timeout) {
                     this.mediaboxServer.OnCreateScreenshotFailed();
                     return;
@@ -219,7 +219,6 @@ namespace Mediabox.GameKit.GameManager {
             return GetComponents<IMediaboxServerFactory>()
                 .OrderBy(factory => factory.Priority)
                 .FirstOrDefault()?.Create();
-            ;
         }
         
         void EnsureSingletonInstance() {
@@ -253,11 +252,11 @@ namespace Mediabox.GameKit.GameManager {
 
         static TGameDefinition LoadGameDefinition(string path, GameDefinitionSettings settings) {
             var jsonPath = Path.Combine(path, settings.gameDefinitionFileName);
-            if (!File.Exists(jsonPath)) {
+            if (!FileHelper.Exists(jsonPath)) {
                 throw new Exception($"No {settings.gameDefinitionFileName} found at contentBundleFolderPath {path}.");
             }
 
-            var jsonString = File.ReadAllText(jsonPath);
+            var jsonString = FileHelper.ReadAllText(jsonPath);
             var definition = JsonUtility.FromJson<TGameDefinition>(jsonString);
             return definition;
         }
@@ -265,8 +264,7 @@ namespace Mediabox.GameKit.GameManager {
         // This method will check for content folders where the whole folder has been zipped instead of the folder contents only.
         // That means, that instead of the expected contentBundleFolderPath of e.g. GameA/index.json, files can be found at GameA/GameA/index.json
         static string FixWronglyZippedArchive(string path) {
-            var directoryInfo = new DirectoryInfo(path);
-            if (!directoryInfo.Exists) {
+            if (!DirectoryHelper.Exists(path)) {
                 throw new Exception($"Directory {path}, which was provided by MediaboxAPI, does not exist.");
             }
 
@@ -275,20 +273,22 @@ namespace Mediabox.GameKit.GameManager {
                 throw new Exception($"Directory {path}, does not have a valid directory name.");
             }
 
-            if (OnlyTheGivenDirectoryExistsInDirectory(directoryInfo, directoryName) && NoNonSystemFileExistsInDirectory(directoryInfo) ) {
+            if (OnlyTheGivenDirectoryExistsInDirectory(path, directoryName) && NoNonSystemFileExistsInDirectory(path) ) {
                 path = Path.Combine(path, directoryName);
             }
 
             return path;
         }
 
-        static bool OnlyTheGivenDirectoryExistsInDirectory(DirectoryInfo directoryInfo, string directoryName) {
-            var directories = directoryInfo.GetDirectories();
-            return directories.Length == 1 && directories[0].Name == directoryName;
+        static bool OnlyTheGivenDirectoryExistsInDirectory(string path, string directoryName) {
+            var directories = DirectoryHelper.GetDirectories(path).ToArray();
+            return directories.Length == 1 && directories[0] == directoryName;
         }
 
-        static bool NoNonSystemFileExistsInDirectory(DirectoryInfo directoryInfo) {
-            return directoryInfo.EnumerateFiles().All(file => file.Name == ".DS_Store");
+        static bool NoNonSystemFileExistsInDirectory(string path)
+        {
+            // TODO: FIX!!
+            return true; // directoryInfo.EnumerateFiles().All(file => file.Name == ".DS_Store");
         }
     
         static IGame<TGameDefinition> FindGame() {

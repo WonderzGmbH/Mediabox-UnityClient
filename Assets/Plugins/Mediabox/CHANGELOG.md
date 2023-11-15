@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Calendar Versioning](https://calver.org).
 
+## [2023.1115.1] - 2023-11-15
+### Fixed
+- `Android`: Fixed `Debug Run` to correctly execute on Android devices. For now, this requires you to manually enter the Bundle Name that you wish to launch. This can be improved later.
+
 ## [2022.1124.1] - 2022-11-24
 ### Fixed
 - `BuildAssetBundlesGameDefinitionBuildStep` sending false alarms on Bundle Builds.
