@@ -12,6 +12,7 @@
 - (void) onUnloadingSucceeded;
 - (void) onSaveDataWritten;
 - (void) onGameExitRequested;
+- (void) onUserScoreChanged: (float) score;
 - (void) onCreateScreenshotFailed;
 - (void) onCreateScreenshotSucceeded: (NSString*) screenshotPath;
 // other methods

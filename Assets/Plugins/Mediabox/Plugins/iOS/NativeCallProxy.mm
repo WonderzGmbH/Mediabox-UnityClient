@@ -44,6 +44,11 @@ extern "C" {
         [api onGameExitRequested];
     }
 
+    void onUserScoreChanged(float score) {
+        assert(api != nil);
+        [api onUserScoreChanged: score];
+    }
+
     void OnCreateScreenshotFailed() {
         assert(api != nil);
         [api onCreateScreenshotFailed];
@@ -54,4 +59,3 @@ extern "C" {
         [api onCreateScreenshotSucceeded:[NSString stringWithUTF8String:apiGameObject]];
     }
 }
-
