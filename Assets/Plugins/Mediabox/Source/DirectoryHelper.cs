@@ -12,7 +12,7 @@ namespace Mediabox {
         {
             if ((Application.platform != RuntimePlatform.Android && Application.platform != RuntimePlatform.WebGLPlayer) || !path.StartsWith(Application.streamingAssetsPath))
             {
-                return File.Exists(path);
+                return Directory.Exists(path);
             }
             UnityWebRequest webRequest = UnityWebRequest.Get(path);
             webRequest.SendWebRequest();
@@ -35,7 +35,6 @@ namespace Mediabox {
                 return new DirectoryInfo(path).GetDirectories().Select(it => it.Name);
             }
 
-            DirectoryInfo info = default;
             UnityWebRequest webRequest = UnityWebRequest.Get(path);
             webRequest.SendWebRequest();
             while (!webRequest.isDone) { }
