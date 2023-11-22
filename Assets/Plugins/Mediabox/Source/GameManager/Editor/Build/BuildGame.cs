@@ -10,6 +10,14 @@ namespace Mediabox.GameManager.Editor.Build {
 
 		public static void Build(BuildTarget buildTarget, bool streamingAssetsGameDefinitionMode = false, bool autoRun = true) {
 			BuildPlayerOptions buildPlayerOptions;
+			
+			
+			if (!BuildPipeline.IsBuildTargetSupported(BuildPipeline.GetBuildTargetGroup(buildTarget), buildTarget))
+			{
+				Debug.LogError($"Error! You currently don't have the Module for Platform {buildTarget} installed. Please install it using Unity Hub. Aborting build.");
+				return;
+			}
+			
 			try {
 				buildPlayerOptions = BuildPlayerWindow.DefaultBuildMethods.GetBuildPlayerOptions(new BuildPlayerOptions(){target = buildTarget, targetGroup = BuildPipeline.GetBuildTargetGroup(buildTarget)});
 			} catch (BuildPlayerWindow.BuildMethodException e) {
