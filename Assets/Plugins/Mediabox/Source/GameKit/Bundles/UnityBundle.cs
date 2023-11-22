@@ -39,7 +39,8 @@ namespace Mediabox.GameKit.Bundles {
 		}
 		
 		[System.Diagnostics.Conditional("UNITY_EDITOR")]
-		void ReapplyShaders(GameObject gameObject) {
+		void ReapplyShaders(GameObject gameObject)
+		{
 			var renderers = gameObject.GetComponentsInChildren<Renderer>(true);
 			foreach (var rend in renderers) {
 				var materials = rend.sharedMaterials;
@@ -63,6 +64,17 @@ namespace Mediabox.GameKit.Bundles {
 				}
 			}
 #endif
+
+			var skyboxes = gameObject.GetComponentsInChildren<Skybox>(true);
+			foreach (var skybox in skyboxes)
+			{
+				Debug.Log("Found skybox: "+skybox);
+				var material = skybox.material;
+				if (material != null) {
+					Debug.Log("Found material: "+material+" with shader: "+material.shader.name);
+					material.shader = Shader.Find(material.shader.name);
+				}
+			}
 
 			var images = gameObject.GetComponentsInChildren<UnityEngine.UI.Image>(true);
 			foreach (var image in images) {
