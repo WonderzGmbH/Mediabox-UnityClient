@@ -24,6 +24,11 @@ namespace Mediabox.GameManager.Editor.Build.BuildStep {
 			gameDefinitions = FilterSupportedGameDefinitions(gameDefinitions);
 			if (gameDefinitions.Length == 0)
 				return;
+			if (!BuildPipeline.IsBuildTargetSupported(BuildPipeline.GetBuildTargetGroup(buildTarget), buildTarget))
+			{
+				Debug.LogError($"Error! You currently don't have the Module for Platform {buildTarget} installed. Please install it using Unity Hub. Skipping this platform.");
+				return;
+			}
 
 			var bundleBuildDirectory = this.buildSettings.GetAssetBundleBuildPath(buildTarget);
 			if (!PathUtility.EnsureDirectory(bundleBuildDirectory))
@@ -37,7 +42,9 @@ namespace Mediabox.GameManager.Editor.Build.BuildStep {
 					Debug.LogError($"ERROR: Assets {string.Join(", ", invalidAssets)} are flagged to be part of Asset Bundle {assetBundleBuild.assetBundleName}. Please remove those. The build will fail in the next step.");
 				}
 			}
-			BuildPipeline.BuildAssetBundles(bundleBuildDirectory, assetBundleBuilds, this.buildSettings.buildAssetBundleOptions, buildTarget);
+
+			var manifest = BuildPipeline.BuildAssetBundles(bundleBuildDirectory, assetBundleBuilds, this.buildSettings.buildAssetBundleOptions, buildTarget);
+			Debug.Log(manifest);
 			foreach (var gameDefinition in gameDefinitions) {
 				var bundleName = (gameDefinition.gameDefinition as IGameBundleDefinition).BundleName;
 				PathUtility.CopyFileToDirectory(bundleName, bundleBuildDirectory, gameDefinition.directory);

@@ -96,16 +96,14 @@ namespace Mediabox.GameManager.Simulation {
 				HandleScreenshotUserChoice(path, (ScreenshotUserChoice) Enum.Parse(typeof(ScreenshotUserChoice), choice));
 			}
 		}
-
-		public void OnUserScoreSet()
-		{
-			throw new NotImplementedException();
-		}
+		
+		
 
 		private string UserScorePlayerPrefKey => $"{GetType().Name}.UserScores.{this.BundleName}";
 
 		public void OnUserScoreChanged(float newValue)
 		{
+			this.userScore = newValue;
 			PlayerPrefs.SetFloat(UserScorePlayerPrefKey, newValue);
 		}
 
@@ -160,6 +158,7 @@ namespace Mediabox.GameManager.Simulation {
 			EnsureSaveDataDirectoryExists();
 			SendEvent(nameof(IMediaboxClient.SetContentLanguage), this.locale);
 			SendEvent(nameof(IMediaboxClient.SetSaveDataFolder), this.SaveDataDirectoryPath);
+			this.userScore = PlayerPrefs.GetFloat(UserScorePlayerPrefKey, 0f);
 			SendEvent(nameof(IMediaboxClient.SetUserScore), JsonUtility.ToJson(new UserScoreData(this.userScore)));
 			SendEvent(nameof(IMediaboxClient.SetContentBundleFolder), this.ContentBundleFolder);
 		}
@@ -221,7 +220,9 @@ namespace Mediabox.GameManager.Simulation {
 			}
 		}
 
-		void DrawRunningGameContextButtons() {
+		void DrawRunningGameContextButtons()
+		{
+			GUILayout.Label($"Score: {this.userScore}");
 			if (GUILayout.Button("Stop Game"))
 				Stop();
 			if (GUILayout.Button("Create Screenshot"))
