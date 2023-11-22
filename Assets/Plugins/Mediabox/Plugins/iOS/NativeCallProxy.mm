@@ -44,7 +44,7 @@ extern "C" {
         [api onGameExitRequested];
     }
 
-    void onUserScoreChanged(float score) {
+    void OnUserScoreChanged(float score) {
         assert(api != nil);
         [api onUserScoreChanged: score];
     }

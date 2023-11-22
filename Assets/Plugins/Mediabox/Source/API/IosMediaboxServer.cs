@@ -8,7 +8,7 @@ namespace Mediabox.API {
         [DllImport("__Internal")] static extern void OnLoadingFailed();
         [DllImport("__Internal")] static extern void OnUnloadingSucceeded();
         [DllImport("__Internal")] static extern void OnSaveDataWritten();
-        [DllImport("__Internal")] static extern void onUserScoreChanged(float newValue);
+        [DllImport("__Internal")] static extern void OnUserScoreChanged(float newValue);
         [DllImport("__Internal")] static extern void OnCreateScreenshotSucceeded(string path);
         [DllImport("__Internal")] static extern void OnCreateScreenshotFailed();
         [DllImport("__Internal")] static extern void OnGameExitRequested();
@@ -52,7 +52,7 @@ namespace Mediabox.API {
 
         public void OnUserScoreChanged(float newValue) {
 #if UNITY_IOS
-            onUserScoreChanged(newValue);
+            OnUserScoreChanged(newValue);
 #endif
         }
 
