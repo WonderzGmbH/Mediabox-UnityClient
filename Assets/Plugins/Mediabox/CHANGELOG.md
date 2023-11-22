@@ -8,12 +8,16 @@ and this project adheres to [Calendar Versioning](https://calver.org).
 ### Added
 - `UserScore`: Added support for User Score reporting to `GameManagerBase` and `GameBase`. Use `GameBase.API.ReportNewUserScore` to report a new score and `GameBase.Score` to read the current score. The score will be persisted between sessions
 - `ReapplyShaders`: Whenever packaged Unity Bundles are loaded during Editor Runtime, all Shaders will be reapplied to Materials on known types like `Image`, and `Renderer`. If you need this feature for `Text Mesh Pro` Texts as well, you need to wait for a more sophisticated solution for adding custom Material Scanners through configuration.
+- `Build`: Better reporting if build fails due to missing modules
+- `UserScore`: A sample was added to `GameA`
+- `ReapplyShaders`: This will fix broken shaders when e.g. using built Android bundles in the editor
 ### Fixed
 - `GameManagerBase.PauseApplication`: Multiple invocations of the functions before unpausing caused the application to freeze. This has been fixed and a warning is printed instead.
 ### Removed
 - `GameManagerBase.QuitApplication`: Use `IGameAPI.Quit` instead.
 - `GameManagerBase.HasContentBundle`: Was probably never needed
 - `GameManagerBase.Instance`: Use `GameBase.API` instead. This change includes usages of `QuitApplication`, `LoadAssetFromBundle<T>` and `LoadSceneFromBundle`
+- `SimulationRun`: wouldn't work in the editor anymore with Editor Bundles. Fixed now.
 
 ## [2023.1115.1] - 2023-11-15
 ### Fixed
