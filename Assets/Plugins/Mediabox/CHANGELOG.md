@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Calendar Versioning](https://calver.org).
 
+## [2023.1121.1] - 2023-11-21
+### Added
+- `UserScore`: Added support for User Score reporting to `GameManagerBase` and `GameBase`. Use `GameBase.API.ReportNewUserScore` to report a new score and `GameBase.Score` to read the current score. The score will be persisted between sessions
+- `ReapplyShaders`: Whenever packaged Unity Bundles are loaded during Editor Runtime, all Shaders will be reapplied to Materials on known types like `Image`, and `Renderer`. If you need this feature for `Text Mesh Pro` Texts as well, you need to wait for a more sophisticated solution for adding custom Material Scanners through configuration.
+### Fixed
+- `GameManagerBase.PauseApplication`: Multiple invocations of the functions before unpausing caused the application to freeze. This has been fixed and a warning is printed instead.
+### Removed
+- `GameManagerBase.QuitApplication`: Use `IGameAPI.Quit` instead.
+- `GameManagerBase.HasContentBundle`: Was probably never needed
+- `GameManagerBase.Instance`: Use `GameBase.API` instead. This change includes usages of `QuitApplication`, `LoadAssetFromBundle<T>` and `LoadSceneFromBundle`
+
 ## [2023.1115.1] - 2023-11-15
 ### Fixed
 - `Android`: Fixed `Debug Run` to correctly execute on Android devices. For now, this requires you to manually enter the Bundle Name that you wish to launch. This can be improved later.

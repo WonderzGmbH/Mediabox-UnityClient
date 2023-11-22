@@ -32,6 +32,19 @@ namespace Mediabox.API {
         /// </summary>
         /// <param name="path">The path to the folder that's been provided for you to Read and Write Data to.</param>
         void SetSaveDataFolder(string path);
+        
+        /// <summary>
+        /// This method is called by <see cref="IMediaboxServer"/>, when save data should be loaded.
+        /// </summary>
+        /// <param name="scoreJson">A string representing the user's score in JSON format. 
+        /// The expected format is {"value":0.12345}.</param>
+        /// <remarks>
+        /// The score parameter should be a valid JSON string containing a numeric value.
+        /// The value should be in the "value" property of the JSON object.
+        /// Example: {"value": 0.12345}
+        /// </remarks>
+        /// <exception cref="ArgumentException">Thrown when the provided JSON format is invalid or missing the "value" property.</exception>
+        void SetUserScore(string scoreJson);
 
         /// <summary>
         /// This method is called by <see cref="IMediaboxServer"/>, when content should be unloaded before Unity is put into standby.

@@ -1,11 +1,12 @@
 ﻿using System.Threading.Tasks;
+using Mediabox.GameKit.GameManager;
 using Mediabox.GameKit.Pause;
 
 namespace Mediabox.GameKit.Game {
 	public interface IGame<TGameDefinition>
 	{
 
-		void Initialize(IPauseSynchronizationService pauseSynchronizationService);
+		void Initialize(IGameAPI gameAPI, IPauseSynchronizationService pauseSynchronizationService);
 		
 		/// <summary>
 		/// This method is called when the game is supposed to start and it sends all necessary information.
@@ -19,6 +20,11 @@ namespace Mediabox.GameKit.Game {
 		/// <param name="language">The identifier for the new language.</param>
 		Task SetLanguage(string language);
 		/// <summary>
+		/// This method will be called on GameStart and whenever the NativeAPI sends an event for score change.
+		/// </summary>
+		/// <param name="score">The new score.</param>
+		Task SetScore(float score);
+		/// <summary>
 		/// This method will be called to notify you to save the game progress before quitting the game.
 		/// </summary>
 		/// <param name="path">The directory in which to store any relevant savegame data.</param>
@@ -28,5 +34,7 @@ namespace Mediabox.GameKit.Game {
 		/// </summary>
 		/// <param name="path">The directory in which to store any relevant savegame data.</param>
 		Task Load(string path);
+
+		float Score { get; }
 	}
 }

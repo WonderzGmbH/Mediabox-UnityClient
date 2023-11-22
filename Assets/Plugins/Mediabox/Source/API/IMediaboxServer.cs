@@ -35,6 +35,12 @@ namespace Mediabox.API {
         /// </summary>
         void OnCreateScreenshotSucceeded(string path);
         /// <summary>
+        /// Report to Mediabox that a user's score has changed.
+        /// This value will be persisted by the main app and
+        /// reported back to the app on next start.
+        /// </summary>
+        void OnUserScoreChanged(float newValue);
+        /// <summary>
         /// Report to Mediabox that creating a screenshot has finished.
         /// </summary>
         void OnCreateScreenshotFailed();

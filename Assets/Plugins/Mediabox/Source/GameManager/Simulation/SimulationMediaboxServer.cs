@@ -37,6 +37,7 @@ namespace Mediabox.GameManager.Simulation {
 
 		string apiGameObjectName;
 		string locale = "DE";
+		float userScore = 0f;
 		string saveDataFolder = "./save";
 		bool waitingForLoadingCallback;
 		bool waitingForSaveDataCallback;
@@ -96,6 +97,18 @@ namespace Mediabox.GameManager.Simulation {
 			}
 		}
 
+		public void OnUserScoreSet()
+		{
+			throw new NotImplementedException();
+		}
+
+		private string UserScorePlayerPrefKey => $"{GetType().Name}.UserScores.{this.BundleName}";
+
+		public void OnUserScoreChanged(float newValue)
+		{
+			PlayerPrefs.SetFloat(UserScorePlayerPrefKey, newValue);
+		}
+
 		void IMediaboxServer.OnLoadingSucceeded() {
 			this.state = State.Stoppable;
 			this.waitingForLoadingCallback = false;
@@ -147,6 +160,7 @@ namespace Mediabox.GameManager.Simulation {
 			EnsureSaveDataDirectoryExists();
 			SendEvent(nameof(IMediaboxClient.SetContentLanguage), this.locale);
 			SendEvent(nameof(IMediaboxClient.SetSaveDataFolder), this.SaveDataDirectoryPath);
+			SendEvent(nameof(IMediaboxClient.SetUserScore), JsonUtility.ToJson(new UserScoreData(this.userScore)));
 			SendEvent(nameof(IMediaboxClient.SetContentBundleFolder), this.ContentBundleFolder);
 		}
 

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using Mediabox.GameKit.GameManager;
 using Mediabox.GameKit.Pause;
 using Mediabox.GameKit.Pause.Actions;
 using UnityEngine;
@@ -8,9 +9,11 @@ using UnityEngine;
 namespace Mediabox.GameKit.Game {
 	public abstract class GameBase<TGameDefinition> : MonoBehaviour, IGame<TGameDefinition> {
 		string _savePath;
+		private float _score;
+		public IGameAPI API { get; private set; }
 		protected string GetSavePath(string path) => Path.Combine(this._savePath, path);
 		public IPauseSynchronizationService pauseSynchronizationService;
-		private HashSet<IPauseAction> pauseActions = new HashSet<IPauseAction>();
+		private readonly HashSet<IPauseAction> _pauseActions = new HashSet<IPauseAction>();
 
 		protected virtual IEnumerable<IPauseAction> CreatePauseActions()
 		{
@@ -18,25 +21,26 @@ namespace Mediabox.GameKit.Game {
 			yield return new VolumePauseActionWithState();
 		}
 
-		public void Initialize(IPauseSynchronizationService pauseSynchronizationService)
+		public void Initialize(IGameAPI gameAPI, IPauseSynchronizationService pauseSynchronizationService)
 		{
+			this.API = gameAPI;
 			this.pauseSynchronizationService = pauseSynchronizationService;
 			var pauseActions = CreatePauseActions();
 			foreach (var pauseAction in pauseActions)
 			{
 				pauseSynchronizationService.AddPauseAction(pauseAction);
-				this.pauseActions.Add(pauseAction);
+				this._pauseActions.Add(pauseAction);
 			}
 		}
 
 		protected virtual void OnDestroy()
 		{
-			foreach (var pauseAction in this.pauseActions)
+			foreach (var pauseAction in this._pauseActions)
 			{
 				pauseSynchronizationService.RemovePauseAction(pauseAction);
 			}
 
-			this.pauseActions.Clear();
+			this._pauseActions.Clear();
 		}
 		
 		/// <summary>
@@ -51,6 +55,19 @@ namespace Mediabox.GameKit.Game {
 		/// </summary>
 		/// <param name="language">The identifier for the new language.</param>
 		public abstract Task SetLanguage(string language);
+
+		/// <summary>
+		/// This will change the score of the game.
+		/// Note: If you want the score to persist and to be reported to Mediabox as well, use <see cref="API"/>'s member <see cref="IGameAPI.ReportNewUserScore"/> instead.
+		/// </summary>
+		/// <param name="score">The new score</param>
+		/// <returns>A Task that can be awaited for.</returns>
+		public virtual Task SetScore(float score)
+		{
+			this._score = score;
+			return Task.CompletedTask;
+		}
+
 		/// <summary>
 		/// This method will be called to notify you to save the game progress before quitting the game.
 		/// </summary>
@@ -65,6 +82,8 @@ namespace Mediabox.GameKit.Game {
 			this._savePath = path;
 			return Task.CompletedTask;
 		}
+
+		public float Score => this._score;
 
 		public void SaveData<T>(string path, T value) {
 			var saveGamePath = GetSavePath(path);

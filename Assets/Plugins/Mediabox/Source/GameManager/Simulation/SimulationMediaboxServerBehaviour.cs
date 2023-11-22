@@ -1,10 +1,11 @@
 ﻿using Mediabox.API;
 using Mediabox.GameKit.GameDefinition;
+using Mediabox.GameKit.GameManager;
 using UnityEngine;
 
 namespace Mediabox.GameManager.Simulation {
 	/// <summary>
-	/// Put this script on the same GameObject as your implementation of <see cref="Mediabox.GameKit.GameManager.GameManagerBase{TGameDefinition}"/>
+	/// Put this script on the same GameObject as your implementation of <see cref="GameManagerBase{TGameDefinition}"/>
 	/// </summary>
 	public class SimulationMediaboxServerBehaviour : MonoBehaviour, IMediaboxServerFactory {
 		static readonly Rect windowDefaultSize = new Rect(150, 25, 150, 475);

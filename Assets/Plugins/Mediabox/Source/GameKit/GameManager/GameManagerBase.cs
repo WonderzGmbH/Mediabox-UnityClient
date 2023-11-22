@@ -19,13 +19,15 @@ namespace Mediabox.GameKit.GameManager {
     /// You can import the Package Samples with Unity's Package Manager, if you want to get started quickly.
     /// </summary>
     /// <typeparam name="TGameDefinition">The type of GameDefinition that you use in your project. GameDefinitions will be stored separately on the Mediabox-Backend and allow you to launch different types of game within one Unity Client. This feature can be configured and disabled using the "Game Definition Hub" that can be found in the "Mediabox"-Menu.</typeparam>
-    public abstract class GameManagerBase<TGameDefinition> : GameManagerBase, IMediaboxClient, IGameManager {
+    public abstract class GameManagerBase<TGameDefinition> : GameManagerBase, IMediaboxClient, IGameAPI {
 
-        IMediaboxServer mediaboxServer;
-        string language;
-        string saveGamePath;
-        IBundle loadedBundle;
+        IMediaboxServer _mediaboxServer;
+        string _language;
+        float _userScore;
+        string _saveGamePath;
+        IBundle _loadedBundle;
         static GameManagerBase<TGameDefinition> instance;
+        [Obsolete("Use `GameBase.API instead.")]
         public static GameManagerBase<TGameDefinition> Instance => instance;
 
         protected virtual string DefaultSceneName => "StartScene";
@@ -53,37 +55,62 @@ namespace Mediabox.GameKit.GameManager {
         /// <param name="mediaboxServer">An implementation of NativeAPI.</param>
         /// <exception cref="NativeApiAlreadySetupException">Thrown, if SetNativeApi has already been called.</exception>
         public override void SetNativeApi(IMediaboxServer mediaboxServer) {
-            if(this.mediaboxServer != null)
+            if(this._mediaboxServer != null)
                 throw new NativeApiAlreadySetupException();
-            this.mediaboxServer = mediaboxServer;
-            this.mediaboxServer.InitializeApi(this.gameObject.name);
-        }
-        public void QuitApplication() {
-            this.mediaboxServer.OnGameExitRequested();
-        }
-        public bool HasContentBundle => this.loadedBundle != null;
-        public async Task<T> LoadAssetFromContentBundle<T>(string assetPath) where T:UnityEngine.Object {
-            return await this.loadedBundle.LoadAssetAsync<T>(assetPath);
+            this._mediaboxServer = mediaboxServer;
+            this._mediaboxServer.InitializeApi(this.gameObject.name);
         }
 
-        public async Task LoadSceneFromContentBundle<T>(string assetPath, LoadSceneMode loadSceneMode = LoadSceneMode.Single) where T : UnityEngine.Object {
-            await this.loadedBundle.LoadScene(assetPath, loadSceneMode);
-        }
-
+        [Obsolete("Invoke QuitGame instead.")]
+        public void QuitApplication() => (this as IGameAPI).Quit();
         #endregion // PublicAPI
+
+        #region IGameAPI
+        
+        public float UserScore => _userScore;
+
+        void IGameAPI.Quit() {
+            this._mediaboxServer.OnGameExitRequested();
+        }
+
+        bool HasContentBundle => this._loadedBundle != null;
+        void IGameAPI.ReportNewUserScore(float newScore)
+        {
+            if (Math.Abs(this._userScore - newScore) < float.Epsilon)
+                return;
+            this._userScore = newScore;
+            FindGame()?.SetScore(newScore);
+            this._mediaboxServer.OnUserScoreChanged(newScore);
+        }
+
+        async Task<T> IGameAPI.LoadAssetFromContentBundle<T>(string assetPath) {
+            return await this._loadedBundle.LoadAssetAsync<T>(assetPath);
+        }
+
+        async Task IGameAPI.LoadSceneFromContentBundle<T>(string assetPath, LoadSceneMode loadSceneMode) {
+            await this._loadedBundle.LoadScene(assetPath, loadSceneMode);
+        }
+
+        #endregion // IGameAPI
 
         // All methods in this region will be called by the NativeAPI. Refer to NativeAPI.cs for details.
         #region IMediaboxCallbacks
         public void SetContentLanguage(string locale) {
-            this.language = locale;
-            FindGame()?.SetLanguage(this.language);
+            this._language = locale;
+            FindGame()?.SetLanguage(this._language);
         }
 
         public void SetSaveDataFolder(string path) {
-            this.saveGamePath = path;
+            this._saveGamePath = path;
             FindGame()?.Load(path);
         }
-        
+
+        public void SetUserScore(string scoreJson)
+        {
+            this._userScore = JsonUtility.FromJson<UserScoreData>(scoreJson).value;
+            FindGame()?.SetScore(this._userScore);
+        }
+
         public async void SetContentBundleFolder(string path){
             try {
                 await ResetGame();
@@ -96,7 +123,7 @@ namespace Mediabox.GameKit.GameManager {
                         await LoadGameDefinitionBundle(path, gameBundleDefinition);
                         if (definition is IGameSceneDefinition gameSceneDefinition) {
                             if (definition is IGameBundleSceneDefinition gameBundleSceneDefinition)
-                                await this.loadedBundle.LoadScene(gameBundleSceneDefinition.SceneName);
+                                await this._loadedBundle.LoadScene(gameBundleSceneDefinition.SceneName);
                             else
                                 await LoadGameDefinitionScene(gameSceneDefinition);
                         } else {
@@ -104,15 +131,16 @@ namespace Mediabox.GameKit.GameManager {
                         }
                     }
                 }
-                await OnStartGame(path, definition, this.saveGamePath);
-                FindGame().Initialize(this._pauseSynchronizationService);
-                await FindGame().Load(this.saveGamePath);
-                await FindGame().SetLanguage(this.language);
+                await OnStartGame(path, definition, this._saveGamePath);
+                FindGame().Initialize(this, this._pauseSynchronizationService);
+                await FindGame().Load(this._saveGamePath);
+                await FindGame().SetScore(this._userScore);
+                await FindGame().SetLanguage(this._language);
                 await FindGame().StartGame(path, definition);
-                this.mediaboxServer.OnLoadingSucceeded();
+                this._mediaboxServer.OnLoadingSucceeded();
             } catch (Exception e) {
                 Debug.LogException(e);
-                this.mediaboxServer.OnLoadingFailed();
+                this._mediaboxServer.OnLoadingFailed();
             }
         }
 
@@ -134,15 +162,26 @@ namespace Mediabox.GameKit.GameManager {
             } catch (Exception e) {
                 Debug.LogException(e);
             }
-            this.mediaboxServer.OnSaveDataWritten();
+            this._mediaboxServer.OnSaveDataWritten();
         }
         
         public void PauseApplication() {
+            if (this.pauseHandle != null)
+            {
+                Debug.LogWarning($"Warning, the application was paused multiple times. If you intend to have multiple pause handles, please use {nameof(GameBase<object>)}.{nameof(GameBase<object>.pauseSynchronizationService)}");
+                return;
+            }
             this.pauseHandle = this._pauseSynchronizationService.Pause();
         }
 
         public void UnpauseApplication() {
+            if (this.pauseHandle == null)
+            {
+                Debug.LogWarning($"Warning, the application was unpaused while not paused. If you intend to have multiple pause handles, please use {nameof(GameBase<object>)}.{nameof(GameBase<object>.pauseSynchronizationService)}");
+                return;
+            }
             this._pauseSynchronizationService.Unpause(this.pauseHandle);
+            this.pauseHandle = null;
         }
         
         public void CreateScreenshot() {
@@ -157,18 +196,18 @@ namespace Mediabox.GameKit.GameManager {
             const float timeout = 5f;
             while (!FileHelper.Exists(fullFilePath)) {
                 if (Time.realtimeSinceStartup > startTime + timeout) {
-                    this.mediaboxServer.OnCreateScreenshotFailed();
+                    this._mediaboxServer.OnCreateScreenshotFailed();
                     return;
                 }
                 await Task.Delay(100);
             }
-            this.mediaboxServer.OnCreateScreenshotSucceeded(fullFilePath);
+            this._mediaboxServer.OnCreateScreenshotSucceeded(fullFilePath);
         }
 
         public async void UnloadGameContent() {
             await ResetGame();
             await Resources.UnloadUnusedAssets();
-            this.mediaboxServer.OnUnloadingSucceeded();
+            this._mediaboxServer.OnUnloadingSucceeded();
         }
 
         async Task ResetGame() {
@@ -176,12 +215,13 @@ namespace Mediabox.GameKit.GameManager {
             if (SceneManager.GetActiveScene().name != this.DefaultSceneName)
                 await SceneManager.LoadSceneAsync(this.DefaultSceneName);
             UnloadBundle();
+            this._userScore = default;
         }
 
         void UnloadBundle() {
             if (this.HasContentBundle) {
-                this.loadedBundle.Unload();
-                this.loadedBundle = null;
+                this._loadedBundle.Unload();
+                this._loadedBundle = null;
             }
         }
 
@@ -238,12 +278,12 @@ namespace Mediabox.GameKit.GameManager {
             var bundlePath = Path.Combine(path, gameBundleDefinition.BundleName);
             var bundle = BundleManager.Load(bundlePath);
             if (bundle == null) {
-                this.mediaboxServer.OnLoadingFailed();
+                this._mediaboxServer.OnLoadingFailed();
                 throw new Exception($"No AssetBundle found at contentBundleFolderPath {bundlePath}. Either, the contentBundleFolderPath has not been set up correctly in the GameDefinition, or the bundle has not been placed in the correct place.");
             }
 
             await bundle;
-            this.loadedBundle = bundle.Result;
+            this._loadedBundle = bundle.Result;
         }
         
         static async Task LoadGameDefinitionScene(IGameSceneDefinition gameSceneDefinition) {

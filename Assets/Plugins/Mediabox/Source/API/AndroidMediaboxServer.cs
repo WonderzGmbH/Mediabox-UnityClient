@@ -13,40 +13,41 @@ namespace Mediabox.API {
 			this.androidNativeServer = CreateBridgeObject();
 		}
 		
-		public void InitializeApi(string apiGameObjectName) {
-			this.androidNativeServer.CallStatic(nameof(InitializeApi).LowerCaseFirst(), apiGameObjectName);
+		void IMediaboxServer.InitializeApi(string apiGameObjectName) {
+			this.androidNativeServer.CallStatic(nameof(IMediaboxServer.InitializeApi).LowerCaseFirst(), apiGameObjectName);
 		}
 
-		public void OnLoadingSucceeded() {
-			this.androidNativeServer.CallStatic(nameof(OnLoadingSucceeded).LowerCaseFirst());
+		void IMediaboxServer.OnLoadingSucceeded() {
+			this.androidNativeServer.CallStatic(nameof(IMediaboxServer.OnLoadingSucceeded).LowerCaseFirst());
 		}
 
-		public void OnLoadingFailed() {
-			this.androidNativeServer.CallStatic(nameof(OnLoadingFailed).LowerCaseFirst());
+		void IMediaboxServer.OnLoadingFailed() {
+			this.androidNativeServer.CallStatic(nameof(IMediaboxServer.OnLoadingFailed).LowerCaseFirst());
 		}
 
-		public void OnUnloadingSucceeded() {
-			this.androidNativeServer.CallStatic(nameof(OnUnloadingSucceeded).LowerCaseFirst());
+		void IMediaboxServer.OnUnloadingSucceeded() {
+			this.androidNativeServer.CallStatic(nameof(IMediaboxServer.OnUnloadingSucceeded).LowerCaseFirst());
 		}
 
-		public void OnUnloadingFailed() {
-			this.androidNativeServer.CallStatic(nameof(OnUnloadingFailed).LowerCaseFirst());
+		void IMediaboxServer.OnSaveDataWritten() {
+			this.androidNativeServer.CallStatic(nameof(IMediaboxServer.OnSaveDataWritten).LowerCaseFirst());
 		}
 
-		public void OnSaveDataWritten() {
-			this.androidNativeServer.CallStatic(nameof(OnSaveDataWritten).LowerCaseFirst());
+		void IMediaboxServer.OnCreateScreenshotSucceeded(string path) {
+			this.androidNativeServer.CallStatic(nameof(IMediaboxServer.OnCreateScreenshotSucceeded).LowerCaseFirst(), path);
 		}
 
-		public void OnCreateScreenshotSucceeded(string path) {
-			this.androidNativeServer.CallStatic(nameof(OnCreateScreenshotSucceeded).LowerCaseFirst(), path);
+		void IMediaboxServer.OnUserScoreChanged(float newValue)
+		{
+			this.androidNativeServer.CallStatic(nameof(IMediaboxServer.OnUserScoreChanged).LowerCaseFirst(), newValue);
 		}
 
-		public void OnCreateScreenshotFailed() {
-			this.androidNativeServer.CallStatic(nameof(OnCreateScreenshotFailed).LowerCaseFirst());
+		void IMediaboxServer.OnCreateScreenshotFailed() {
+			this.androidNativeServer.CallStatic(nameof(IMediaboxServer.OnCreateScreenshotFailed).LowerCaseFirst());
 		}
 
-		public void OnGameExitRequested() {
-			this.androidNativeServer.Call(nameof(OnGameExitRequested).LowerCaseFirst());
+		void IMediaboxServer.OnGameExitRequested() {
+			this.androidNativeServer.Call(nameof(IMediaboxServer.OnGameExitRequested).LowerCaseFirst());
 		}
 
 		void ReleaseUnmanagedResources() {
