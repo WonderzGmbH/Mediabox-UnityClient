@@ -215,7 +215,6 @@ namespace Mediabox.GameKit.GameManager {
             if (SceneManager.GetActiveScene().name != this.DefaultSceneName)
                 await SceneManager.LoadSceneAsync(this.DefaultSceneName);
             UnloadBundle();
-            this._userScore = default;
         }
 
         void UnloadBundle() {
