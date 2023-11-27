@@ -50,7 +50,7 @@ namespace Mediabox.API {
 #endif
         }
 
-        public void OnUserScoreChanged(float newValue) {
+        void IMediaboxServer.OnUserScoreChanged(float newValue) {
 #if UNITY_IOS
             OnUserScoreChanged(newValue);
 #endif
