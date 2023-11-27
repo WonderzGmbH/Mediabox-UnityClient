@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Calendar Versioning](https://calver.org).
 
+## [2023.1127.1] - 2023-11-27
+### Added
+- Better error reporting during build pipelines
+### Fixed
+- Version Number to enforce update
+- `Score` won't reset occasionally anymore
+
 ## [2023.1121.1] - 2023-11-21
 ### Added
 - `UserScore`: Added support for User Score reporting to `GameManagerBase` and `GameBase`. Use `GameBase.API.ReportNewUserScore` to report a new score and `GameBase.Score` to read the current score. The score will be persisted between sessions
