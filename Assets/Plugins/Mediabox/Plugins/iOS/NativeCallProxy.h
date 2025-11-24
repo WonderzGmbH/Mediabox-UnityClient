@@ -6,7 +6,7 @@
 // NativeCallsProtocol defines protocol with methods you want to be called from managed
 @protocol NativeCallsProtocol
 @required
-- (void) initializeApi:(NSString*) gameObjectName;
+- (void) initializeApi:(NSString*) gameObjectName : (int) unityVersion;
 - (void) onLoadingSucceeded;
 - (void) onLoadingFailed;
 - (void) onUnloadingSucceeded;

@@ -16,7 +16,7 @@ id<NativeCallsProtocol> api = NULL;
 extern "C" {
     void InitializeApi(const char* apiGameObject) {
         assert(api != nil);
-        [api initializeApi:[NSString stringWithUTF8String:apiGameObject]];
+        [api initializeApi:[NSString stringWithUTF8String:apiGameObject] : UNITY_VERSION];
     }
 
     void OnLoadingSucceeded() {
