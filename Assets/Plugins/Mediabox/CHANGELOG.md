@@ -4,9 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Calendar Versioning](https://calver.org).
 
-## [2026.0122.0] - 2026-01-22
+## [2026.122.1] - 2026-01-22
 ### Added
 - Workaround for Turkish users (Android export)
+- Added code to mitigate Android Flicker bug after pause on Mali chips
 
 ## [2023.1127.1] - 2023-11-27
 ### Added

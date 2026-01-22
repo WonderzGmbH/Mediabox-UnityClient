@@ -9,9 +9,37 @@ namespace Mediabox.Samples {
 	/// Details to this class can be found in the base class.
 	/// </summary>
 	public class GameManager : GameManagerBase<GameDefinition> {
+
+
 		protected override Task OnStartGame(string contentBundleFolderPath, GameDefinition definition, string saveGamePath) {
 			Debug.Log($"[GameManager] Starting Game: {JsonUtility.ToJson(definition)} at contentBundleFolderPath {contentBundleFolderPath} with saveGamePath {saveGamePath}");
 			return Task.CompletedTask;
 		}
+
+		public UniversalRenderPipelineAsset pipelineAsset = null;
+
+	#if UNITY_ANDROID
+
+		// Android flicker bug resolution:
+		void OnApplicationPause(bool pauseStatus) {
+			if (pauseStatus) return;
+			if (Time.time == 0) return;
+			if (SystemInfo.graphicsDeviceType != GraphicsDeviceType.Vulkan)return;
+			// Optional additional restriction. So far we have only seen Adreno chips with the error, 
+			// but a lot of posts about Mali chips having other flickering bugs, we have opted out of 
+			// implementing this restriction in case they are also effected.
+			// if (!SystemInfo.graphicsDeviceName.ToLower().Contains("adreno")) return;
+			ReflectionCallReleaseTargets();
+		}
+
+		void ReflectionCallReleaseTargets() {
+			if (pipelineAsset == null) return;
+			ScriptableRenderer renderer = pipelineAsset.GetRenderer(-1);
+			if (renderer == null) return;
+			var methodInfo = typeof(ScriptableRenderer).GetMethod("ReleaseRenderTargets", BindingFlags.Instance | BindingFlags.NonPublic);
+			methodInfo?.Invoke(renderer, Array.Empty<object>());
+		}		
+	#endif
 	}
+
 }
