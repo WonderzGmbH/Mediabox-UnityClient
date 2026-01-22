@@ -10,14 +10,15 @@ namespace Mediabox.Samples {
 	/// </summary>
 	public class GameManager : GameManagerBase<GameDefinition> {
 
+
 		protected override Task OnStartGame(string contentBundleFolderPath, GameDefinition definition, string saveGamePath) {
 			Debug.Log($"[GameManager] Starting Game: {JsonUtility.ToJson(definition)} at contentBundleFolderPath {contentBundleFolderPath} with saveGamePath {saveGamePath}");
 			return Task.CompletedTask;
 		}
 
-	#if UNITY_ANDROID
-
 		public UniversalRenderPipelineAsset pipelineAsset = null;
+
+	#if UNITY_ANDROID
 
 		// Android flicker bug resolution:
 		void OnApplicationPause(bool pauseStatus) {
