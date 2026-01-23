@@ -10,7 +10,7 @@ public abstract class OverrideUnityActivity extends UnityPlayerActivity
 
   protected void UnitySendMessage(String gameObj, String method, String arg) { mUnityPlayer.UnitySendMessage(gameObj,method,arg); }
 
-  protected FrameLayout getUnityFrameLayout() { return mUnityPlayer; }
+  protected FrameLayout getUnityFrameLayout() { return mUnityPlayer.getFrameLayout(); }
 
   abstract protected void showMainActivity(String setToColor);
   
@@ -27,3 +27,4 @@ public abstract class OverrideUnityActivity extends UnityPlayerActivity
       instance = null;
   }
 }
+
