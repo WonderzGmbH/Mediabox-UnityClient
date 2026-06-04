@@ -78,7 +78,7 @@ namespace Mediabox.GameManager.Editor.HubPlugins {
 		}
 
 		void ValidateSelectedGameDefinition(string[] directories) {
-			this.selectedIndex = Mathf.Clamp(this.selectedIndex, 0, directories.Length);
+			this.selectedIndex = Mathf.Clamp(this.selectedIndex, 0, directories.Length - 1);
 		}
 		
 		string[] DrawSelector(string[] directories) {
