@@ -24,16 +24,18 @@ namespace Mediabox.GameManager.Editor.Build.BuildStep {
 				PathUtility.DeleteDirectoryIfExists(buildDirectory);
 			PathUtility.EnsureDirectory(buildDirectory);
 			foreach (var gameDefinition in gameDefinitions) {
-				ZipGameDefinition(gameDefinition, buildDirectory);
+				ZipGameDefinition(gameDefinition, buildDirectory, buildTarget);
 			}
 		}
 
 		public void PostProcess() {
 		}
 
-		void ZipGameDefinition(GameDefinitionBuildInfo gameDefinition, string buildPath) {
+		void ZipGameDefinition(GameDefinitionBuildInfo gameDefinition, string buildPath, BuildTarget buildTarget) {
 			var relativePath = PathUtility.GetRelativePath(gameDefinition.directory, this.settings.gameDefinitionDirectoryPath);
-			var bundlePath = Path.ChangeExtension(Path.Combine(buildPath, relativePath), "zip");
+			var relativePathWithoutExtension = Path.ChangeExtension(relativePath, null);
+			var fileNameWithTarget = $"{relativePathWithoutExtension}_{buildTarget}";
+			var bundlePath = Path.ChangeExtension(Path.Combine(buildPath, fileNameWithTarget), "zip");
 			PathUtility.DeleteFileIfExists(bundlePath);
 			var customPlatformSettingsPath = Path.Combine(gameDefinition.directory, GameDefinitionBuildSettings.customPlatformSettings);
 			PathUtility.ZipDirectoryWithExcludeFile(gameDefinition.directory, bundlePath, customPlatformSettingsPath, this.buildSettings.TempGameDefinitionBuildPath);
