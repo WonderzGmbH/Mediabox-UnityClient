@@ -37,7 +37,6 @@ namespace Mediabox.GameManager.Editor.Build {
 			if(streamingAssetsGameDefinitionMode) {
 				Debug.Log($"Configuring {nameof(ServerMode)}.{nameof(ServerMode.Simulation)}");
 				settingsPlugin.settings.ServerMode = ServerMode.Simulation;
-				EditorUtility.SetDirty(settingsPlugin.settings);
 			}
 
 			try {
@@ -48,7 +47,6 @@ namespace Mediabox.GameManager.Editor.Build {
 				}
 			} finally {
 				settingsPlugin.settings.ServerMode = oldIntegrationMode;
-				EditorUtility.SetDirty(settingsPlugin.settings);
 			}
 		}
 	}

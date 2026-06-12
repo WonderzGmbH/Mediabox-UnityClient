@@ -90,7 +90,9 @@ namespace Mediabox.GameManager.Simulation.Editor.HubPlugins {
 			PathUtility.EnsureEmptyDirectory(targetPath);
 			foreach (var directory in directories) {
 				var localDir = PathUtility.GetRelativePath(directory, this.settingsPlugin.settings.gameDefinitionDirectoryPath);
-				var zipPath = Path.ChangeExtension(Path.Combine(Path.Combine(this.settingsPlugin.buildSettings.gameDefinitionBuildPath, buildTarget.ToString()), localDir), "zip");
+				var localDirWithoutExtension = Path.ChangeExtension(localDir, null);
+				var zipFileName = $"{localDirWithoutExtension}_{buildTarget}.zip";
+				var zipPath = Path.Combine(Path.Combine(this.settingsPlugin.buildSettings.gameDefinitionBuildPath, buildTarget.ToString()), zipFileName);
 				if (!File.Exists(zipPath)) {
 					Debug.LogWarning($"Skipping {zipPath}, as it has not been built. Make sure to rebuild the Game Definitions.");
 					continue;
