@@ -24,7 +24,9 @@ namespace Mediabox.GameManager.Simulation.Editor {
 		}
 
 		void ExtractContentBundle() {
-			var bundlePath = Path.ChangeExtension(Path.Combine(Path.Combine(this.buildSettings.gameDefinitionBuildPath, EditorUserBuildSettings.activeBuildTarget.ToString()), this.BundleName), "zip");
+			var bundleNameWithoutExtension = Path.ChangeExtension(this.BundleName, null);
+			var zipFileName = $"{bundleNameWithoutExtension}_{EditorUserBuildSettings.activeBuildTarget}.zip";
+			var bundlePath = Path.Combine(Path.Combine(this.buildSettings.gameDefinitionBuildPath, EditorUserBuildSettings.activeBuildTarget.ToString()), zipFileName);
 			PathUtility.EnsureEmptyDirectory(this.ContentBundleFolder);
 			if (!File.Exists(bundlePath)) {
 				throw new System.Exception($"No Build exists for Game {this.BundleName} at {bundlePath}. Please rebuild your Game Definitions before using the SimulationBuildMode.");
@@ -48,4 +50,3 @@ namespace Mediabox.GameManager.Simulation.Editor {
 #endregion IDisposable
 	}
 }
-
